@@ -20,7 +20,7 @@ public class EchoClientHandler extends SimpleChannelInboundHandler<String> {
 //        ctx.writeAndFlush(Unpooled.copiedBuffer("Netty rocks!", CharsetUtil.UTF_8));
       CDTPPackage.Builder builder = CDTPPackage.newBuilder();
 
-      builder.setCommand(CommandEnum.Login.getCode());
+      builder.setCommand(CommandEnum.connect.getCode());
       builder.setVersion(3);
       
       CDTPPackage ctPackage = builder.build();

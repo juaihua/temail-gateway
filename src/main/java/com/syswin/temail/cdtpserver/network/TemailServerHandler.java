@@ -42,7 +42,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof CDTPPackage) {
 
             CDTPPackage cdtpPackage = (CDTPPackage) msg;
-
+            System.out.println("receive info:"+cdtpPackage);
             if (cdtpPackage.getCommand() == CommandEnum.ping.getCode()) {
                 //如果是心跳包
                 handleHeartbreat(ctx, cdtpPackage);
@@ -78,7 +78,8 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-
+      
+      LOGGER.info("TEMAIL_KEY:"+ctx.channel().attr(TEMAIL_KEY).get());     
         if (evt instanceof IdleStateEvent) {//指定时间内,通道没有任何数据
             if (counter >= 3) {
                 //close channel
@@ -141,6 +142,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
                 temailInfo.setTimestamp(new Timestamp(System.currentTimeMillis()));
                 //
                 ActiveTemailManager.add(temailKey,temailInfo);
+                ctx.writeAndFlush(cdtpPackage);
             }else{
               
             }
