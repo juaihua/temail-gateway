@@ -4,9 +4,14 @@ package com.syswin.temail.cdtpserver.utils;
  * Created by weis on 18/8/9.
  */
 public enum CommandEnum {
-    HeartbeatPing(1, "ping"),
-    HeartbeatPong(2, "pong"),
-    Login(100, "login");
+    connect(100, "connect"),
+    disconnect(101, "disconnect"),
+    req(102, "req"),
+    resp(103, "resp"),
+    push(104, "push"),
+    push_resp (105, "push_resp"),
+    ping(106, "ping"),
+    pong(107, "pong");
 
     private  int      code;
     private  String   desc;

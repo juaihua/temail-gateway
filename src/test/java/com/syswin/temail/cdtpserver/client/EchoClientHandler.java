@@ -3,6 +3,7 @@ package com.syswin.temail.cdtpserver.client;
 import com.google.gson.Gson;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 
+import com.syswin.temail.cdtpserver.utils.CommandEnum;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -18,8 +19,8 @@ public class EchoClientHandler extends SimpleChannelInboundHandler<String> {
         //当被通知Channel是活跃的时候，发送一条消息
 //        ctx.writeAndFlush(Unpooled.copiedBuffer("Netty rocks!", CharsetUtil.UTF_8));
       CDTPPackage.Builder builder = CDTPPackage.newBuilder();
-      builder.setAlgorithm(1);
-      builder.setCommand(2);
+
+      builder.setCommand(CommandEnum.Login.getCode());
       builder.setVersion(3);
       
       CDTPPackage ctPackage = builder.build();

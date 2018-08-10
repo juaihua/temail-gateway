@@ -43,7 +43,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
             CDTPPackage cdtpPackage = (CDTPPackage) msg;
 
-            if (cdtpPackage.getCommand() == CommandEnum.HeartbeatPing.getCode()) {
+            if (cdtpPackage.getCommand() == CommandEnum.ping.getCode()) {
                 //如果是心跳包
                 handleHeartbreat(ctx, cdtpPackage);
             } else {
@@ -88,7 +88,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
                 System.out.println("已与Client断开连接");
             } else {
                 counter++;
-                SendMsg.sendHeartbeat((SocketChannel) ctx.channel(), CommandEnum.HeartbeatPing);
+                SendMsg.sendHeartbeat((SocketChannel) ctx.channel(), CommandEnum.ping);
                 System.out.println("lose: " + counter + "heartbeat packet");
             }
         }
@@ -112,9 +112,9 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
         counter = 0;
 
-        if (packet.getCommand() == CommandEnum.HeartbeatPing.getCode()) {
+        if (packet.getCommand() == CommandEnum.ping.getCode()) {
 
-            SendMsg.sendHeartbeat((SocketChannel) ctx.channel(), CommandEnum.HeartbeatPong);
+            SendMsg.sendHeartbeat((SocketChannel) ctx.channel(), CommandEnum.pong);
         }
 
         LOGGER.info("server received heartbeat packet from:" + ctx.channel().remoteAddress().toString());
@@ -129,7 +129,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
     private void handleData(ChannelHandlerContext ctx, CDTPPackage cdtpPackage) {
         counter = 0;
         //登陆单独处理
-        if(cdtpPackage.getCommand() == CommandEnum.Login.getCode()){
+        if(cdtpPackage.getCommand() == CommandEnum.connect.getCode()){
             Gson gson = new Gson();
             TemailInfo temailInfo = gson.fromJson(cdtpPackage.getData().toStringUtf8(),TemailInfo.class);
             boolean loginResult = login(cdtpPackage, temailInfo);
