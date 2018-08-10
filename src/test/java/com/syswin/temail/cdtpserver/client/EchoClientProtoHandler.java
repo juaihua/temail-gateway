@@ -27,6 +27,7 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
       builder.setAlgorithm(1);
       //builder.setCommand(2);
       builder.setCommand(CommandEnum.connect.getCode());
+      builder.setPkgId("pckAgeId1234");
       builder.setVersion(3);
       
       TemailInfo temailInfo = new TemailInfo();
@@ -43,12 +44,19 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-      if(counter ==0){
+      if(counter <=2){
         if(msg instanceof CDTPPackage){
+          System.out.println("msg:"+msg);
           counter++;
           CDTPPackage.Builder builder = CDTPPackage.newBuilder();
           builder.setAlgorithm(11);
-          builder.setCommand(CommandEnum.ping.getCode());
+          if(counter==2){
+            builder.setCommand(CommandEnum.disconnect.getCode());
+          }
+          else{
+            builder.setCommand(CommandEnum.ping.getCode());
+          }
+          
           builder.setVersion(13);
           
           CDTPPackage ctPackage = builder.build();

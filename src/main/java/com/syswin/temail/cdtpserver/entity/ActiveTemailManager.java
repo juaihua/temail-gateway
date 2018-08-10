@@ -12,18 +12,37 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ActiveTemailManager {
 
     //在线temail管理
-    private static Map<String,TemailInfo> onlineTemailMap = new ConcurrentHashMap<String,TemailInfo>();
+    private static Map<String,Map<String, TemailInfo>> onlineTemailMap = new ConcurrentHashMap<String,Map<String, TemailInfo>>();
 
     public static void add(String temailKey,TemailInfo temailInfo){
-         onlineTemailMap.put(temailKey,temailInfo);
+      
+      Map<String, TemailInfo> temailMap = onlineTemailMap.get(temailInfo.getTemail());
+      if(temailMap != null){
+        temailMap.put(temailInfo.getDevId(), temailInfo);
+      }else{
+        
+        Map<String, TemailInfo> devidMap = new ConcurrentHashMap<String, TemailInfo>();
+        devidMap.put(temailInfo.getDevId(), temailInfo);
+        
+        onlineTemailMap.put(temailInfo.getTemail(),devidMap);
+      }
+        
 
     }
 
-    public static TemailInfo get(String temailKey){
-
-        return  onlineTemailMap.get(temailKey);
+    public static TemailInfo getOne(String temailKey){
+        String[] temailKeyArray =  temailKey.split("-");  
+        return  onlineTemailMap.get(temailKey).get(temailKeyArray[1]);
 
     }
+    
+    
+    public static Map<String, TemailInfo> getAll(String temailKey){
+      
+      return  onlineTemailMap.get(temailKey);
+
+   }
+    
 
     /**
      * 主动离线时调用
@@ -47,13 +66,13 @@ public class ActiveTemailManager {
      */
     public static void removeChannel(SocketChannel socketChannel){
      
-      for(Iterator<Map.Entry<String,TemailInfo>> iter = onlineTemailMap.entrySet().iterator(); iter.hasNext();){
+     /* for(Iterator<Map.Entry<String,TemailInfo>> iter = onlineTemailMap.entrySet().iterator(); iter.hasNext();){
         Map.Entry<String,TemailInfo> item = iter.next();
         TemailInfo  temailInfo = item.getValue();
         if(temailInfo.getSocketChannel().remoteAddress().toString().equals(socketChannel.remoteAddress().toString())){
           iter.remove();            
         }       
-      }
+      }*/
     }
 
     public static int getSize(){

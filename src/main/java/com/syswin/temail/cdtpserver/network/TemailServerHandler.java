@@ -1,6 +1,7 @@
 package com.syswin.temail.cdtpserver.network;
 
 import com.google.gson.Gson;
+import com.google.protobuf.ByteString;
 import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
@@ -8,6 +9,7 @@ import com.syswin.temail.cdtpserver.handler.BaseHandler;
 import com.syswin.temail.cdtpserver.handler.HandlerFactory;
 import com.syswin.temail.cdtpserver.utils.CommandEnum;
 import com.syswin.temail.cdtpserver.utils.SendMsg;
+
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -15,10 +17,12 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.AttributeKey;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 
 /**
@@ -26,7 +30,6 @@ import java.sql.Timestamp;
  */
 @ChannelHandler.Sharable
 public class TemailServerHandler extends ChannelInboundHandlerAdapter {
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -43,7 +46,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
             CDTPPackage cdtpPackage = (CDTPPackage) msg;
             System.out.println("receive info:"+cdtpPackage);
-            if (cdtpPackage.getCommand() == CommandEnum.ping.getCode()) {
+            if (cdtpPackage.getCommand() == CommandEnum.ping.getCode()|| cdtpPackage.getCommand() == CommandEnum.pong.getCode()) {
                 //如果是心跳包
                 handleHeartbreat(ctx, cdtpPackage);
             } else {
@@ -54,8 +57,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-
-        System.out.println("client is active");
+        LOGGER.info("client is active");
         ClientMap.add(ctx.channel().remoteAddress().toString(), (SocketChannel) ctx.channel());
 
         LOGGER.info("当前连接数: ", ClientMap.getSize());
@@ -63,7 +65,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        System.out.println("client is inactive");
+        LOGGER.info("client is inactive");  
         ClientMap.remove((SocketChannel) ctx.channel());
         //System.out.println("当前连接数: "+ClientMap.getSize());
         LOGGER.info("当前连接数: ", ClientMap.getSize());
@@ -114,11 +116,14 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
         counter = 0;
 
         if (packet.getCommand() == CommandEnum.ping.getCode()) {
-
             SendMsg.sendHeartbeat((SocketChannel) ctx.channel(), CommandEnum.pong);
+            LOGGER.info("server send heartbeat ping packet to:" + ctx.channel().remoteAddress().toString());
         }
-
-        LOGGER.info("server received heartbeat packet from:" + ctx.channel().remoteAddress().toString());
+        
+        if(packet.getCommand() == CommandEnum.pong.getCode()){        
+            LOGGER.info("server received heartbeat pong packet from:" + ctx.channel().remoteAddress().toString());
+        }
+                
     }
 
     /**
@@ -139,12 +144,15 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
                 String temailKey = temailInfo.getTemail()+"-"+temailInfo.getDevId();
                 ctx.channel().attr(TEMAIL_KEY).set(temailKey);
                 temailInfo.setSocketChannel((SocketChannel)ctx.channel());
-                temailInfo.setTimestamp(new Timestamp(System.currentTimeMillis()));
-                //
-                ActiveTemailManager.add(temailKey,temailInfo);
-                ctx.writeAndFlush(cdtpPackage);
-            }else{
-              
+                temailInfo.setTimestamp(new Timestamp(System.currentTimeMillis()));               
+                ActiveTemailManager.add(temailKey,temailInfo);                
+                              
+                CDTPPackage.Builder builder = CDTPPackage.newBuilder();               
+                builder.setCommand(CommandEnum.resp.getCode());
+                builder.setPkgId(cdtpPackage.getPkgId());
+                CDTPPackage newcdtpPackage = builder.build();
+                LOGGER.info("send login success msg:"+newcdtpPackage.toString());
+                ctx.writeAndFlush(newcdtpPackage);
             }
         }
         else{
@@ -167,12 +175,12 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
      */
     private boolean login(CDTPPackage cdtpPackage, TemailInfo temailInfo){
       
-        String  temailKey = temailInfo.getTemail()+"-"+ temailInfo.getDevId();
+        /*String  temailKey = temailInfo.getTemail()+"-"+ temailInfo.getDevId();
         if(ActiveTemailManager.get(temailKey) != null){
             //已经在线,不让登陆
             return false;
         }
-
+*/
         return true;
     }
 

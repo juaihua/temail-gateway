@@ -39,6 +39,16 @@ public enum CommandEnum {
     }
 
 
+ // 根据value返回枚举类型,主要在switch中使用
+    public static CommandEnum getByValue(int value) {
+        for (CommandEnum code : values()) {
+            if (code.getCode() == value) {
+                return code;
+            }
+        }
+        return null;
+    }
+
 
 
 }

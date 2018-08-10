@@ -1,6 +1,9 @@
 package com.syswin.temail.cdtpserver.utils;
 
+import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
+import com.syswin.temail.cdtpserver.entity.TemailInfo;
+
 import io.netty.channel.socket.SocketChannel;
 
 /**
@@ -20,6 +23,12 @@ public class SendMsg {
         CDTPPackageProto.CDTPPackage cdtpPackage = builder.build();
 
         socketChannel.writeAndFlush(cdtpPackage);
+    }
+    
+    
+    public static void sendToTemail(String toTemail,CDTPPackageProto cdtpPackageProto,SocketChannel socketChannel){
+      
+      //TemailInfo temailInfo = ActiveTemailManager.get(temailKey)
     }
 
 
