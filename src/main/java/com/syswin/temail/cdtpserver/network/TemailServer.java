@@ -49,7 +49,8 @@ public class TemailServer implements ApplicationRunner {
                         pipeline.addLast(new PacketDecoder());
                         pipeline.addLast(new PacketEncoder());
                                                 
-                        pipeline.addLast("idleStateHandler",new IdleStateHandler(0,0,10));
+                        //pipeline.addLast("idleStateHandler",new IdleStateHandler(0,0,10));
+                        pipeline.addLast("idleStateHandler",new IdleStateHandler(0,0,90));
                         pipeline.addLast(new TemailServerHandler());
                     }
                 });

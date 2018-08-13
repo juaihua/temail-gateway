@@ -8,6 +8,7 @@ import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import com.syswin.temail.cdtpserver.handler.BaseHandler;
 import com.syswin.temail.cdtpserver.handler.HandlerFactory;
 import com.syswin.temail.cdtpserver.utils.CommandEnum;
+import com.syswin.temail.cdtpserver.utils.ConstantsAttributeKey;
 import com.syswin.temail.cdtpserver.utils.SendMsg;
 
 import io.netty.buffer.Unpooled;
@@ -33,7 +34,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private AttributeKey<String> TEMAIL_KEY = AttributeKey.valueOf("TEMAIL_KEY");
+    //private AttributeKey<String> TEMAIL_KEY = AttributeKey.valueOf("TEMAIL_KEY");
     //heartbeat lose counter
     private int counter;
 
@@ -43,9 +44,8 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
         if (msg instanceof CDTPPackage) {
-
             CDTPPackage cdtpPackage = (CDTPPackage) msg;
-            System.out.println("receive info:"+cdtpPackage);
+            LOGGER.info("receive info:"+cdtpPackage);
             if (cdtpPackage.getCommand() == CommandEnum.ping.getCode()|| cdtpPackage.getCommand() == CommandEnum.pong.getCode()) {
                 //如果是心跳包
                 handleHeartbreat(ctx, cdtpPackage);
@@ -81,13 +81,15 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
       
-      LOGGER.info("TEMAIL_KEY:"+ctx.channel().attr(TEMAIL_KEY).get());     
+        //LOGGER.info("TEMAIL_KEY:"+ctx.channel().attr(TEMAIL_KEY).get());
+        LOGGER.info("TEMAIL_KEY:"+ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
         if (evt instanceof IdleStateEvent) {//指定时间内,通道没有任何数据
             if (counter >= 3) {
                 //close channel
                 ctx.channel().close().sync();
                 //清理状态数据
-                ActiveTemailManager.remove(ctx.channel().attr(TEMAIL_KEY).get());
+                //ActiveTemailManager.remove(ctx.channel().attr(TEMAIL_KEY).get());
+                ActiveTemailManager.remove(ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
                 System.out.println("已与Client断开连接");
             } else {
                 counter++;
@@ -133,6 +135,31 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
      * @param cdtpPackage 包内容
      */
     private void handleData(ChannelHandlerContext ctx, CDTPPackage cdtpPackage) {
+      counter = 0;
+      //登陆单独处理
+      if(cdtpPackage.getCommand() == CommandEnum.connect.getCode()){
+        handler = HandlerFactory.getHandler(cdtpPackage, (SocketChannel) ctx.channel());
+        handler.process();
+      }
+      else{
+        //业务处理
+        handler = HandlerFactory.getHandler(cdtpPackage, (SocketChannel) ctx.channel());   
+        if(null != handler){
+          handler.process();
+          cdtpPackage.getCommand();//        
+          System.out.println("***cdtpPackage:" + cdtpPackage.toString());
+          ctx.writeAndFlush(cdtpPackage);
+        }
+        else{
+          LOGGER.info("builder handler is  null.");
+        }
+        
+        
+      }
+      
+  }
+    
+  /*  private void handleData(ChannelHandlerContext ctx, CDTPPackage cdtpPackage) {
         counter = 0;
         //登陆单独处理
         if(cdtpPackage.getCommand() == CommandEnum.connect.getCode()){
@@ -142,7 +169,8 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
             if(loginResult){
                 //设置session
                 String temailKey = temailInfo.getTemail()+"-"+temailInfo.getDevId();
-                ctx.channel().attr(TEMAIL_KEY).set(temailKey);
+                //ctx.channel().attr(TEMAIL_KEY).set(temailKey);
+                ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).set(temailKey);
                 temailInfo.setSocketChannel((SocketChannel)ctx.channel());
                 temailInfo.setTimestamp(new Timestamp(System.currentTimeMillis()));               
                 ActiveTemailManager.add(temailKey,temailInfo);                
@@ -166,7 +194,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
           
         }
         
-    }
+    }*/
 
     /**
      * 登陆逻辑
