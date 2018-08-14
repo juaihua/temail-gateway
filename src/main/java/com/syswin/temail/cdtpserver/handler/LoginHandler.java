@@ -43,6 +43,8 @@ public class LoginHandler extends BaseHandler {
   
   public LoginHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage) {
     super(socketChannel, cdtpPackage);
+    
+    System.out.println(socketChannel.remoteAddress());
   }
 
   @Override
@@ -111,7 +113,7 @@ public class LoginHandler extends BaseHandler {
     builder.setPkgId(getCdtpPackage().getPkgId());
     CDTPPackage newcdtpPackage = builder.build();
     LOGGER.info("send login success msg:" + newcdtpPackage.toString());*/
-    getSocketChannel().writeAndFlush(response.getData());    
+    this.getSocketChannel().writeAndFlush(response.getData());    
     LOGGER.info("login  success , the  temial is :{} and  devId is {} , send  msg is {}", temailInfo.getTemail(),  temailInfo.getDevId(), response.toString());
   }
   

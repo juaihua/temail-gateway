@@ -53,7 +53,8 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
           counter++;
           CDTPPackage.Builder builder = CDTPPackage.newBuilder();
           builder.setAlgorithm(11);
-          builder.setCommand(CommandEnum.ping.getCode());
+          builder.setCommand(CommandEnum.req.getCode());
+          //builder.setCommand(CommandEnum.ping.getCode());
           /*if(counter==2){
             builder.setCommand(CommandEnum.disconnect.getCode());
           }
@@ -62,8 +63,17 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
           }*/
           
           builder.setVersion(13);
+          builder.setTo("gaojh@123.com");
           
           CDTPPackage ctPackage = builder.build();
+          
+          TemailInfo temailInfo = new TemailInfo();
+          temailInfo.setTemail("sean@t.email");
+          temailInfo.setDevId("devId");
+          Gson gson = new Gson();   
+          String gsonString = gson.toJson(temailInfo);         
+          builder.setData(ByteString.copyFrom(gsonString, Charset.defaultCharset()));    
+          
           //System.out.println("yyyyyy");
           ctx.writeAndFlush(ctPackage);
         } 

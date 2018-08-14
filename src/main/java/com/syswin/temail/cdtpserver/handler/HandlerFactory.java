@@ -28,10 +28,9 @@ public class HandlerFactory {
           case connect://out biz            
             return new LoginHandler(socketChannel,cdtpPackage);
           case disconnect://out biz            
-            return new DisconnectHandler(socketChannel, cdtpPackage);
-          default:            
-            break;
+            return new DisconnectHandler(socketChannel, cdtpPackage);            
+          default:
+            return new RequestHandler(socketChannel, cdtpPackage);            
         }
-        return null;
     }
 }

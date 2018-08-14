@@ -142,21 +142,13 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
         handler.process();
       }
       else{
-        //业务处理
-        handler = HandlerFactory.getHandler(cdtpPackage, (SocketChannel) ctx.channel());   
-        if(null != handler){
+          //业务处理
+          handler = HandlerFactory.getHandler(cdtpPackage, (SocketChannel) ctx.channel());          
           handler.process();
-          cdtpPackage.getCommand();//        
-          System.out.println("***cdtpPackage:" + cdtpPackage.toString());
-          ctx.writeAndFlush(cdtpPackage);
-        }
-        else{
-          LOGGER.info("builder handler is  null.");
-        }
-        
-        
-      }
-      
+          cdtpPackage.getCommand();//
+          LOGGER.info("dispatch  info: {}", cdtpPackage.toString());
+          ctx.writeAndFlush(cdtpPackage);       
+      }      
   }
     
   /*  private void handleData(ChannelHandlerContext ctx, CDTPPackage cdtpPackage) {
