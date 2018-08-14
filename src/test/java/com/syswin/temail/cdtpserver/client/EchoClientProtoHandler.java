@@ -32,7 +32,7 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
       builder.setVersion(3);
       
       TemailInfo temailInfo = new TemailInfo();
-      temailInfo.setTemail("weisheng777@teamil.com");
+      temailInfo.setTemail("sean@t.email");
       temailInfo.setDevId("devId");
       Gson gson = new Gson();
       String gsonString = gson.toJson(temailInfo);

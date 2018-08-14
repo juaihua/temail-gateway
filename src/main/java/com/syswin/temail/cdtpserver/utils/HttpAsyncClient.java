@@ -5,7 +5,6 @@ import java.util.concurrent.CountDownLatch;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.entity.StringEntity;
@@ -17,22 +16,19 @@ import org.springframework.http.MediaType;
 
 import com.google.gson.Gson;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
-
+import com.syswin.temail.cdtpserver.exception.CdtpServerException;
 public class HttpAsyncClient {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(MethodHandles.lookup().lookupClass());
 
-  public static  void post(String url, CDTPPackage cdtpPackage) throws Exception {
+  public static  void post(String url, CDTPPackage cdtpPackage){
     callHttpService(url, cdtpPackage);
   }
 
 
-  private static void callHttpService(String url, final CDTPPackage cdtpPackage) throws Exception {
-    RequestConfig requestConfig =
-        RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(10000).build();
-    CloseableHttpAsyncClient httpclient =
-        HttpAsyncClients.custom().setMaxConnPerRoute(50).setDefaultRequestConfig(requestConfig).build();
+  private static void callHttpService(String url, final CDTPPackage cdtpPackage){
+    CloseableHttpAsyncClient httpclient = HttpAsyncClients.createDefault();
     try {
       httpclient.start();
       final HttpPost request = new HttpPost(url);
@@ -65,8 +61,11 @@ public class HttpAsyncClient {
 
       });
       latch.await();
-    } finally {
       httpclient.close();
+    } catch (CdtpServerException ex) {       
+        throw new CdtpServerException("route url:{} error" + url, ex);
+    } catch (Exception ex) {
+      throw new CdtpServerException("route url:{} error" + url, ex);           
     }
   }
 

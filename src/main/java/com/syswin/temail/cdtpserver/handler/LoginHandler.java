@@ -4,14 +4,14 @@ import io.netty.channel.socket.SocketChannel;
 
 import java.lang.invoke.MethodHandles;
 import java.sql.Timestamp;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
+import org.assertj.core.util.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,7 +23,6 @@ import org.springframework.web.client.RestTemplate;
 import com.google.gson.Gson;
 import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
-import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.Response;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import com.syswin.temail.cdtpserver.utils.ConstantsAttributeKey;
@@ -70,22 +69,26 @@ public class LoginHandler extends BaseHandler {
     TemailInfo temailInfo =
         gson.fromJson(getCdtpPackage().getData().toStringUtf8(), TemailInfo.class);
     
-    String  cdtpPackageJson = gson.toJson(getCdtpPackage());    
+    Map map =  new ConcurrentHashMap<String, String>();  
+    map.put("temail", temailInfo.getTemail());  
+    map.put("unsignedBytes", "");
+    map.put("signature", "");
+    String  authDataJson = gson.toJson(map); 
+    
+    //String  cdtpPackageJson = gson.toJson(getCdtpPackage());    
     HttpHeaders requestHeaders = new HttpHeaders();
-    //requestHeaders.setContentType(MediaType.APPLICATION_JSON); 
     requestHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8); 
-    HttpEntity<String> requestEntity = new HttpEntity<String>(cdtpPackageJson, requestHeaders);
+    //HttpEntity<String> requestEntity = new HttpEntity<String>(cdtpPackageJson, requestHeaders);
+    
+    HttpEntity<String> requestEntity = new HttpEntity<String>(authDataJson, requestHeaders);
     
     RestTemplate restTemplate = new RestTemplate();
     restTemplate.setErrorHandler(new SilentResponseErrorHandler());
     
     ResponseEntity<Response> responseEntity =
         restTemplate.exchange(verifyUrl, HttpMethod.POST, requestEntity, Response.class);
-    
-    //ResponseEntity<Context> responseEntity = restTemplate.exchange(url, HttpMethod.POST, requestEntity,Context.class);
-
     Response  response = responseEntity.getBody();
-    if(response.getCode().equals(HttpStatus.OK)){
+    if(response.getCode()==HttpStatus.OK.value()){
        loginSuccess(temailInfo, response);
     }
     else{
