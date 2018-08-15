@@ -27,6 +27,7 @@ public class RequestHandler  extends BaseHandler{
   @Override
   public void process() {
   
+    LOGGER.info("收到转发消息 :{}", getCdtpPackage().toString());
     TransferCDTPPackage  transferCDTPPackage = new  TransferCDTPPackage();
     
     BeanUtils.copyProperties(getCdtpPackage(), transferCDTPPackage);
@@ -34,7 +35,7 @@ public class RequestHandler  extends BaseHandler{
     
     //transferCDTPPackage.setData(getCdtpPackage().getData().toString());
     HttpAsyncClient.post(getTemailServerConfig().getDispatchUrl() , transferCDTPPackage, getSocketChannel());
-    LOGGER.info("execute dispath commond, the temail key is {}",this.getSocketChannel().attr(ConstantsAttributeKey.TEMAIL_KEY).get()); 
+    LOGGER.info("执行dispath commond成功, the temail key is {}",this.getSocketChannel().attr(ConstantsAttributeKey.TEMAIL_KEY).get()); 
   }
 
 }
