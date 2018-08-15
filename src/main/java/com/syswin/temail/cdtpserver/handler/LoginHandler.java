@@ -9,9 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
-import org.assertj.core.util.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,9 +23,12 @@ import org.springframework.web.client.RestTemplate;
 import com.google.gson.Gson;
 import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
+import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.Response;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
+import com.syswin.temail.cdtpserver.utils.CommandEnum;
 import com.syswin.temail.cdtpserver.utils.ConstantsAttributeKey;
+import com.syswin.temail.cdtpserver.utils.TemailServerConfig;
 
 /**
  * Created by weis on 18/8/8.
@@ -38,6 +41,9 @@ public class LoginHandler extends BaseHandler {
   @Resource
   private RestTemplate restTemplate;
  
+  @Resource
+  private TemailServerConfig  config;
+  
   //@Value("${login.verifyUrl}")  
   private String  verifyUrl = "http://172.31.245.225:8888/verify";
   
@@ -108,13 +114,12 @@ public class LoginHandler extends BaseHandler {
     temailInfo.setTimestamp(new Timestamp(System.currentTimeMillis()));
     ActiveTemailManager.add(temailKey, temailInfo);
 
-    /*CDTPPackage.Builder builder = CDTPPackage.newBuilder();
+    CDTPPackage.Builder builder = CDTPPackage.newBuilder();
     builder.setCommand(CommandEnum.resp.getCode());
     builder.setPkgId(getCdtpPackage().getPkgId());
     CDTPPackage newcdtpPackage = builder.build();
-    LOGGER.info("send login success msg:" + newcdtpPackage.toString());*/
-    this.getSocketChannel().writeAndFlush(response.getData());    
-    LOGGER.info("login  success , the  temial is :{} and  devId is {} , send  msg is {}", temailInfo.getTemail(),  temailInfo.getDevId(), response.toString());
+    this.getSocketChannel().writeAndFlush(newcdtpPackage);    
+    LOGGER.info("login  success , the  temial is :{} and  devId is {} , send  msg is {}", temailInfo.getTemail(),  temailInfo.getDevId(), newcdtpPackage.toString());
   }
   
   private  void  loginFailure(TemailInfo temailInfo, Response  response){

@@ -15,22 +15,23 @@ public class HandlerFactory {
 
     public static BaseHandler getHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel){
         
-        /*if(cdtpPackage.getCommand() == CommandEnum.connect.getCode()){
-            return new LoginHandler(cdtpPackage,socketChannel);
-        }
-        
-        if(cdtpPackage.getCommand() == CommandEnum.disconnect.getCode()){
-          return new LoginHandler(cdtpPackage,socketChannel);
-        }*/
-        
-        
-        switch (CommandEnum.getByValue(cdtpPackage.getCommand())) {
-          case connect://out biz            
+      /*switch (CommandEnum.getByValue(cdtpPackage.getCommand())) {
+      case connect://out biz            
+        return new LoginHandler(socketChannel,cdtpPackage);
+      case disconnect://out biz            
+        return new DisconnectHandler(socketChannel, cdtpPackage);            
+      default:
+        return new RequestHandler(socketChannel, cdtpPackage);            
+    }*/
+      
+        if(cdtpPackage.getCommand() == CommandEnum.connect.getCode()){
             return new LoginHandler(socketChannel,cdtpPackage);
-          case disconnect://out biz            
-            return new DisconnectHandler(socketChannel, cdtpPackage);            
-          default:
-            return new RequestHandler(socketChannel, cdtpPackage);            
         }
+        else if(cdtpPackage.getCommand() == CommandEnum.disconnect.getCode()){
+          return new DisconnectHandler(socketChannel,cdtpPackage);
+        }
+        else{
+            return new RequestHandler(socketChannel, cdtpPackage); 
+        }       
     }
 }

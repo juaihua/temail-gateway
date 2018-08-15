@@ -2,6 +2,7 @@ package com.syswin.temail.cdtpserver.network;
 
 import com.syswin.temail.cdtpserver.network.codec.PacketDecoder;
 import com.syswin.temail.cdtpserver.network.codec.PacketEncoder;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -9,6 +10,9 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.Setter;
+
+import org.apache.http.annotation.Obsolete;
+import org.apache.logging.log4j.core.config.Order;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -19,6 +23,7 @@ import java.net.InetSocketAddress;
  * Created by weis on 18/8/2.
  */
 @Component
+@Order(1)
 public class TemailServer implements ApplicationRunner {
 
     @Setter

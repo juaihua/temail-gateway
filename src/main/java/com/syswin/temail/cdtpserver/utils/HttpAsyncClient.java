@@ -16,24 +16,28 @@ import org.springframework.http.MediaType;
 
 import com.google.gson.Gson;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
+import com.syswin.temail.cdtpserver.entity.TransferCDTPPackage;
 import com.syswin.temail.cdtpserver.exception.CdtpServerException;
 public class HttpAsyncClient {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(MethodHandles.lookup().lookupClass());
 
-  public static  void post(String url, CDTPPackage cdtpPackage){
-    callHttpService(url, cdtpPackage);
+  public static  void post(String url, TransferCDTPPackage transferCDTPPackage){
+    callHttpService(url, transferCDTPPackage);
   }
 
 
-  private static void callHttpService(String url, final CDTPPackage cdtpPackage){
+  private static void callHttpService(String url, final TransferCDTPPackage transferCDTPPackage){
     CloseableHttpAsyncClient httpclient = HttpAsyncClients.createDefault();
     try {
       httpclient.start();
+      
       final HttpPost request = new HttpPost(url);
       Gson gson = new Gson();
-      String cdtpPackageJson = gson.toJson(cdtpPackage);
+      String cdtpPackageJson = gson.toJson(transferCDTPPackage);
+      
+     
       StringEntity entitySender = new StringEntity(cdtpPackageJson, "UTF-8");
       request.setEntity(entitySender);
       request.setHeader("Content-Type", MediaType.APPLICATION_JSON_UTF8_VALUE);
