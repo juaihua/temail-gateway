@@ -1,23 +1,30 @@
 package com.syswin.temail.cdtpserver.network;
 
-import com.syswin.temail.cdtpserver.network.codec.PacketDecoder;
-import com.syswin.temail.cdtpserver.network.codec.PacketEncoder;
-
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+
+import java.net.InetSocketAddress;
+
+import javax.annotation.Resource;
+
 import lombok.Setter;
 
-import org.apache.http.annotation.Obsolete;
 import org.apache.logging.log4j.core.config.Order;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import java.net.InetSocketAddress;
+import com.syswin.temail.cdtpserver.handler.HandlerFactory;
+import com.syswin.temail.cdtpserver.network.codec.PacketDecoder;
+import com.syswin.temail.cdtpserver.network.codec.PacketEncoder;
 
 /**
  * Created by weis on 18/8/2.
@@ -29,6 +36,10 @@ public class TemailServer implements ApplicationRunner {
     @Setter
     private int port = 8099;
 
+    @Resource
+    HandlerFactory   handlerFactory;
+    
+    
     @Override
     public void run(ApplicationArguments args) {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -56,7 +67,10 @@ public class TemailServer implements ApplicationRunner {
                                                 
                         //pipeline.addLast("idleStateHandler",new IdleStateHandler(0,0,10));
                         pipeline.addLast("idleStateHandler",new IdleStateHandler(0,0,90));
-                        pipeline.addLast(new TemailServerHandler());
+                        
+                        TemailServerHandler temailServerHandler = new TemailServerHandler();
+                        temailServerHandler.setHandlerFactory(handlerFactory);
+                        pipeline.addLast(temailServerHandler);
                     }
                 });
 

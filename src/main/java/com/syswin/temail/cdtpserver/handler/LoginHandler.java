@@ -7,11 +7,8 @@ import java.sql.Timestamp;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
+import com.syswin.temail.cdtpserver.config.TemailServerConfig;
 import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
@@ -28,7 +26,6 @@ import com.syswin.temail.cdtpserver.entity.Response;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import com.syswin.temail.cdtpserver.utils.CommandEnum;
 import com.syswin.temail.cdtpserver.utils.ConstantsAttributeKey;
-import com.syswin.temail.cdtpserver.utils.TemailServerConfig;
 
 /**
  * Created by weis on 18/8/8.
@@ -37,20 +34,9 @@ public class LoginHandler extends BaseHandler {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(MethodHandles.lookup().lookupClass());
-
-  @Resource
-  private RestTemplate restTemplate;
  
-  @Resource
-  private TemailServerConfig  config;
-  
-  //@Value("${login.verifyUrl}")  
-  private String  verifyUrl = "http://172.31.245.225:8888/verify";
-  
-  public LoginHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage) {
-    super(socketChannel, cdtpPackage);
-    
-    System.out.println(socketChannel.remoteAddress());
+  public LoginHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage, TemailServerConfig   temailServerConfig) {
+    super(socketChannel, cdtpPackage, temailServerConfig);
   }
 
   @Override
@@ -83,20 +69,19 @@ public class LoginHandler extends BaseHandler {
     map.put("signature", "");
     String  authDataJson = gson.toJson(map); 
     
-    //String  cdtpPackageJson = gson.toJson(getCdtpPackage());    
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8); 
-    //HttpEntity<String> requestEntity = new HttpEntity<String>(cdtpPackageJson, requestHeaders);
     
     HttpEntity<String> requestEntity = new HttpEntity<String>(authDataJson, requestHeaders);
     
     RestTemplate restTemplate = new RestTemplate();
     restTemplate.setErrorHandler(new SilentResponseErrorHandler());
-    
+
+    LOGGER.info("verifyUrl is :", getTemailServerConfig().getVerifyUrl());
     ResponseEntity<Response> responseEntity =
-        restTemplate.exchange(verifyUrl, HttpMethod.POST, requestEntity, Response.class);
+        restTemplate.exchange(getTemailServerConfig().getVerifyUrl(), HttpMethod.POST, requestEntity, Response.class);
     Response  response = responseEntity.getBody();
-    if(response.getCode()==HttpStatus.OK.value()){
+    if(null != response.getCode() && response.getCode()==HttpStatus.OK.value()){
        loginSuccess(temailInfo, response);
     }
     else{
@@ -123,8 +108,10 @@ public class LoginHandler extends BaseHandler {
   }
   
   private  void  loginFailure(TemailInfo temailInfo, Response  response){
-    getSocketChannel().writeAndFlush(response.getData());
-    getSocketChannel().close();
+    if(null != response.getData()){
+      getSocketChannel().writeAndFlush(response.getData());
+      getSocketChannel().close();
+    }    
     LOGGER.info("login  fail , the  temial is :{} and  devId is {} , send msg is {} ", temailInfo.getTemail(),  temailInfo.getDevId(), temailInfo.toString());
   }
 

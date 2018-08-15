@@ -1,5 +1,8 @@
 package com.syswin.temail.cdtpserver.handler;
 
+import javax.annotation.Resource;
+
+import com.syswin.temail.cdtpserver.config.TemailServerConfig;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -19,18 +22,21 @@ public abstract class BaseHandler {
    @Getter
    private AttributeKey<String> TEMAIL_KEY = AttributeKey.valueOf("TEMAIL_KEY");*/
 
-  
     private SocketChannel socketChannel;
     
     private CDTPPackageProto.CDTPPackage cdtpPackage;
-
     
+    private TemailServerConfig   temailServerConfig;
+   
     public BaseHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage){
-
+      this.socketChannel = socketChannel;
+      this.cdtpPackage = cdtpPackage;
+    }
+    
+    public BaseHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage, TemailServerConfig   temailServerConfig){
         this.socketChannel = socketChannel;
         this.cdtpPackage = cdtpPackage;
-       
-
+        this.temailServerConfig = temailServerConfig;
     }
 
 
