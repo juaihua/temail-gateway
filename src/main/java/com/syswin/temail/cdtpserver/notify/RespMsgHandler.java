@@ -7,16 +7,13 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 
-import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
-import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
+import com.syswin.temail.cdtpserver.connection.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import com.syswin.temail.cdtpserver.entity.TransferCDTPPackage;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
-import com.syswin.temail.cdtpserver.utils.CommandEnum;
-import com.syswin.temail.cdtpserver.utils.SendMsg;
+import com.syswin.temail.cdtpserver.handler.SendMsg;
 
 public class RespMsgHandler {
 

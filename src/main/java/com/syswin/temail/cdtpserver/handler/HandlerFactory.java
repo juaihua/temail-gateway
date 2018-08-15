@@ -6,9 +6,9 @@ import io.netty.channel.socket.SocketChannel;
 
 import org.springframework.stereotype.Component;
 
-import com.syswin.temail.cdtpserver.config.TemailServerConfig;
+import com.syswin.temail.cdtpserver.TemailServerProperties;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
-import com.syswin.temail.cdtpserver.utils.CommandEnum;
+import com.syswin.temail.cdtpserver.entity.CommandEnum;
 
 /**
  * Created by weis on 18/8/8.
@@ -16,8 +16,8 @@ import com.syswin.temail.cdtpserver.utils.CommandEnum;
 @Component
 public class HandlerFactory {
 
-    @Resource 
-    TemailServerConfig   temailServerConfig;
+    @Resource
+    TemailServerProperties temailServerConfig;
     
     //public static BaseHandler getHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel){
     public BaseHandler getHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel){    

@@ -3,7 +3,7 @@ package com.syswin.temail.cdtpserver.client;
 import com.google.gson.Gson;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 
-import com.syswin.temail.cdtpserver.utils.CommandEnum;
+import com.syswin.temail.cdtpserver.entity.CommandEnum;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

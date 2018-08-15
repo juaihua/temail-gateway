@@ -2,7 +2,7 @@ package com.syswin.temail.cdtpserver.handler;
 
 import io.netty.channel.socket.SocketChannel;
 
-import com.syswin.temail.cdtpserver.config.TemailServerConfig;
+import com.syswin.temail.cdtpserver.TemailServerProperties;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
 
 /**
@@ -14,7 +14,7 @@ public class HeartbeatHandler extends BaseHandler {
       super(socketChannel,cdtpPackage);
     }
   
-    public HeartbeatHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel, TemailServerConfig   temailServerConfig){
+    public HeartbeatHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel, TemailServerProperties temailServerConfig){
         super(socketChannel,cdtpPackage, temailServerConfig);
     }
 

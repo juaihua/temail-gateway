@@ -9,18 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 
-import com.google.protobuf.ByteString;
-import com.syswin.temail.cdtpserver.config.TemailServerConfig;
+import com.syswin.temail.cdtpserver.TemailServerProperties;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.TransferCDTPPackage;
-import com.syswin.temail.cdtpserver.utils.ConstantsAttributeKey;
-import com.syswin.temail.cdtpserver.utils.HttpAsyncClient;
 
 public class RequestHandler  extends BaseHandler{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  public RequestHandler(SocketChannel socketChannel, CDTPPackage cdtpPackage, TemailServerConfig   temailServerConfig) {
+  public RequestHandler(SocketChannel socketChannel, CDTPPackage cdtpPackage, TemailServerProperties temailServerConfig) {
     super(socketChannel, cdtpPackage, temailServerConfig);
   }
 

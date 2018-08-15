@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
-import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.TransferCDTPPackage;
 
 /**

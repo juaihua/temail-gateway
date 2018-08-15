@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandles;
 
 import javax.annotation.Resource;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -11,8 +12,9 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.syswin.temail.cdtpserver.config.TemailServerConfig;
+import com.syswin.temail.cdtpserver.TemailServerProperties;
 
+@Slf4j
 @Component
 @Order(2)
 public class MonitorMqApplication implements ApplicationRunner {
@@ -23,16 +25,15 @@ public class MonitorMqApplication implements ApplicationRunner {
   private String  verifyUrl;*/
   
   @Resource
-  private  TemailServerConfig  temailServerConfig;
+  private TemailServerProperties properties;
   
   @Override
   public void run(ApplicationArguments args) throws Exception {
     LOGGER.info("启动线程监听MQ");
-    
-    System.out.println("verifyUrl:"+temailServerConfig.getVerifyUrl());
+    System.out.println("verifyUrl:"+ properties.getVerifyUrl());
     
      MonitorMqRunnable  monitorMqRunnable =new   MonitorMqRunnable();
-     monitorMqRunnable.setTemailServerConfig(temailServerConfig);
+     monitorMqRunnable.setTemailServerConfig(properties);
      Thread monitorThread = new Thread(monitorMqRunnable, "monitorThread") ;
      monitorThread.start();
 

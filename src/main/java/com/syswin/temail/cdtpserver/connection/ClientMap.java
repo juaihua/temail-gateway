@@ -1,4 +1,4 @@
-package com.syswin.temail.cdtpserver.network;
+package com.syswin.temail.cdtpserver.connection;
 
 import io.netty.channel.Channel;
 import io.netty.channel.socket.SocketChannel;

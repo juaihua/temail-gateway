@@ -1,4 +1,4 @@
-package com.syswin.temail.cdtpserver.utils;
+package com.syswin.temail.cdtpserver.entity;
 
 /**
  * Created by weis on 18/8/9.

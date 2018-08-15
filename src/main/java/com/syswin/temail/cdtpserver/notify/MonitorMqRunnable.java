@@ -11,7 +11,7 @@ import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.syswin.temail.cdtpserver.config.TemailServerConfig;
+import com.syswin.temail.cdtpserver.TemailServerProperties;
 
 public class MonitorMqRunnable implements Runnable {
 
@@ -20,7 +20,7 @@ public class MonitorMqRunnable implements Runnable {
   
   @Setter
   @Getter
-  private TemailServerConfig   temailServerConfig;
+  private TemailServerProperties temailServerConfig;
   
   @Override
   public void run() {

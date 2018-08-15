@@ -15,8 +15,8 @@ import com.google.protobuf.ByteString;
 import com.syswin.temail.cdtpserver.entity.CDTPBody;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
-import com.syswin.temail.cdtpserver.utils.CommandEnum;
-import com.syswin.temail.cdtpserver.utils.ConstantsAttributeKey;
+import com.syswin.temail.cdtpserver.entity.CommandEnum;
+import com.syswin.temail.cdtpserver.handler.ConstantsAttributeKey;
 
 /**
  * Created by weis on 18/8/3.

@@ -8,21 +8,11 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.Delimiters;
-import io.netty.handler.codec.protobuf.ProtobufDecoder;
-import io.netty.handler.codec.protobuf.ProtobufEncoder;
-import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
-import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
-import io.netty.util.CharsetUtil;
 
 import java.net.InetSocketAddress;
 
-import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
-import com.syswin.temail.cdtpserver.network.codec.PacketDecoder;
-import com.syswin.temail.cdtpserver.network.codec.PacketEncoder;
+import com.syswin.temail.cdtpserver.codec.PacketDecoder;
+import com.syswin.temail.cdtpserver.codec.PacketEncoder;
 
 /**
  * Created by weis on 18/8/3.

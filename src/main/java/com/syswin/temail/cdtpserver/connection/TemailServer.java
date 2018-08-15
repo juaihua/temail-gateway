@@ -1,5 +1,6 @@
-package com.syswin.temail.cdtpserver.network;
+package com.syswin.temail.cdtpserver.connection;
 
+import com.syswin.temail.cdtpserver.handler.TemailServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -23,8 +24,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import com.syswin.temail.cdtpserver.handler.HandlerFactory;
-import com.syswin.temail.cdtpserver.network.codec.PacketDecoder;
-import com.syswin.temail.cdtpserver.network.codec.PacketEncoder;
+import com.syswin.temail.cdtpserver.codec.PacketDecoder;
+import com.syswin.temail.cdtpserver.codec.PacketEncoder;
 
 /**
  * Created by weis on 18/8/2.

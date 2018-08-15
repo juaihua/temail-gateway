@@ -1,5 +1,6 @@
-package com.syswin.temail.cdtpserver.entity;
+package com.syswin.temail.cdtpserver.connection;
 
+import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import io.netty.channel.socket.SocketChannel;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OnlineTemailManager {
 
     //在线temail管理
-   private static Map<String,TemailInfo> onlineTemailMap = new ConcurrentHashMap<String,TemailInfo>();
+   private static Map<String, TemailInfo> onlineTemailMap = new ConcurrentHashMap<String,TemailInfo>();
 
     //socketChannel 对应多个Temail
     private static Map<String,List<TemailInfo>> activeChannelMap = new ConcurrentHashMap<String,List<TemailInfo>>();

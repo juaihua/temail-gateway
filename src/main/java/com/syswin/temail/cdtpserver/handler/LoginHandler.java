@@ -18,14 +18,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
-import com.syswin.temail.cdtpserver.config.TemailServerConfig;
-import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
+import com.syswin.temail.cdtpserver.TemailServerProperties;
+import com.syswin.temail.cdtpserver.connection.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.Response;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
-import com.syswin.temail.cdtpserver.utils.CommandEnum;
-import com.syswin.temail.cdtpserver.utils.ConstantsAttributeKey;
+import com.syswin.temail.cdtpserver.entity.CommandEnum;
 
 /**
  * Created by weis on 18/8/8.
@@ -35,7 +34,7 @@ public class LoginHandler extends BaseHandler {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(MethodHandles.lookup().lookupClass());
  
-  public LoginHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage, TemailServerConfig   temailServerConfig) {
+  public LoginHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage, TemailServerProperties temailServerConfig) {
     super(socketChannel, cdtpPackage, temailServerConfig);
   }
 

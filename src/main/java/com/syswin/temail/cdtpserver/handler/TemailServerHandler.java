@@ -1,15 +1,10 @@
-package com.syswin.temail.cdtpserver.network;
+package com.syswin.temail.cdtpserver.handler;
 
-import com.google.gson.Gson;
-import com.google.protobuf.ByteString;
-import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
+import com.syswin.temail.cdtpserver.connection.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
-import com.syswin.temail.cdtpserver.handler.BaseHandler;
-import com.syswin.temail.cdtpserver.handler.HandlerFactory;
-import com.syswin.temail.cdtpserver.utils.CommandEnum;
-import com.syswin.temail.cdtpserver.utils.ConstantsAttributeKey;
-import com.syswin.temail.cdtpserver.utils.SendMsg;
+import com.syswin.temail.cdtpserver.connection.ClientMap;
+import com.syswin.temail.cdtpserver.entity.CommandEnum;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
@@ -17,14 +12,11 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateEvent;
-import io.netty.util.AttributeKey;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
 
 import lombok.Getter;
 import lombok.Setter;

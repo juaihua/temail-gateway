@@ -1,5 +1,6 @@
-package com.syswin.temail.cdtpserver.entity;
+package com.syswin.temail.cdtpserver.connection;
 
+import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import io.netty.channel.socket.SocketChannel;
 
 import java.util.Iterator;

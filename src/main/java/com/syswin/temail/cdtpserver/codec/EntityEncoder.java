@@ -1,4 +1,4 @@
-package com.syswin.temail.cdtpserver.network.codec;
+package com.syswin.temail.cdtpserver.codec;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
