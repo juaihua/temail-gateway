@@ -104,15 +104,15 @@ public class LoginHandler extends BaseHandler {
     builder.setPkgId(getCdtpPackage().getPkgId());
     CDTPPackage newcdtpPackage = builder.build();
     this.getSocketChannel().writeAndFlush(newcdtpPackage);    
-    LOGGER.info("login  success , the  temial is :{} and  devId is {} , send  msg is {}", temailInfo.getTemail(),  temailInfo.getDevId(), newcdtpPackage.toString());
+    LOGGER.info("**********登录成功, the  temial is :{} and  devId is {} , send  msg is {}", temailInfo.getTemail(),  temailInfo.getDevId(), newcdtpPackage.toString());
   }
   
   private  void  loginFailure(TemailInfo temailInfo, Response  response){
     if(null != response.getData()){
-      getSocketChannel().writeAndFlush(response.getData());
-      getSocketChannel().close();
+      getSocketChannel().writeAndFlush(response.getData());     
     }    
-    LOGGER.info("login  fail , the  temial is :{} and  devId is {} , send msg is {} ", temailInfo.getTemail(),  temailInfo.getDevId(), temailInfo.toString());
+    getSocketChannel().close();
+    LOGGER.info("##########登录失败 , the  temial is :{} and  devId is {} , send msg is {} ", temailInfo.getTemail(),  temailInfo.getDevId(), temailInfo.toString());
   }
 
 

@@ -67,11 +67,13 @@ public class HttpAsyncClient {
             try {
               instreams = entity.getContent();
               resultStr = convertStreamToString(instreams);
+              LOGGER.info("收到异步回执消息:{}", resultStr);
               TransferCDTPPackage transferCDTPPackage =
                   convertStringToTransferCDTPPackage(resultStr);
               CDTPPackage.Builder builder = CDTPPackage.newBuilder();
               copyBeanProperties(transferCDTPPackage, builder);
               CDTPPackage ctPackage = builder.build();
+              LOGGER.info("RequestHandler 返回给前端的回执消息:{}", ctPackage.toString());
               socketChannel.writeAndFlush(ctPackage);
             } catch (UnsupportedOperationException ex) {
               LOGGER.error("execute ReqHandler call back  exception", ex);

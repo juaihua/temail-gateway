@@ -149,12 +149,19 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
         handler.process();
       }
       else{
-          //业务处理
-          handler = handlerFactory.getHandler(cdtpPackage, (SocketChannel) ctx.channel());          
-          handler.process();
-          cdtpPackage.getCommand();//
-          LOGGER.info("dispatch  info: {}", cdtpPackage.toString());
-          ctx.writeAndFlush(cdtpPackage);       
+          if(null != ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get()){
+            //业务处理
+            handler = handlerFactory.getHandler(cdtpPackage, (SocketChannel) ctx.channel());          
+            handler.process();
+            cdtpPackage.getCommand();//
+            LOGGER.info("dispatch  info: {}", cdtpPackage.toString());
+            ctx.writeAndFlush(cdtpPackage);
+          }
+          else{
+            LOGGER.info("尚未登录成功, 非法的连接************************");
+            ctx.channel().close();
+          }
+                 
       }      
   }
     
