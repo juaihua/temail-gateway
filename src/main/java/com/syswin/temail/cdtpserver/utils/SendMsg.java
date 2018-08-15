@@ -1,5 +1,7 @@
 package com.syswin.temail.cdtpserver.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
@@ -10,6 +12,7 @@ import io.netty.channel.socket.SocketChannel;
 /**
  * Created by weis on 18/8/9.
  */
+@Slf4j
 public class SendMsg {
 
     /**
@@ -22,13 +25,14 @@ public class SendMsg {
         builder.setCommand(command.getCode());//设置心跳命令
 
         CDTPPackageProto.CDTPPackage cdtpPackage = builder.build();
-
+        log.info("发送心跳指令信息: {}", cdtpPackage.toString());
         socketChannel.writeAndFlush(cdtpPackage);
     }
     
     
     //public static void sendToTemail(String toTemail,CDTPPackageProto cdtpPackageProto,SocketChannel socketChannel){
     public static void sendToTemail(CDTPPackage ctPackage,SocketChannel socketChannel){  
+      log.info("从MQ中提取信息, 向对应的通道中发送:{}", ctPackage.toString());
       socketChannel.writeAndFlush(ctPackage); 
     }
 

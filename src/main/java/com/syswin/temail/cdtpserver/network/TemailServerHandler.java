@@ -81,6 +81,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
 //        ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+        LOGGER.info("在 TemailServerHandler 中, 发送 Unpooled.EMPTY_BUFFER");
         ctx.writeAndFlush(Unpooled.EMPTY_BUFFER);
     }
 
@@ -91,7 +92,8 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
         //LOGGER.info("TEMAIL_KEY:"+ctx.channel().attr(TEMAIL_KEY).get());
         LOGGER.info("TEMAIL_KEY:"+ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
         if (evt instanceof IdleStateEvent) {//指定时间内,通道没有任何数据
-            if (counter >= 3) {
+            //if (counter >= 30) {
+            if (counter >= 10) {
                 //close channel
                 ctx.channel().close().sync();
                 //清理状态数据
@@ -152,10 +154,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
           if(null != ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get()){
             //业务处理
             handler = handlerFactory.getHandler(cdtpPackage, (SocketChannel) ctx.channel());          
-            handler.process();
-            cdtpPackage.getCommand();//
-            LOGGER.info("dispatch  info: {}", cdtpPackage.toString());
-            ctx.writeAndFlush(cdtpPackage);
+            handler.process();           
           }
           else{
             LOGGER.info("尚未登录成功, 非法的连接************************");
@@ -165,57 +164,4 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
       }      
   }
     
-  /*  private void handleData(ChannelHandlerContext ctx, CDTPPackage cdtpPackage) {
-        counter = 0;
-        //登陆单独处理
-        if(cdtpPackage.getCommand() == CommandEnum.connect.getCode()){
-            Gson gson = new Gson();
-            TemailInfo temailInfo = gson.fromJson(cdtpPackage.getData().toStringUtf8(),TemailInfo.class);
-            boolean loginResult = login(cdtpPackage, temailInfo);
-            if(loginResult){
-                //设置session
-                String temailKey = temailInfo.getTemail()+"-"+temailInfo.getDevId();
-                //ctx.channel().attr(TEMAIL_KEY).set(temailKey);
-                ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).set(temailKey);
-                temailInfo.setSocketChannel((SocketChannel)ctx.channel());
-                temailInfo.setTimestamp(new Timestamp(System.currentTimeMillis()));               
-                ActiveTemailManager.add(temailKey,temailInfo);                
-                              
-                CDTPPackage.Builder builder = CDTPPackage.newBuilder();               
-                builder.setCommand(CommandEnum.resp.getCode());
-                builder.setPkgId(cdtpPackage.getPkgId());
-                CDTPPackage newcdtpPackage = builder.build();
-                LOGGER.info("send login success msg:"+newcdtpPackage.toString());
-                ctx.writeAndFlush(newcdtpPackage);
-            }
-        }
-        else{
-          //业务处理
-          handler = HandlerFactory.getHandler(cdtpPackage, (SocketChannel) ctx.channel());          
-          handler.process();
-          cdtpPackage.getCommand();//
-          
-          System.out.println("***cdtpPackage:" + cdtpPackage.toString());
-          ctx.writeAndFlush(cdtpPackage);
-          
-        }
-        
-    }*/
-
-    /**
-     * 登陆逻辑
-     * @param cdtpPackage
-     * @return
-     */
-    private boolean login(CDTPPackage cdtpPackage, TemailInfo temailInfo){
-      
-        /*String  temailKey = temailInfo.getTemail()+"-"+ temailInfo.getDevId();
-        if(ActiveTemailManager.get(temailKey) != null){
-            //已经在线,不让登陆
-            return false;
-        }
-*/
-        return true;
-    }
-
 }

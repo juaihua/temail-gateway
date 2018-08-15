@@ -100,7 +100,7 @@ public class LoginHandler extends BaseHandler {
     ActiveTemailManager.add(temailKey, temailInfo);
 
     CDTPPackage.Builder builder = CDTPPackage.newBuilder();
-    builder.setCommand(CommandEnum.resp.getCode());
+    builder.setCommand(CommandEnum.connect.getCode());
     builder.setPkgId(getCdtpPackage().getPkgId());
     CDTPPackage newcdtpPackage = builder.build();
     this.getSocketChannel().writeAndFlush(newcdtpPackage);    
@@ -109,6 +109,7 @@ public class LoginHandler extends BaseHandler {
   
   private  void  loginFailure(TemailInfo temailInfo, Response  response){
     if(null != response.getData()){
+      LOGGER.info("登录失败, 发送 response.getData： {}", response.getData()); 
       getSocketChannel().writeAndFlush(response.getData());     
     }    
     getSocketChannel().close();

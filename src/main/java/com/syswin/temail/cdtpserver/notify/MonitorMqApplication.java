@@ -18,19 +18,14 @@ import com.syswin.temail.cdtpserver.config.TemailServerConfig;
 public class MonitorMqApplication implements ApplicationRunner {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(MethodHandles.lookup().lookupClass());
-  
-  /*@Value("${login.verifyUrl}")  
-  private String  verifyUrl;*/
-  
+    
   @Resource
   private  TemailServerConfig  temailServerConfig;
   
   @Override
   public void run(ApplicationArguments args) throws Exception {
     LOGGER.info("启动线程监听MQ");
-    
-    System.out.println("verifyUrl:"+temailServerConfig.getVerifyUrl());
-    
+       
      MonitorMqRunnable  monitorMqRunnable =new   MonitorMqRunnable();
      monitorMqRunnable.setTemailServerConfig(temailServerConfig);
      Thread monitorThread = new Thread(monitorMqRunnable, "monitorThread") ;

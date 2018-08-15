@@ -38,7 +38,7 @@ public class RespMsgHandler {
           Map.Entry<String, TemailInfo> entry = (Map.Entry<String, TemailInfo>) iter.next();
           String temail = (String) entry.getKey();
           TemailInfo temailInfo = (TemailInfo) entry.getValue();
-
+          LOGGER.info("在线把消息推送给:{}, 具体推送消息为:{}",  temail, ctPackage);
           SendMsg.sendToTemail(ctPackage, temailInfo.getSocketChannel());
         }
       }
