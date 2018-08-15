@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
-import com.syswin.temail.cdtpserver.utils.TemailServerConfig;
+import com.syswin.temail.cdtpserver.config.TemailServerConfig;
 
 
 /**

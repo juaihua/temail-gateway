@@ -1,5 +1,6 @@
 package com.syswin.temail.cdtpserver.notify;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,8 @@ import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
@@ -19,6 +22,10 @@ import com.syswin.temail.cdtpserver.entity.TransferCDTPPackage;
  */
 @Slf4j
 public class TemailServerMqListener implements MessageListenerConcurrently {
+  
+    private static final Logger LOGGER = LoggerFactory
+      .getLogger(MethodHandles.lookup().lookupClass());
+    
     private Gson gson = new Gson();
     
     @Override
@@ -27,14 +34,14 @@ public class TemailServerMqListener implements MessageListenerConcurrently {
             for (MessageExt msg : msgs) {
                          
                 String msgData = new String(msg.getBody());
-                System.out.println("接收到的消息是：" + msgData);                
+                LOGGER.info("*********************************从MQ接受到消息是:"+msgData);
                 TransferCDTPPackage  transferCDTPPackageJson = gson.fromJson(msgData, TransferCDTPPackage.class);//把JSON字符串转为对象  
                 String to = transferCDTPPackageJson.getTo();   
                 RespMsgHandler.sendMsg(transferCDTPPackageJson);
             }
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-        } catch (Exception e) {
-            log.error("队列传输出错！请求参数：" + msgs, e);
+        } catch (Exception ex) {
+            LOGGER.error("队列传输出错！请求参数：{}" , msgs, ex);
             return ConsumeConcurrentlyStatus.RECONSUME_LATER;
         }
     }

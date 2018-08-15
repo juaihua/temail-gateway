@@ -26,6 +26,9 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Created by weis on 18/8/2.
  */
@@ -40,6 +43,10 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
     private BaseHandler handler;
 
+    @Setter
+    @Getter
+    private HandlerFactory handlerFactory;
+    
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
@@ -138,12 +145,12 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
       counter = 0;
       //登陆单独处理
       if(cdtpPackage.getCommand() == CommandEnum.connect.getCode()){
-        handler = HandlerFactory.getHandler(cdtpPackage, (SocketChannel) ctx.channel());
+        handler = handlerFactory.getHandler(cdtpPackage, (SocketChannel) ctx.channel());
         handler.process();
       }
       else{
           //业务处理
-          handler = HandlerFactory.getHandler(cdtpPackage, (SocketChannel) ctx.channel());          
+          handler = handlerFactory.getHandler(cdtpPackage, (SocketChannel) ctx.channel());          
           handler.process();
           cdtpPackage.getCommand();//
           LOGGER.info("dispatch  info: {}", cdtpPackage.toString());

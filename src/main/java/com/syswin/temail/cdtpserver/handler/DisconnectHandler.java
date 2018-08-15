@@ -11,16 +11,15 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 
 import com.google.gson.Gson;
+import com.syswin.temail.cdtpserver.config.TemailServerConfig;
 import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
-import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
+import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import com.syswin.temail.cdtpserver.utils.ConstantsAttributeKey;
 
 public class DisconnectHandler extends BaseHandler {
@@ -30,8 +29,8 @@ public class DisconnectHandler extends BaseHandler {
   @Value("{disconnect.url}")
   private String disconnectUrl;
 
-  public DisconnectHandler(SocketChannel socketChannel, CDTPPackage cdtpPackage) {
-    super(socketChannel, cdtpPackage);
+  public DisconnectHandler(SocketChannel socketChannel, CDTPPackage cdtpPackage, TemailServerConfig   temailServerConfig) {
+      super(socketChannel, cdtpPackage, temailServerConfig);
   }
 
   @Override

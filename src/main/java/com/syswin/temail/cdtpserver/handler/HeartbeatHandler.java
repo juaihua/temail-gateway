@@ -1,7 +1,9 @@
 package com.syswin.temail.cdtpserver.handler;
 
-import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
 import io.netty.channel.socket.SocketChannel;
+
+import com.syswin.temail.cdtpserver.config.TemailServerConfig;
+import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
 
 /**
  * Created by weis on 18/8/8.
@@ -9,7 +11,11 @@ import io.netty.channel.socket.SocketChannel;
 public class HeartbeatHandler extends BaseHandler {
 
     public HeartbeatHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel){
-        super(socketChannel,cdtpPackage);
+      super(socketChannel,cdtpPackage);
+    }
+  
+    public HeartbeatHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel, TemailServerConfig   temailServerConfig){
+        super(socketChannel,cdtpPackage, temailServerConfig);
     }
 
     @Override
