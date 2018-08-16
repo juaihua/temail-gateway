@@ -1,7 +1,5 @@
 package com.syswin.temail.cdtpserver.connection;
 
-import com.syswin.temail.cdtpserver.handler.TemailServerHandler;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -18,29 +16,39 @@ import java.net.InetSocketAddress;
 import javax.annotation.Resource;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import org.apache.logging.log4j.core.config.Order;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import com.syswin.temail.cdtpserver.handler.factory.HandlerFactory;
 import com.syswin.temail.cdtpserver.codec.PacketDecoder;
 import com.syswin.temail.cdtpserver.codec.PacketEncoder;
+import com.syswin.temail.cdtpserver.handler.TemailServerHandler;
+import com.syswin.temail.cdtpserver.handler.factory.HandlerFactory;
+import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
+import com.syswin.temail.cdtpserver.status.TemailSocketSyncClient;
 
 /**
  * Created by weis on 18/8/2.
  */
 @Component
 @Order(1)
+@Slf4j
 public class TemailServer implements ApplicationRunner {
 
     @Setter
-    private int port = 8099;
+    private int port = 8098;
 
     @Resource
     HandlerFactory   handlerFactory;
     
+    @Resource
+    TemailServerProperties   temailServerProperties;
+    
+    @Resource
+    TemailSocketSyncClient temailSocketSyncClient;
     
     @Override
     public void run(ApplicationArguments args) {
@@ -51,7 +59,7 @@ public class TemailServer implements ApplicationRunner {
 
         b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                 // 指定使用NIO传输Channel
-                .localAddress(new InetSocketAddress(port))
+                .localAddress(new InetSocketAddress(temailServerProperties.getPort()))
                 // 通过NoDelay禁用Nagle,使消息立即发送出去
                 // .option(ChannelOption.TCP_NODELAY,true)
                 // 保持长连接状态
@@ -72,6 +80,7 @@ public class TemailServer implements ApplicationRunner {
                         
                         TemailServerHandler temailServerHandler = new TemailServerHandler();
                         temailServerHandler.setHandlerFactory(handlerFactory);
+                        temailServerHandler.setTemailSocketSyncClient(temailSocketSyncClient);
                         pipeline.addLast(temailServerHandler);
                     }
                 });
@@ -79,8 +88,8 @@ public class TemailServer implements ApplicationRunner {
 
         try {
             // 异步地绑定服务器;调用sync方法阻塞等待直到绑定完成
-            ChannelFuture f = b.bind().sync();
-            System.out.println("服务器已启动,正在监听用户的请求......");
+            ChannelFuture f = b.bind().sync();            
+            log.info("Temail 服务器已启动,正在监听用户的请求......");
             // 获取Channel的CloseFuture，并且阻塞当前线程直到它完成
             f.channel().closeFuture().sync();
         } catch (InterruptedException e) {

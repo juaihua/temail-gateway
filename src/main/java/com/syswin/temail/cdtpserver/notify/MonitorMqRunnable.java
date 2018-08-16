@@ -27,18 +27,12 @@ public class MonitorMqRunnable implements Runnable {
     
     try{     
       LOGGER.info("开始监听MQ信息........");       
-     /* String  consumerGroup = "cdtp-server-consumer";
-      String  namesrvAddr = "172.28.43.18:9876";
-      String  topic = "temail-server-channle-1";*/
       DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(temailServerConfig.getConsumerGroup());
-      //consumer.setNamesrvAddr(properties.getNamesrvAddr());
       consumer.setNamesrvAddr(temailServerConfig.getNamesrvAddr());
-      //consumer.subscribe(properties.getTopic(), "*");
       consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);      
       consumer.subscribe(temailServerConfig.getTopic() , "*");     
       consumer.setMessageListener(new TemailServerMqListener());      
-      consumer.start();
-      
+      consumer.start();      
     }
     catch (MQClientException ex) {
       LOGGER.error("monitor mq msg  exception", ex);

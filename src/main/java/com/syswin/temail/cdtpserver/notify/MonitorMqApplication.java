@@ -24,14 +24,11 @@ public class MonitorMqApplication implements ApplicationRunner {
   
   @Override
   public void run(ApplicationArguments args) throws Exception {
-    LOGGER.info("启动线程监听MQ");
-    System.out.println("verifyUrl:"+ properties.getVerifyUrl());
-    
+     LOGGER.info("启动线程监听MQ");
      MonitorMqRunnable  monitorMqRunnable =new   MonitorMqRunnable();
      monitorMqRunnable.setTemailServerConfig(properties);
      Thread monitorThread = new Thread(monitorMqRunnable, "monitorThread") ;
      monitorThread.start();
-
   }
 
 }

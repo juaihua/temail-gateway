@@ -1,12 +1,5 @@
 package com.syswin.temail.cdtpserver.handler;
 
-import com.syswin.temail.cdtpserver.connection.ActiveTemailManager;
-import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
-import com.syswin.temail.cdtpserver.entity.CommandEnum;
-import com.syswin.temail.cdtpserver.handler.base.BaseHandler;
-import com.syswin.temail.cdtpserver.handler.factory.HandlerFactory;
-
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -15,11 +8,24 @@ import io.netty.handler.timeout.IdleStateEvent;
 
 import java.lang.invoke.MethodHandles;
 
+import javax.annotation.Resource;
+
 import lombok.Getter;
 import lombok.Setter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.syswin.temail.cdtpserver.connection.ActiveTemailManager;
+import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
+import com.syswin.temail.cdtpserver.entity.CommandEnum;
+import com.syswin.temail.cdtpserver.entity.TemailInfo;
+import com.syswin.temail.cdtpserver.entity.TemailSocketInfo;
+import com.syswin.temail.cdtpserver.entity.TemailSocketOptEnum;
+import com.syswin.temail.cdtpserver.handler.base.BaseHandler;
+import com.syswin.temail.cdtpserver.handler.factory.HandlerFactory;
+import com.syswin.temail.cdtpserver.status.TemailSocketSyncClient;
+import com.syswin.temail.cdtpserver.utils.TemailSocketBuilderUtil;
 
 /**
  * Created by weis on 18/8/2.
@@ -32,7 +38,11 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
   private int counter;
 
   private BaseHandler handler;
-
+  
+  @Setter
+  @Getter
+  TemailSocketSyncClient temailSocketSyncClient;
+  
   @Setter
   @Getter
   private HandlerFactory handlerFactory;
@@ -62,8 +72,9 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
   public void channelInactive(ChannelHandlerContext ctx) {
     LOGGER.info("socketChannel {} client is inactive", ctx.channel().remoteAddress().toString());
     LOGGER.info("当前连接数: ", ActiveTemailManager.getOnlineTemailMap().size());
-    ActiveTemailManager.remove(ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
-    
+    if(null != ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get()){
+      ActiveTemailManager.remove(ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
+    }    
   }
 
   @Override
@@ -78,11 +89,15 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
     if (evt instanceof IdleStateEvent) {//指定时间内,通道没有任何数据
       //if (counter >= 30) {
       if (counter >= 10) {
+        
+        TemailInfo  temailInfo = ActiveTemailManager.getOne(ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());        
+        TemailSocketInfo  temailSocketInfo = TemailSocketBuilderUtil.temailSocketBuilder(temailInfo, TemailSocketOptEnum.add.toString()); 
+        temailSocketSyncClient.updateTemailSocketInfToRemote(temailSocketInfo);
+        
         ActiveTemailManager.remove(ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
         LOGGER.info("socketChannel{} , TemailKey is {} 空闲超时, 已与Client断开连接 , 并且从状态管理中移除",
             ((SocketChannel) ctx.channel()).remoteAddress().toString(),
             ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
-        //close channel
         ctx.channel().close().sync();
         //清理状态数据
       } else {

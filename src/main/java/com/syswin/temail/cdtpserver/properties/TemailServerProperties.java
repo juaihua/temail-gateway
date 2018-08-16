@@ -1,8 +1,9 @@
 package com.syswin.temail.cdtpserver.properties;
 
 import lombok.Data;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 
 @Data
@@ -18,6 +19,10 @@ public class TemailServerProperties {
   private String namesrvAddr;
 
   private String topic;
+  
+  private String  updateSocketStatusUrl;
+  
+  private int  port;
 
 
 }

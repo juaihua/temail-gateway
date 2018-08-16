@@ -21,11 +21,15 @@ import com.google.gson.Gson;
 import com.syswin.temail.cdtpserver.connection.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
+import com.syswin.temail.cdtpserver.entity.CommandEnum;
 import com.syswin.temail.cdtpserver.entity.Response;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
-import com.syswin.temail.cdtpserver.entity.CommandEnum;
+import com.syswin.temail.cdtpserver.entity.TemailSocketInfo;
+import com.syswin.temail.cdtpserver.entity.TemailSocketOptEnum;
 import com.syswin.temail.cdtpserver.handler.base.BaseHandler;
 import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
+import com.syswin.temail.cdtpserver.status.TemailSocketSyncClient;
+import com.syswin.temail.cdtpserver.utils.TemailSocketBuilderUtil;
 
 /**
  * Created by weis on 18/8/8.
@@ -35,8 +39,8 @@ public class LoginHandler extends BaseHandler {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(MethodHandles.lookup().lookupClass());
  
-  public LoginHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage, TemailServerProperties temailServerConfig) {
-    super(socketChannel, cdtpPackage, temailServerConfig);
+  public LoginHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage, TemailServerProperties temailServerConfig, TemailSocketSyncClient temailSocketSyncClient) {
+    super(socketChannel, cdtpPackage, temailServerConfig, temailSocketSyncClient);
   }
 
   @Override
@@ -101,18 +105,26 @@ public class LoginHandler extends BaseHandler {
     temailInfo.setTimestamp(new Timestamp(System.currentTimeMillis()));
     ActiveTemailManager.add(temailKey, temailInfo);
 
+    TemailSocketInfo  temailSocketInfo = TemailSocketBuilderUtil.temailSocketBuilder(temailInfo, TemailSocketOptEnum.add.toString()); 
+    getTemailSocketSyncClient().updateTemailSocketInfToRemote(temailSocketInfo);
+    
     CDTPPackage.Builder builder = CDTPPackage.newBuilder();
     builder.setCommand(CommandEnum.connect.getCode());
     builder.setPkgId(getCdtpPackage().getPkgId());
     CDTPPackage newcdtpPackage = builder.build();
     this.getSocketChannel().writeAndFlush(newcdtpPackage);    
     LOGGER.info("**********登录成功, the  temial is :{} and  devId is {} , 返回给前端的消息是: {}", temailInfo.getTemail(),  temailInfo.getDevId(), newcdtpPackage.toString());
+   
+    
+    
   }
   
   private  void  loginFailure(TemailInfo temailInfo, Response  response){
-      if(null != response && null != response.getData()){
-        LOGGER.info("登录失败, 发送 response.getData： {}", response.getData()); 
-        getSocketChannel().writeAndFlush(response.getData());     
+      if(null != response){        
+        LOGGER.info("登录失败, 发送 response.getData： {}, response.getMessage:{} ", response.getData(), response.getMessage()); 
+        if(null != response.getData()){
+          getSocketChannel().writeAndFlush(response.getData());
+        }             
       }    
     getSocketChannel().close();
     LOGGER.info("##########登录失败 , the  temial is :{} and  devId is {} , send msg is {} ", temailInfo.getTemail(),  temailInfo.getDevId(), temailInfo.toString());
