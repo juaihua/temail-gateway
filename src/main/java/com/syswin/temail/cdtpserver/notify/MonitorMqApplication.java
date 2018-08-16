@@ -4,7 +4,6 @@ import java.lang.invoke.MethodHandles;
 
 import javax.annotation.Resource;
 
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -14,16 +13,12 @@ import org.springframework.stereotype.Component;
 
 import com.syswin.temail.cdtpserver.TemailServerProperties;
 
-@Slf4j
 @Component
 @Order(2)
 public class MonitorMqApplication implements ApplicationRunner {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(MethodHandles.lookup().lookupClass());
-  
-  /*@Value("${login.verifyUrl}")  
-  private String  verifyUrl;*/
-  
+
   @Resource
   private TemailServerProperties properties;
   

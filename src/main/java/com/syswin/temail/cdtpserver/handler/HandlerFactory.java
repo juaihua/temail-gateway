@@ -19,17 +19,7 @@ public class HandlerFactory {
     @Resource
     TemailServerProperties temailServerConfig;
     
-    //public static BaseHandler getHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel){
-    public BaseHandler getHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel){    
-      /*switch (CommandEnum.getByValue(cdtpPackage.getCommand())) {
-      case connect://out biz            
-        return new LoginHandler(socketChannel,cdtpPackage);
-      case disconnect://out biz            
-        return new DisconnectHandler(socketChannel, cdtpPackage);            
-      default:
-        return new RequestHandler(socketChannel, cdtpPackage);            
-    }*/
-      
+    public BaseHandler getHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel){         
         if(cdtpPackage.getCommand() == CommandEnum.connect.getCode()){
             return new LoginHandler(socketChannel,cdtpPackage, temailServerConfig);
         }

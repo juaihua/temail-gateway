@@ -1,5 +1,6 @@
 package com.syswin.temail.cdtpserver.handler;
 
+import lombok.extern.slf4j.Slf4j;
 import io.netty.channel.socket.SocketChannel;
 
 import com.syswin.temail.cdtpserver.TemailServerProperties;
@@ -8,6 +9,7 @@ import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
 /**
  * Created by weis on 18/8/8.
  */
+@Slf4j
 public class HeartbeatHandler extends BaseHandler {
 
     public HeartbeatHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel){
@@ -27,7 +29,7 @@ public class HeartbeatHandler extends BaseHandler {
 //        builder.setVersion(3);
 
         CDTPPackageProto.CDTPPackage ctPackage = builder.build();
-
+        log.info("发送心跳信息:{}", ctPackage.toString());
         this.getSocketChannel().writeAndFlush(ctPackage);
     }
 }
