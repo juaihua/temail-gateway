@@ -1,4 +1,4 @@
-package com.syswin.temail.cdtpserver;
+package com.syswin.temail.cdtpserver.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

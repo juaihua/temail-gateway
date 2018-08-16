@@ -1,7 +1,7 @@
 package com.syswin.temail.cdtpserver.handler.base;
 
-import com.syswin.temail.cdtpserver.TemailServerProperties;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
+import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
 
 import io.netty.channel.socket.SocketChannel;
 import lombok.Data;
