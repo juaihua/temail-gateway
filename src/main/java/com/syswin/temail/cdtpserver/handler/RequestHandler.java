@@ -9,9 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 
-import com.syswin.temail.cdtpserver.TemailServerProperties;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.TransferCDTPPackage;
+import com.syswin.temail.cdtpserver.handler.base.BaseHandler;
+import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
 
 public class RequestHandler  extends BaseHandler{
 

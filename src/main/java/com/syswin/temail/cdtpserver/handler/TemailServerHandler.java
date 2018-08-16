@@ -1,18 +1,23 @@
 package com.syswin.temail.cdtpserver.handler;
 
 import com.syswin.temail.cdtpserver.connection.ActiveTemailManager;
-import com.syswin.temail.cdtpserver.connection.ClientMap;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.CommandEnum;
+import com.syswin.temail.cdtpserver.handler.base.BaseHandler;
+import com.syswin.temail.cdtpserver.handler.factory.HandlerFactory;
+
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateEvent;
+
 import java.lang.invoke.MethodHandles;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,22 +55,20 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) {
-    LOGGER.info("client is active,  remoteAddress {}", ctx.channel().remoteAddress().toString());
-        /*ClientMap.add(ctx.channel().remoteAddress().toString(), (SocketChannel) ctx.channel());
-        LOGGER.info("当前连接数: ", ClientMap.getSize());*/
+    LOGGER.info("client is active,  remoteAddress {}", ctx.channel().remoteAddress().toString());      
   }
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) {
     LOGGER.info("socketChannel {} client is inactive", ctx.channel().remoteAddress().toString());
-    ClientMap.remove((SocketChannel) ctx.channel());
-    LOGGER.info("当前连接数: ", ClientMap.getSize());
+    LOGGER.info("当前连接数: ", ActiveTemailManager.getOnlineTemailMap().size());
+    ActiveTemailManager.remove(ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
+    
   }
 
   @Override
   public void channelReadComplete(ChannelHandlerContext ctx) {
-    LOGGER.info("在 TemailServerHandler 中, 发送 Unpooled.EMPTY_BUFFER");
-    ctx.writeAndFlush(Unpooled.EMPTY_BUFFER);
+      LOGGER.info("在 TemailServerHandler 中  socketChannel {} 通道中接收的消息读取完毕.", ctx.channel().remoteAddress());
   }
 
 
@@ -141,7 +144,6 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
         LOGGER.info("尚未登录成功, 非法的连接************************");
         ctx.channel().close();
       }
-
     }
   }
 

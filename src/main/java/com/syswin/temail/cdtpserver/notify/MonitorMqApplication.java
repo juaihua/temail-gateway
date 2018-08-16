@@ -11,7 +11,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.syswin.temail.cdtpserver.TemailServerProperties;
+import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
 
 @Component
 @Order(2)

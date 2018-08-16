@@ -1,4 +1,4 @@
-package com.syswin.temail.cdtpserver.handler;
+package com.syswin.temail.cdtpserver.handler.factory;
 
 import javax.annotation.Resource;
 
@@ -6,9 +6,13 @@ import io.netty.channel.socket.SocketChannel;
 
 import org.springframework.stereotype.Component;
 
-import com.syswin.temail.cdtpserver.TemailServerProperties;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
 import com.syswin.temail.cdtpserver.entity.CommandEnum;
+import com.syswin.temail.cdtpserver.handler.DisconnectHandler;
+import com.syswin.temail.cdtpserver.handler.LoginHandler;
+import com.syswin.temail.cdtpserver.handler.RequestHandler;
+import com.syswin.temail.cdtpserver.handler.base.BaseHandler;
+import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
 
 /**
  * Created by weis on 18/8/8.

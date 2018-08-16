@@ -18,8 +18,8 @@ import com.syswin.temail.cdtpserver.codec.PacketEncoder;
  * Created by weis on 18/8/3.
  */
 public class EchoClient {
-    private final static String HOST = "192.168.15.186";
-    //private final static String HOST = "127.0.0.1";
+    //private final static String HOST = "192.168.15.186";
+    private final static String HOST = "127.0.0.1";
     private final static int PORT = 8099;
 
     public static void start() {

@@ -1,11 +1,14 @@
 package com.syswin.temail.cdtpserver.connection;
 
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
+
 import io.netty.channel.socket.SocketChannel;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import lombok.Getter;
 
 /**
  * Created by weis on 18/8/8.
@@ -13,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ActiveTemailManager {
 
     //在线temail管理
+    @Getter
     private static Map<String,Map<String, TemailInfo>> onlineTemailMap = new ConcurrentHashMap<String,Map<String, TemailInfo>>();
 
     public static void add(String temailKey,TemailInfo temailInfo){

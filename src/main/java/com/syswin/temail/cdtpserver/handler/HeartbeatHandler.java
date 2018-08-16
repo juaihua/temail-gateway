@@ -3,8 +3,9 @@ package com.syswin.temail.cdtpserver.handler;
 import lombok.extern.slf4j.Slf4j;
 import io.netty.channel.socket.SocketChannel;
 
-import com.syswin.temail.cdtpserver.TemailServerProperties;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
+import com.syswin.temail.cdtpserver.handler.base.BaseHandler;
+import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
 
 /**
  * Created by weis on 18/8/8.

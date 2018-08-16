@@ -11,7 +11,7 @@ import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.syswin.temail.cdtpserver.TemailServerProperties;
+import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
 
 public class MonitorMqRunnable implements Runnable {
 
