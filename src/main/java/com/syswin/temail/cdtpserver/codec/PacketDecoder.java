@@ -30,6 +30,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
 
+
         if(byteBuf.readableBytes() >= FIXED_HANDER_LENGTH){
 
             //防止字节流攻击,更具实际业务情况而定
@@ -37,7 +38,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
                 byteBuf.skipBytes(byteBuf.readableBytes());
             }
 
-            int readeStart;
+            int readerIndex = byteBuf.readerIndex();
 
             byteBuf.markReaderIndex();
             int dataLength = byteBuf.readInt();//读取消息总长度
@@ -48,7 +49,8 @@ public class PacketDecoder extends ByteToMessageDecoder {
             }
 
             if(byteBuf.readableBytes() < dataLength){
-                byteBuf.resetReaderIndex();
+//                byteBuf.resetReaderIndex();
+              byteBuf.readerIndex(readerIndex);
                 return;
             }
 

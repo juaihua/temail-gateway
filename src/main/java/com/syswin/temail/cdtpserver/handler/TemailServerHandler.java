@@ -42,7 +42,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
     if (msg instanceof CDTPPackage) {
       CDTPPackage cdtpPackage = (CDTPPackage) msg;
-      LOGGER.info("接收ProtoBuf CDTPPackage 信息:{} ", cdtpPackage.toString());
+      LOGGER.info("接收到客户服发送过来的ProtoBuf CDTPPackage 信息:{} ", cdtpPackage.toString());
       if (cdtpPackage.getCommand() == CommandEnum.ping.getCode() || cdtpPackage.getCommand() == CommandEnum.pong
           .getCode()) {
         //如果是心跳包

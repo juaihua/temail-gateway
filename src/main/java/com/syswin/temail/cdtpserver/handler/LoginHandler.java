@@ -106,7 +106,7 @@ public class LoginHandler extends BaseHandler {
     builder.setPkgId(getCdtpPackage().getPkgId());
     CDTPPackage newcdtpPackage = builder.build();
     this.getSocketChannel().writeAndFlush(newcdtpPackage);    
-    LOGGER.info("**********登录成功, the  temial is :{} and  devId is {} , send  msg is {}", temailInfo.getTemail(),  temailInfo.getDevId(), newcdtpPackage.toString());
+    LOGGER.info("**********登录成功, the  temial is :{} and  devId is {} , 返回给前端的消息是: {}", temailInfo.getTemail(),  temailInfo.getDevId(), newcdtpPackage.toString());
   }
   
   private  void  loginFailure(TemailInfo temailInfo, Response  response){
