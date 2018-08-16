@@ -15,6 +15,7 @@ import com.syswin.temail.cdtpserver.entity.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import com.syswin.temail.cdtpserver.entity.TransferCDTPPackage;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
+import com.syswin.temail.cdtpserver.utils.CdtpPackageUtil;
 import com.syswin.temail.cdtpserver.utils.CommandEnum;
 import com.syswin.temail.cdtpserver.utils.SendMsg;
 
@@ -27,7 +28,8 @@ public class RespMsgHandler {
     try {
       CDTPPackage.Builder builder = CDTPPackage.newBuilder();
       //BeanUtils.copyProperties(transferCDTPPackage, builder);
-      copyBeanProperties(transferCDTPPackage, builder);
+      //copyBeanProperties(transferCDTPPackage, builder);
+      CdtpPackageUtil.copyBeanProperties(transferCDTPPackage, builder);
       CDTPPackage ctPackage = builder.build();
 
       String to = transferCDTPPackage.getTo();

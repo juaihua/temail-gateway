@@ -71,14 +71,11 @@ public class LoginHandler extends BaseHandler {
       String  authDataJson = gson.toJson(map); 
       
       HttpHeaders requestHeaders = new HttpHeaders();
-      requestHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8); 
-      
-      HttpEntity<String> requestEntity = new HttpEntity<String>(authDataJson, requestHeaders);
-      
+      requestHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);       
+      HttpEntity<String> requestEntity = new HttpEntity<String>(authDataJson, requestHeaders);     
       RestTemplate restTemplate = new RestTemplate();
       restTemplate.setErrorHandler(new SilentResponseErrorHandler());
 
-      LOGGER.info("verifyUrl is :", getTemailServerConfig().getVerifyUrl());
       ResponseEntity<Response> responseEntity =
           restTemplate.exchange(getTemailServerConfig().getVerifyUrl(), HttpMethod.POST, requestEntity, Response.class);
       Response  response = responseEntity.getBody();

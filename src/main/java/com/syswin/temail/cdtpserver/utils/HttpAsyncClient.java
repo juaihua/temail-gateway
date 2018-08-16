@@ -71,7 +71,8 @@ public class HttpAsyncClient {
               TransferCDTPPackage transferCDTPPackage =
                   convertStringToTransferCDTPPackage(resultStr);
               CDTPPackage.Builder builder = CDTPPackage.newBuilder();
-              copyBeanProperties(transferCDTPPackage, builder);
+              //copyBeanProperties(transferCDTPPackage, builder);
+              CdtpPackageUtil.copyBeanProperties(transferCDTPPackage, builder);
               CDTPPackage ctPackage = builder.build();
               LOGGER.info("回执消息 TEMAIL_KEY is :{}", socketChannel.attr(ConstantsAttributeKey.TEMAIL_KEY).get());
               socketChannel.writeAndFlush(ctPackage);

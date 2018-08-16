@@ -26,8 +26,6 @@ public class DisconnectHandler extends BaseHandler {
   
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   
-  @Value("{disconnect.url}")
-  private String disconnectUrl;
 
   public DisconnectHandler(SocketChannel socketChannel, CDTPPackage cdtpPackage, TemailServerConfig   temailServerConfig) {
       super(socketChannel, cdtpPackage, temailServerConfig);
@@ -42,7 +40,7 @@ public class DisconnectHandler extends BaseHandler {
     HttpEntity<CDTPPackage> requestEntity = new HttpEntity<CDTPPackage>(getCdtpPackage() , requestHeaders);
     AsyncRestTemplate asyncRt = new AsyncRestTemplate();
     
-    ListenableFuture<ResponseEntity<String>> future = asyncRt.postForEntity(disconnectUrl, requestEntity, String.class);
+    ListenableFuture<ResponseEntity<String>> future = asyncRt.postForEntity(getTemailServerConfig().getDispatchUrl(), requestEntity, String.class);
     future.addCallback(new ListenableFutureCallback<ResponseEntity<String>>() {
         public void onSuccess(ResponseEntity<String> resp) {
            String  result = resp.getBody();
