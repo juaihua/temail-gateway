@@ -36,8 +36,6 @@ import lombok.Setter;
 public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-    //private AttributeKey<String> TEMAIL_KEY = AttributeKey.valueOf("TEMAIL_KEY");
     //heartbeat lose counter
     private int counter;
 
@@ -52,7 +50,7 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
         if (msg instanceof CDTPPackage) {
             CDTPPackage cdtpPackage = (CDTPPackage) msg;
-            LOGGER.info("receive info:"+cdtpPackage);
+            LOGGER.info("接收ProtoBuf CDTPPackage 信息:{} ", cdtpPackage.toString());
             if (cdtpPackage.getCommand() == CommandEnum.ping.getCode()|| cdtpPackage.getCommand() == CommandEnum.pong.getCode()) {
                 //如果是心跳包
                 handleHeartbreat(ctx, cdtpPackage);
@@ -64,23 +62,20 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        LOGGER.info("client is active");
-        ClientMap.add(ctx.channel().remoteAddress().toString(), (SocketChannel) ctx.channel());
-
-        LOGGER.info("当前连接数: ", ClientMap.getSize());
+        LOGGER.info("client is active,  remoteAddress {}", ctx.channel().remoteAddress().toString());
+        /*ClientMap.add(ctx.channel().remoteAddress().toString(), (SocketChannel) ctx.channel());
+        LOGGER.info("当前连接数: ", ClientMap.getSize());*/
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        LOGGER.info("client is inactive");  
-        ClientMap.remove((SocketChannel) ctx.channel());
-        //System.out.println("当前连接数: "+ClientMap.getSize());
+        LOGGER.info("socketChannel {} client is inactive", ctx.channel().remoteAddress().toString());  
+        ClientMap.remove((SocketChannel) ctx.channel());       
         LOGGER.info("当前连接数: ", ClientMap.getSize());
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
-//        ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
         LOGGER.info("在 TemailServerHandler 中, 发送 Unpooled.EMPTY_BUFFER");
         ctx.writeAndFlush(Unpooled.EMPTY_BUFFER);
     }
@@ -88,22 +83,19 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-      
-        //LOGGER.info("TEMAIL_KEY:"+ctx.channel().attr(TEMAIL_KEY).get());
         LOGGER.info("TEMAIL_KEY:"+ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
         if (evt instanceof IdleStateEvent) {//指定时间内,通道没有任何数据
             //if (counter >= 30) {
-            if (counter >= 10) {
+            if (counter >= 10) {                
+                ActiveTemailManager.remove(ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
+                LOGGER.info("socketChannel{} , TemailKey is {} 空闲超时, 已与Client断开连接 , 并且从状态管理中移除", ((SocketChannel)ctx.channel()).remoteAddress().toString(), ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
                 //close channel
                 ctx.channel().close().sync();
                 //清理状态数据
-                //ActiveTemailManager.remove(ctx.channel().attr(TEMAIL_KEY).get());
-                ActiveTemailManager.remove(ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
-                System.out.println("已与Client断开连接");
             } else {
                 counter++;
                 SendMsg.sendHeartbeat((SocketChannel) ctx.channel(), CommandEnum.ping);
-                System.out.println("lose: " + counter + "heartbeat packet");
+                LOGGER.info("socketChannel {} , TemailKey  {} lose : {} heartbeat packet", ((SocketChannel)ctx.channel()).remoteAddress().toString(),  ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get(), counter);
             }
         }
     }
@@ -111,7 +103,6 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
-
         ctx.close();
     }
 

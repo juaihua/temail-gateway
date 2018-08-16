@@ -58,36 +58,41 @@ public class LoginHandler extends BaseHandler {
      * 3.成功操作状态管理服务 
      * 4.失败,返回错误信息,关闭连接
      */    
-    LOGGER.info("in  LoginHandler receive cdtp msg:" + getCdtpPackage().toString());
+    LOGGER.info("在登录LoginHandler中收到 cdtp msg {} ", getCdtpPackage().toString());
     Gson gson = new Gson();
     TemailInfo temailInfo =
         gson.fromJson(getCdtpPackage().getData().toStringUtf8(), TemailInfo.class);
     
-    Map map =  new ConcurrentHashMap<String, String>();  
-    map.put("temail", temailInfo.getTemail());  
-    map.put("unsignedBytes", "");
-    map.put("signature", "");
-    String  authDataJson = gson.toJson(map); 
-    
-    HttpHeaders requestHeaders = new HttpHeaders();
-    requestHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8); 
-    
-    HttpEntity<String> requestEntity = new HttpEntity<String>(authDataJson, requestHeaders);
-    
-    RestTemplate restTemplate = new RestTemplate();
-    restTemplate.setErrorHandler(new SilentResponseErrorHandler());
+    if(null != temailInfo.getTemail()){
+      Map map =  new ConcurrentHashMap<String, String>();  
+      map.put("temail", temailInfo.getTemail());  
+      map.put("unsignedBytes", "");
+      map.put("signature", "");
+      String  authDataJson = gson.toJson(map); 
+      
+      HttpHeaders requestHeaders = new HttpHeaders();
+      requestHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8); 
+      
+      HttpEntity<String> requestEntity = new HttpEntity<String>(authDataJson, requestHeaders);
+      
+      RestTemplate restTemplate = new RestTemplate();
+      restTemplate.setErrorHandler(new SilentResponseErrorHandler());
 
-    LOGGER.info("verifyUrl is :", getTemailServerConfig().getVerifyUrl());
-    ResponseEntity<Response> responseEntity =
-        restTemplate.exchange(getTemailServerConfig().getVerifyUrl(), HttpMethod.POST, requestEntity, Response.class);
-    Response  response = responseEntity.getBody();
-    if(null != response.getCode() && response.getCode()==HttpStatus.OK.value()){
-       loginSuccess(temailInfo, response);
+      LOGGER.info("verifyUrl is :", getTemailServerConfig().getVerifyUrl());
+      ResponseEntity<Response> responseEntity =
+          restTemplate.exchange(getTemailServerConfig().getVerifyUrl(), HttpMethod.POST, requestEntity, Response.class);
+      Response  response = responseEntity.getBody();
+      if(null != response.getCode() && response.getCode()==HttpStatus.OK.value()){
+         loginSuccess(temailInfo, response);
+      }
+      else{
+         loginFailure(temailInfo, response);
+      } 
     }
     else{
-       loginFailure(temailInfo, response);
-    } 
-    
+        LOGGER.info("socketChannel接收到CDTP package 中  temail 信息为空, 关闭连接.",  getSocketChannel().remoteAddress().toString());
+        loginFailure(temailInfo, null);
+    }   
   }
   
   
@@ -108,10 +113,10 @@ public class LoginHandler extends BaseHandler {
   }
   
   private  void  loginFailure(TemailInfo temailInfo, Response  response){
-    if(null != response.getData()){
-      LOGGER.info("登录失败, 发送 response.getData： {}", response.getData()); 
-      getSocketChannel().writeAndFlush(response.getData());     
-    }    
+      if(null != response && null != response.getData()){
+        LOGGER.info("登录失败, 发送 response.getData： {}", response.getData()); 
+        getSocketChannel().writeAndFlush(response.getData());     
+      }    
     getSocketChannel().close();
     LOGGER.info("##########登录失败 , the  temial is :{} and  devId is {} , send msg is {} ", temailInfo.getTemail(),  temailInfo.getDevId(), temailInfo.toString());
   }
