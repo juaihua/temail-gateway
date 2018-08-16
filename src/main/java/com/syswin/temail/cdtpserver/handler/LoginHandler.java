@@ -25,6 +25,7 @@ import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.Response;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import com.syswin.temail.cdtpserver.entity.CommandEnum;
+import com.syswin.temail.cdtpserver.handler.base.BaseHandler;
 
 /**
  * Created by weis on 18/8/8.

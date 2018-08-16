@@ -12,6 +12,7 @@ import org.springframework.beans.BeanUtils;
 import com.syswin.temail.cdtpserver.TemailServerProperties;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.TransferCDTPPackage;
+import com.syswin.temail.cdtpserver.handler.base.BaseHandler;
 
 public class RequestHandler  extends BaseHandler{
 

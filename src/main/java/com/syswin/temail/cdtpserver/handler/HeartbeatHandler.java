@@ -5,6 +5,7 @@ import io.netty.channel.socket.SocketChannel;
 
 import com.syswin.temail.cdtpserver.TemailServerProperties;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
+import com.syswin.temail.cdtpserver.handler.base.BaseHandler;
 
 /**
  * Created by weis on 18/8/8.

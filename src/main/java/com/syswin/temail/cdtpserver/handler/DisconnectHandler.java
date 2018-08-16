@@ -20,6 +20,7 @@ import com.syswin.temail.cdtpserver.TemailServerProperties;
 import com.syswin.temail.cdtpserver.connection.ActiveTemailManager;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
+import com.syswin.temail.cdtpserver.handler.base.BaseHandler;
 
 public class DisconnectHandler extends BaseHandler {
   

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 @ConfigurationProperties(prefix = "temail")
 public class TemailServerProperties {
 
-  //private String  verifyUrl = "http://172.31.245.225:8888/verify";
   private String verifyUrl;
 
   private String dispatchUrl;
