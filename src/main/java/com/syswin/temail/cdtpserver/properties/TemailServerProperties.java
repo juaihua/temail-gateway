@@ -23,6 +23,9 @@ public class TemailServerProperties {
   private String  updateSocketStatusUrl;
   
   private int  port;
-
-
+  
+  private  int   allow_lose_count;
+  
+  private  int   allIdleTimeSeconds;
+  
 }

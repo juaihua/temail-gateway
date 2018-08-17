@@ -13,9 +13,10 @@ public class LocalMachineUtil {
     String localIp = "";
     try {
       InetAddress addr = InetAddress.getLocalHost();
-      String ip = addr.getHostAddress().toString(); // 获取本机ip
+      localIp = addr.getHostAddress().toString(); // 获取本机ip
     } catch (Exception ex) {
       log.error("获取本机IP失败", ex);
+      localIp = "127.0.0.1";
     }
     return localIp;
   }

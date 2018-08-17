@@ -1,13 +1,17 @@
 package com.syswin.temail.cdtpserver.handler.factory;
 
+import io.netty.channel.socket.SocketChannel;
+
 import javax.annotation.Resource;
 
-import io.netty.channel.socket.SocketChannel;
+import lombok.Getter;
+import lombok.Setter;
 
 import org.springframework.stereotype.Component;
 
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
 import com.syswin.temail.cdtpserver.entity.CommandEnum;
+import com.syswin.temail.cdtpserver.entity.TemailMqInfo;
 import com.syswin.temail.cdtpserver.handler.DisconnectHandler;
 import com.syswin.temail.cdtpserver.handler.LoginHandler;
 import com.syswin.temail.cdtpserver.handler.RequestHandler;
@@ -22,15 +26,19 @@ import com.syswin.temail.cdtpserver.status.TemailSocketSyncClient;
 public class HandlerFactory {
 
     @Resource
-    TemailServerProperties temailServerConfig;
+    private TemailServerProperties temailServerConfig;
     
     @Resource
-    TemailSocketSyncClient temailSocketSyncClient;
+    private TemailSocketSyncClient temailSocketSyncClient;
+    
+    @Setter
+    @Getter
+    private  TemailMqInfo  temailMqInfo;
     
     
     public BaseHandler getHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel){         
         if(cdtpPackage.getCommand() == CommandEnum.connect.getCode()){
-            return new LoginHandler(socketChannel,cdtpPackage, temailServerConfig, temailSocketSyncClient);
+            return new LoginHandler(socketChannel,cdtpPackage, temailServerConfig, temailSocketSyncClient, temailMqInfo);
         }
         else if(cdtpPackage.getCommand() == CommandEnum.disconnect.getCode()){
           return new DisconnectHandler(socketChannel,cdtpPackage, temailServerConfig);

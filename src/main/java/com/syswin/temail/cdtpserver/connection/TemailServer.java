@@ -25,10 +25,13 @@ import org.springframework.stereotype.Component;
 
 import com.syswin.temail.cdtpserver.codec.PacketDecoder;
 import com.syswin.temail.cdtpserver.codec.PacketEncoder;
+import com.syswin.temail.cdtpserver.entity.TemailMqInfo;
 import com.syswin.temail.cdtpserver.handler.TemailServerHandler;
 import com.syswin.temail.cdtpserver.handler.factory.HandlerFactory;
 import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
 import com.syswin.temail.cdtpserver.status.TemailSocketSyncClient;
+import com.syswin.temail.cdtpserver.utils.LocalMachineUtil;
+import com.syswin.temail.cdtpserver.utils.TemailMqInfBuilder;
 
 /**
  * Created by weis on 18/8/2.
@@ -37,9 +40,6 @@ import com.syswin.temail.cdtpserver.status.TemailSocketSyncClient;
 @Order(1)
 @Slf4j
 public class TemailServer implements ApplicationRunner {
-
-    @Setter
-    private int port = 8098;
 
     @Resource
     HandlerFactory   handlerFactory;
@@ -71,18 +71,26 @@ public class TemailServer implements ApplicationRunner {
                     protected void initChannel(SocketChannel socketChannel) {
                         ChannelPipeline pipeline = socketChannel.pipeline();
 
-
                         pipeline.addLast(new PacketDecoder());
                         pipeline.addLast(new PacketEncoder());
                                                 
-                        //pipeline.addLast("idleStateHandler",new IdleStateHandler(0,0,10));
-                        pipeline.addLast("idleStateHandler",new IdleStateHandler(0,0,180));
-                        
-                        TemailServerHandler temailServerHandler = new TemailServerHandler();
-                        temailServerHandler.setHandlerFactory(handlerFactory);
-                        temailServerHandler.setTemailSocketSyncClient(temailSocketSyncClient);
+                        pipeline.addLast("idleStateHandler",new IdleStateHandler(0,0,temailServerProperties.getAllIdleTimeSeconds()));
+                                              
+                        TemailServerHandler temailServerHandler = new TemailServerHandler();                      
+                        setTemailServerHandlerProperties(temailServerHandler);
                         pipeline.addLast(temailServerHandler);
                     }
+                    
+                                        
+                    private  void   setTemailServerHandlerProperties(TemailServerHandler temailServerHandler){
+                      TemailMqInfo  temailMqInfo = TemailMqInfBuilder.getTemailMqInf();
+                      handlerFactory.setTemailMqInfo(temailMqInfo);                      
+                      temailServerHandler.setHandlerFactory(handlerFactory);                       
+                      temailServerHandler.setTemailSocketSyncClient(temailSocketSyncClient);
+                      temailServerHandler.setTemailMqInfo(temailMqInfo);
+                      temailServerHandler.setTemailServerProperties(temailServerProperties);
+                    }
+                    
                 });
 
 
@@ -92,8 +100,8 @@ public class TemailServer implements ApplicationRunner {
             log.info("Temail 服务器已启动,正在监听用户的请求......");
             // 获取Channel的CloseFuture，并且阻塞当前线程直到它完成
             f.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException ex) {
+            log.error("Temail 服务器已启动", ex);
         } finally {
             // 优雅的关闭EventLoopGroup，释放所有的资源
             bossGroup.shutdownGracefully();
@@ -101,4 +109,9 @@ public class TemailServer implements ApplicationRunner {
         }
 
     }
+    
+    
+    
+    
+    
 }

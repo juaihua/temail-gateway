@@ -9,6 +9,6 @@ public class TemailSocketInfo {
     private  String  account;
     //操作类型   add: 新建链接， del: 用户登出或者心跳超时
     private  String  optype; 
-    private  TemailSocketInstance  instance;
+    private  TemailSocketInstance  status;
   
 }

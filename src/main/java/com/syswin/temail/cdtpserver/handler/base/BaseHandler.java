@@ -4,6 +4,7 @@ import io.netty.channel.socket.SocketChannel;
 import lombok.Data;
 
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto;
+import com.syswin.temail.cdtpserver.entity.TemailMqInfo;
 import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
 import com.syswin.temail.cdtpserver.status.TemailSocketSyncClient;
 
@@ -20,6 +21,9 @@ public abstract class BaseHandler {
   private TemailServerProperties temailServerConfig;
 
   private TemailSocketSyncClient temailSocketSyncClient;
+  
+  private  TemailMqInfo  temailMqInfo;
+
   
   public BaseHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage) {
     this.socketChannel = socketChannel;
@@ -42,6 +46,15 @@ public abstract class BaseHandler {
     this.cdtpPackage = cdtpPackage;
     this.temailServerConfig = temailServerConfig;
     this.temailSocketSyncClient = temailSocketSyncClient;
+  }
+  
+  public BaseHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage,
+      TemailServerProperties temailServerConfig, TemailSocketSyncClient temailSocketSyncClient, TemailMqInfo  temailMqInfo) {
+    this.socketChannel = socketChannel;
+    this.cdtpPackage = cdtpPackage;
+    this.temailServerConfig = temailServerConfig;
+    this.temailSocketSyncClient = temailSocketSyncClient;
+    this.temailMqInfo = temailMqInfo;
   }
   
 

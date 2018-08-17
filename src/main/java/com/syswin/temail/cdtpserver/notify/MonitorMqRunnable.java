@@ -11,6 +11,7 @@ import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.syswin.temail.cdtpserver.entity.TemailMqInfo;
 import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
 
 public class MonitorMqRunnable implements Runnable {
@@ -22,15 +23,21 @@ public class MonitorMqRunnable implements Runnable {
   @Getter
   private TemailServerProperties temailServerConfig;
   
+  @Setter
+  @Getter
+  private  TemailMqInfo  temailMqInfo;
+  
+  
   @Override
   public void run() {
     
     try{     
-      LOGGER.info("开始监听MQ信息........");       
+      LOGGER.info("开始监听MQ:{} 队列中的信息.", temailMqInfo.getMqTopic());       
       DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(temailServerConfig.getConsumerGroup());
       consumer.setNamesrvAddr(temailServerConfig.getNamesrvAddr());
       consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);      
-      consumer.subscribe(temailServerConfig.getTopic() , "*");     
+      //consumer.subscribe(temailServerConfig.getTopic() , "*");
+      consumer.subscribe(temailMqInfo.getMqTopic() , "*");
       consumer.setMessageListener(new TemailServerMqListener());      
       consumer.start();      
     }
