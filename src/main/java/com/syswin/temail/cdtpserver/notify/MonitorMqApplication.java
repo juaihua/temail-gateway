@@ -37,11 +37,12 @@ public class MonitorMqApplication implements ApplicationRunner {
      log.info("开始监听MQ:{} 队列中的信息.", temailMqInfo.getMqTopic());       
      try{            
        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(temailServerConfig.getConsumerGroup());
-       consumer.setNamesrvAddr(temailServerConfig.getNamesrvAddr());
-       consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);            
+       consumer.setNamesrvAddr(temailServerConfig.getNamesrvAddr());                  
        //consumer.subscribe(temailMqInfo.getMqTopic() , "*");
-       //consumer.subscribe("temail-server-channle-1" , "*");
-       consumer.subscribe("temail-server-172-31-243-110-7460", "*");
+       //consumer.subscribe("temail-server-channle-1" , "*");       
+       //consumer.subscribe("cdtp-server-consumer", "temail-server-172-31-243-110-7460-gaojh");
+       consumer.subscribe("cdtp-server-consumer", temailMqInfo.getMqTopic());     
+       consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);        
        consumer.setMessageListener(new TemailServerMqListener());      
        consumer.start();      
      }
