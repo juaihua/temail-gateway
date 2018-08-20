@@ -1,5 +1,6 @@
 package com.syswin.temail.cdtpserver.connection;
 
+import com.syswin.temail.cdtpserver.constants.TemailConstant;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import com.syswin.temail.cdtpserver.utils.TemailKeyUtil;
 
@@ -38,7 +39,7 @@ public class ActiveTemailManager {
 
   public static TemailInfo getOne(String temailKey) {
     log.info("get Temail from  onlineTemailMap  by  temail key {}",  temailKey);
-    String[] temailKeyArray = temailKey.split("-");
+    String[] temailKeyArray = temailKey.split(TemailConstant.TEMAIL_KEY_SEPARATOR);
     String temail = temailKeyArray[0];
     String devId = temailKeyArray[1];
     if(null != onlineTemailMap.get(temail)){

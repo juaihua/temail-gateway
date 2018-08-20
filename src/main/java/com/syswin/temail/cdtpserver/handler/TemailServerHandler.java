@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.syswin.temail.cdtpserver.connection.ActiveTemailManager;
+import com.syswin.temail.cdtpserver.constants.ConstantsAttributeKey;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.CommandEnum;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;

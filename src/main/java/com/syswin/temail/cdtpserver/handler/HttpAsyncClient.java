@@ -1,6 +1,7 @@
 package com.syswin.temail.cdtpserver.handler;
 
 import com.syswin.temail.cdtpserver.utils.CdtpPackageUtil;
+
 import io.netty.channel.socket.SocketChannel;
 
 import java.io.BufferedReader;
@@ -25,6 +26,7 @@ import org.springframework.http.MediaType;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.protobuf.ByteString;
+import com.syswin.temail.cdtpserver.constants.ConstantsAttributeKey;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.Response;
 import com.syswin.temail.cdtpserver.entity.TransferCDTPPackage;

@@ -1,4 +1,4 @@
-package com.syswin.temail.cdtpserver.handler;
+package com.syswin.temail.cdtpserver.constants;
 
 import io.netty.util.AttributeKey;
 

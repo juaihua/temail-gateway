@@ -17,10 +17,12 @@ import org.springframework.web.client.AsyncRestTemplate;
 
 import com.google.gson.Gson;
 import com.syswin.temail.cdtpserver.connection.ActiveTemailManager;
+import com.syswin.temail.cdtpserver.constants.ConstantsAttributeKey;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import com.syswin.temail.cdtpserver.handler.base.BaseHandler;
 import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
+import com.syswin.temail.cdtpserver.utils.TemailKeyUtil;
 
 public class DisconnectHandler extends BaseHandler {
   
@@ -54,7 +56,7 @@ public class DisconnectHandler extends BaseHandler {
     Gson gson = new Gson();
     TemailInfo temailInfo =
         gson.fromJson(getCdtpPackage().getData().toStringUtf8(), TemailInfo.class); 
-       String temailKey = temailInfo.getTemail() + "-" + temailInfo.getDevId();
+       String temailKey = TemailKeyUtil.builderTemailKey(temailInfo);
     ActiveTemailManager.remove(temailKey);   
     getSocketChannel().close();
     

@@ -38,9 +38,11 @@ public class CdtpPackageUtil {
       if (null != transferCDTPPackage.getReceiverPK()) {
         builder.setReceiverPK(transferCDTPPackage.getReceiverPK());
       }
-
-
       builder.setData(ByteString.copyFrom(transferCDTPPackage.getData(), Charset.defaultCharset()));
     }
   }
+  
+  
+ 
+  
 }

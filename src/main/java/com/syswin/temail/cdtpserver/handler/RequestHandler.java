@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 
+import com.syswin.temail.cdtpserver.constants.ConstantsAttributeKey;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.TransferCDTPPackage;
 import com.syswin.temail.cdtpserver.handler.base.BaseHandler;

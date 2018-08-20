@@ -8,19 +8,22 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.util.LinkedMultiValueMap;
 
 import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
+import com.syswin.temail.cdtpserver.constants.ConstantsAttributeKey;
 import com.syswin.temail.cdtpserver.entity.CDTPBody;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import com.syswin.temail.cdtpserver.entity.CommandEnum;
-import com.syswin.temail.cdtpserver.handler.ConstantsAttributeKey;
 
 /**
  * Created by weis on 18/8/3.
  */
+@Slf4j
 @ChannelHandler.Sharable
 public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
     int  counter = 0;
@@ -31,13 +34,13 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
 //        ctx.writeAndFlush(Unpooled.copiedBuffer("Netty rocks!", CharsetUtil.UTF_8));
       CDTPPackage.Builder builder = CDTPPackage.newBuilder();
       builder.setAlgorithm(1);
-      //builder.setCommand(2);
       builder.setCommand(CommandEnum.connect.getCode());
       builder.setPkgId("pckAgeId1234");
       builder.setVersion(3);
       
       TemailInfo temailInfo = new TemailInfo();
-      temailInfo.setTemail("sean@t.email");
+      //temailInfo.setTemail("sean@t.email");
+      temailInfo.setTemail("jack@t.email");
       temailInfo.setDevId("devId");
       Gson gson = new Gson();
       String gsonString = gson.toJson(temailInfo);
@@ -50,9 +53,9 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-      System.out.println("client  attrKey:"+ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
+      log.info("client  attrKey:"+ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
       if(msg instanceof CDTPPackage){
-        System.out.println("msg:"+msg);
+        log.info("msg:"+msg);
       }
       if(counter ==0){
       //if(counter <=2){
@@ -87,7 +90,7 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
         } 
       }
       else{
-        System.out.println("no send pinginfo ");
+        log.info("no send pinginfo ");
       }
            
 

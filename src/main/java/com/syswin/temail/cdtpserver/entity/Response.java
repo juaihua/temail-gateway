@@ -37,14 +37,15 @@ public class Response<T> {
     return new Response<>(status, message, body);
   }
 
-  private Response() {
+  public Response() {
+    
   }
 
   private Response(HttpStatus status) {
     this.code = status.value();
   }
 
-  private Response(HttpStatus status, String message) {
+  public  Response(HttpStatus status, String message) {
     this.code = status.value();
     this.message = message;
   }
