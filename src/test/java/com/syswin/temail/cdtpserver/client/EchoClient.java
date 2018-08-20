@@ -17,8 +17,8 @@ import java.net.InetSocketAddress;
  * Created by weis on 18/8/3.
  */
 public class EchoClient {
-  //private final static String HOST = "192.168.15.9";
-  private final static String HOST = "127.0.0.1";
+  private final static String HOST = "192.168.15.9";
+  //private final static String HOST = "127.0.0.1";
   private final static int PORT = 8099;
 
   public static void start() {
