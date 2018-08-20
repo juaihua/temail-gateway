@@ -10,10 +10,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Created by weis on 18/8/8.
  */
+@Slf4j
 public class ActiveTemailManager {
 
   // 在线temail管理
@@ -22,7 +24,7 @@ public class ActiveTemailManager {
       new ConcurrentHashMap<String, Map<String, TemailInfo>>();
 
   public static void add(String temailKey, TemailInfo temailInfo) {
-
+    log.info("add  temailInfo to onlineTemailMap,  the temail key is {} ,  TemailInfo  is {}",  temailKey, temailInfo.toString());
     Map<String, TemailInfo> temailMap = onlineTemailMap.get(temailInfo.getTemail());
     if (temailMap != null) {
       temailMap.put(temailInfo.getDevId(), temailInfo);
@@ -35,6 +37,7 @@ public class ActiveTemailManager {
   }
 
   public static TemailInfo getOne(String temailKey) {
+    log.info("get Temail from  onlineTemailMap  by  temail key {}",  temailKey);
     String[] temailKeyArray = temailKey.split("-");
     String temail = temailKeyArray[0];
     String devId = temailKeyArray[1];
@@ -50,6 +53,7 @@ public class ActiveTemailManager {
 
 
   public static Map<String, TemailInfo> getAll(String temailKey) {
+    log.info("get  temailinfo Map  by  temial key: {}",temailKey);
     return onlineTemailMap.get(TemailKeyUtil.getTemailFromTemailKey(temailKey));
   }
 
@@ -69,6 +73,7 @@ public class ActiveTemailManager {
    * @param temailKey
    */
   public static void remove(String temailKey) {
+    log.info("remove temail info  from  onlineTemailMap by  temail key :{}", temailKey);
     //onlineTemailMap.remove(temailKey);
     onlineTemailMap.remove(TemailKeyUtil.getTemailFromTemailKey(temailKey));
   }

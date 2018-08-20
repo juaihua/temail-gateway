@@ -14,9 +14,10 @@ public class LocalMachineUtil {
     try {
       InetAddress addr = InetAddress.getLocalHost();
       localIp = addr.getHostAddress().toString(); // 获取本机ip
+      localIp = localIp.replace(".", "-");
     } catch (Exception ex) {
       log.error("获取本机IP失败", ex);
-      localIp = "127.0.0.1";
+      localIp = "127-0-0-1";
     }
     return localIp;
   }
@@ -25,6 +26,10 @@ public class LocalMachineUtil {
       String localProcessInf = ManagementFactory.getRuntimeMXBean().getName();
       String localPId = localProcessInf.split("@")[0];
       return localPId;
+  }
+  
+  public  static  void  main(String  args[]){
+    System.out.println(getLocalIp());
   }
 
 }

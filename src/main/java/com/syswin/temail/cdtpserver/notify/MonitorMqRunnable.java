@@ -35,9 +35,10 @@ public class MonitorMqRunnable implements Runnable {
       LOGGER.info("开始监听MQ:{} 队列中的信息.", temailMqInfo.getMqTopic());       
       DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(temailServerConfig.getConsumerGroup());
       consumer.setNamesrvAddr(temailServerConfig.getNamesrvAddr());
-      consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);      
-      //consumer.subscribe(temailServerConfig.getTopic() , "*");
+      consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);            
       consumer.subscribe(temailMqInfo.getMqTopic() , "*");
+      //consumer.subscribe("temail-server-channle-1" , "*");
+      //consumer.subscribe("temail-server-172-31-243-110-7460", "*");
       consumer.setMessageListener(new TemailServerMqListener());      
       consumer.start();      
     }

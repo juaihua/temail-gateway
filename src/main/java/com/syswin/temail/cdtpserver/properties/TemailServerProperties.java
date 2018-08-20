@@ -18,7 +18,7 @@ public class TemailServerProperties {
 
   private String namesrvAddr;
 
-  private String topic;
+  //private String topic;
   
   private String  updateSocketStatusUrl;
   
