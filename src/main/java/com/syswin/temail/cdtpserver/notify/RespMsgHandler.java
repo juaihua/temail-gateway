@@ -22,8 +22,6 @@ public class RespMsgHandler {
   public static void sendMsg(TransferCDTPPackage transferCDTPPackage) {
     try {
       CDTPPackage.Builder builder = CDTPPackage.newBuilder();
-      //BeanUtils.copyProperties(transferCDTPPackage, builder);
-      //copyBeanProperties(transferCDTPPackage, builder);
       CdtpPackageUtil.copyBeanProperties(transferCDTPPackage, builder);
       CDTPPackage ctPackage = builder.build();
 
@@ -39,45 +37,12 @@ public class RespMsgHandler {
           SendMsg.sendToTemail(ctPackage, temailInfo.getSocketChannel());
         }
       } else {
-        LOGGER.info("no find temail  sockchannel in  ActiveTemailManager.");
+        LOGGER.info("no find temail:{}  related sockchannel in  ActiveTemailManager.", to);
       }
 
     } catch (Exception ex) {
       LOGGER.error("send tomail msg  error", ex);
     }
   }
-
-  public static void copyBeanProperties(TransferCDTPPackage transferCDTPPackage, CDTPPackage.Builder builder) {
-
-    builder.setCommand(transferCDTPPackage.getCommand());
-    builder.setVersion(transferCDTPPackage.getVersion());
-    builder.setAlgorithm(transferCDTPPackage.getAlgorithm());
-    if (null != transferCDTPPackage.getSign()) {
-      builder.setSign(transferCDTPPackage.getSign());
-    }
-
-    builder.setDem(transferCDTPPackage.getDem());
-    builder.setTimestamp(transferCDTPPackage.getTimestamp());
-    if (null != transferCDTPPackage.getPkgId()) {
-      builder.setPkgId(transferCDTPPackage.getPkgId());
-    }
-
-    if (null != transferCDTPPackage.getFrom()) {
-      builder.setFrom(transferCDTPPackage.getFrom());
-    }
-    if (null != transferCDTPPackage.getTo()) {
-      builder.setTo(transferCDTPPackage.getTo());
-    }
-
-    if (null != transferCDTPPackage.getSenderPK()) {
-      builder.setSenderPK(transferCDTPPackage.getSenderPK());
-    }
-
-    if (null != transferCDTPPackage.getReceiverPK()) {
-      builder.setReceiverPK(transferCDTPPackage.getReceiverPK());
-    }
-
-    builder.setData(ByteString.copyFrom(transferCDTPPackage.getData(), Charset.defaultCharset()));
-  }
-
+  
 }
