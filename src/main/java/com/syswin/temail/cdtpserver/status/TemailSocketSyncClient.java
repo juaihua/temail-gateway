@@ -12,7 +12,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import reactor.core.publisher.Mono;
 
 import com.google.gson.Gson;
 import com.syswin.temail.cdtpserver.entity.TemailSocketInfo;
@@ -33,29 +36,20 @@ public class TemailSocketSyncClient {
         
         Gson gson = new Gson();
         String   socketChannelStatusJson = gson.toJson(temailSocketInfo);
-        HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        HttpEntity<String> requestEntity = new HttpEntity<String>(socketChannelStatusJson, requestHeaders);
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setErrorHandler(new SilentResponseErrorHandler());
+       
+        Mono<TemailSocketResponse>  monoResp = WebClient.create()
+            .post()
+            .uri(temailServerConfig.getUpdateSocketStatusUrl())
+            .contentType(MediaType.APPLICATION_JSON_UTF8)
+            .body(BodyInserters.fromObject(socketChannelStatusJson))
+             .retrieve().bodyToMono(TemailSocketResponse.class);
         
-        ResponseEntity<TemailSocketResponse> responseEntity =
-            restTemplate.exchange(temailServerConfig.getUpdateSocketStatusUrl() , HttpMethod.POST,
-                requestEntity, TemailSocketResponse.class);
-        TemailSocketResponse  temailSocketResponse = responseEntity.getBody();
+        TemailSocketResponse  temailSocketResponse = monoResp.block();        
         if(StringUtils.isNotEmpty(temailSocketResponse.getResult()) && temailSocketResponse.getResult().equalsIgnoreCase("success")) {
            log.info("更新TemailSocket 信息到状态服务成功, Temail Socket is {} ", temailSocketResponse.toString());
         }else {
            log.error("****更新TemailSocket 信息到状态服务失败, Temail Socket is {} ", temailSocketResponse.toString());
         }
-        
-      /*  WebClient webClient = WebClient.builder()
-            .baseUrl("https://api.github.com")
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/vnd.github.v3+json")
-            .defaultHeader(HttpHeaders.USER_AGENT, "Spring 5 WebClient")
-            .build();*/
-
-        
         
     }
     catch(Exception  ex){
