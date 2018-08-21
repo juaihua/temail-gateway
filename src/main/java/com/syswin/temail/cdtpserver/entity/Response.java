@@ -1,7 +1,11 @@
 package com.syswin.temail.cdtpserver.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import org.springframework.http.HttpStatus;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -9,6 +13,8 @@ import static org.springframework.http.HttpStatus.OK;
 @JsonInclude(Include.NON_NULL)
 public class Response<T> {
 
+  @Setter
+  @Getter
   private Integer code;
   private String message;
   private T data;
@@ -56,9 +62,7 @@ public class Response<T> {
     this.data = data;
   }
 
-  public Integer getCode() {
-    return code;
-  }
+  
 
   public String getMessage() {
     return message;

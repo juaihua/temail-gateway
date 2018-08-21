@@ -53,11 +53,12 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-      log.info("client  attrKey:"+ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
+      //log.info("client  attrKey:"+ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
       if(msg instanceof CDTPPackage){
         log.info("msg:"+msg);
       }
-      if(counter ==0){
+      
+      /*if(counter ==0){
       //if(counter <=2){
         if(msg instanceof CDTPPackage){
           System.out.println("msg:"+msg);
@@ -91,7 +92,7 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
       }
       else{
         log.info("no send pinginfo ");
-      }
+      }*/
            
 
     }

@@ -133,12 +133,15 @@ public class LoginHandler extends BaseHandler {
       builder.setPkgId(getCdtpPackage().getPkgId());
       
       Gson gson = new Gson();
+      if(null == response.getCode()){
+        response.setCode(HttpStatus.FORBIDDEN.value());
+      }
       String  responseJson = gson.toJson(response);            
       builder.setData(ByteString.copyFrom(responseJson, Charset.defaultCharset())); 
       CDTPPackage newcdtpPackage = builder.build();
       
-      LOGGER.info("登录失败, 发送 response.getData： {}, response.getMessage:{} ", response.getData(),
-          response.getMessage());      
+      LOGGER.info("登录失败, 发送 response.getData： {}, response.getMessage:{},  返回给前端的具体报文信息:{} ", response.getData(),
+          response.getMessage(), newcdtpPackage.toString());      
       getSocketChannel().writeAndFlush(newcdtpPackage);   
     }
     getSocketChannel().close();
