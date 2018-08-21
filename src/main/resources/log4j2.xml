@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout>
+                <pattern>%d %p %C{1.} [%t] %m%n</pattern>
+            </PatternLayout>
+        </Console>
+		<RollingFile name="RollingFileInfo" fileName="/home/java/logs/cdtp-server.log"
+                      filePattern="/home/logs/$${date:yyyy-MM}/encrypt_server-%d{yyyy-MM-dd}-%i.log">
+             <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->        
+             <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+             <PatternLayout pattern="[%d{HH:mm:ss:SSS}] [%p] - %l - %m%n"/>
+             <Policies>
+                 <TimeBasedTriggeringPolicy/>
+                 <SizeBasedTriggeringPolicy size="1MB"/>
+             </Policies>
+             <DefaultRolloverStrategy compressionLevel="0" max="3">
+             	 <Delete basePath="/home/logs/encrypt_server.log" maxDepth="1">  
+                     <IfFileName glob="encrypt_server-*.log" />  
+                     <IfLastModified age="30d" />  
+            	 </Delete>
+             </DefaultRolloverStrategy>
+     	</RollingFile>
+    </Appenders>    
+    <Loggers>
+        <Logger name="org.apache.catalina.util.LifecycleBase" level="error" />
+        <Logger name="org.apache.coyote.http11.Http11NioProtocol" level="warn" />
+        <Logger name="org.apache.tomcat.util.net.NioSelectorPool" level="warn" />
+        <Logger name="org.hibernate.validator.internal.util.Version" level="warn" />
+        <Logger name="org.springframework" level="warn" />
+        <Logger name="com.github" level="debug" />
+        <Root level="info">
+            <AppenderRef ref="RollingFileInfo" />
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>
