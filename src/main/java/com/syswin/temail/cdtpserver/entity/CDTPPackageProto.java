@@ -4,16 +4,19 @@
 package com.syswin.temail.cdtpserver.entity;
 
 public final class CDTPPackageProto {
-  private CDTPPackageProto() {}
 
-  public static void registerAllExtensions(com.google.protobuf.ExtensionRegistryLite registry) {}
+  private CDTPPackageProto() {
+  }
+
+  public static void registerAllExtensions(com.google.protobuf.ExtensionRegistryLite registry) {
+  }
 
   public static void registerAllExtensions(com.google.protobuf.ExtensionRegistry registry) {
     registerAllExtensions((com.google.protobuf.ExtensionRegistryLite) registry);
   }
 
   public interface CDTPPackageOrBuilder extends
-  // @@protoc_insertion_point(interface_extends:com.syswin.temail.CDTPPackage)
+      // @@protoc_insertion_point(interface_extends:com.syswin.temail.CDTPPackage)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -106,12 +109,14 @@ public final class CDTPPackageProto {
      */
     com.google.protobuf.ByteString getData();
   }
+
   /**
    * Protobuf type {@code com.syswin.temail.CDTPPackage}
    */
   public static final class CDTPPackage extends com.google.protobuf.GeneratedMessageV3 implements
-  // @@protoc_insertion_point(message_implements:com.syswin.temail.CDTPPackage)
+      // @@protoc_insertion_point(message_implements:com.syswin.temail.CDTPPackage)
       CDTPPackageOrBuilder {
+
     private static final long serialVersionUID = 0L;
 
     // Use CDTPPackage.newBuilder() to construct.
@@ -516,10 +521,12 @@ public final class CDTPPackageProto {
     @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1)
+      if (isInitialized == 1) {
         return true;
-      if (isInitialized == 0)
+      }
+      if (isInitialized == 0) {
         return false;
+      }
 
       memoizedIsInitialized = 1;
       return true;
@@ -569,8 +576,9 @@ public final class CDTPPackageProto {
     @java.lang.Override
     public int getSerializedSize() {
       int size = memoizedSize;
-      if (size != -1)
+      if (size != -1) {
         return size;
+      }
 
       size = 0;
       if (command_ != 0) {
@@ -779,8 +787,9 @@ public final class CDTPPackageProto {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-    // @@protoc_insertion_point(builder_implements:com.syswin.temail.CDTPPackage)
+        // @@protoc_insertion_point(builder_implements:com.syswin.temail.CDTPPackage)
         com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackageOrBuilder {
+
       public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
         return com.syswin.temail.cdtpserver.entity.CDTPPackageProto.internal_static_com_syswin_temail_CDTPPackage_descriptor;
       }
@@ -925,8 +934,9 @@ public final class CDTPPackageProto {
       public Builder mergeFrom(
           com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage other) {
         if (other == com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage
-            .getDefaultInstance())
+            .getDefaultInstance()) {
           return this;
+        }
         if (other.getCommand() != 0) {
           setCommand(other.getCommand());
         }
@@ -1600,12 +1610,12 @@ public final class CDTPPackageProto {
         return super.mergeUnknownFields(unknownFields);
       }
 
-
       // @@protoc_insertion_point(builder_scope:com.syswin.temail.CDTPPackage)
     }
 
     // @@protoc_insertion_point(class_scope:com.syswin.temail.CDTPPackage)
     private static final com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage DEFAULT_INSTANCE;
+
     static {
       DEFAULT_INSTANCE = new com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage();
     }
@@ -1648,6 +1658,7 @@ public final class CDTPPackageProto {
   }
 
   private static com.google.protobuf.Descriptors.FileDescriptor descriptor;
+
   static {
     java.lang.String[] descriptorData =
         {"\n\032META-INF/CDTPPackage.proto\022\021com.syswin"
@@ -1667,14 +1678,14 @@ public final class CDTPPackageProto {
           }
         };
     com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(descriptorData,
-        new com.google.protobuf.Descriptors.FileDescriptor[] {}, assigner);
+        new com.google.protobuf.Descriptors.FileDescriptor[]{}, assigner);
     internal_static_com_syswin_temail_CDTPPackage_descriptor =
         getDescriptor().getMessageTypes().get(0);
     internal_static_com_syswin_temail_CDTPPackage_fieldAccessorTable =
         new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-            internal_static_com_syswin_temail_CDTPPackage_descriptor, new java.lang.String[] {
-                "Command", "Version", "Algorithm", "Sign", "Dem", "Timestamp", "PkgId", "From",
-                "To", "SenderPK", "ReceiverPK", "Data",});
+            internal_static_com_syswin_temail_CDTPPackage_descriptor, new java.lang.String[]{
+            "Command", "Version", "Algorithm", "Sign", "Dem", "Timestamp", "PkgId", "From",
+            "To", "SenderPK", "ReceiverPK", "Data",});
   }
 
   // @@protoc_insertion_point(outer_class_scope)

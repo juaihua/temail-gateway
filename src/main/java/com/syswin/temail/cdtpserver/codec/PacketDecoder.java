@@ -19,9 +19,8 @@ import java.util.List;
  * 1.长度，为int类型的数据
  * 2.要传输的数据
  * </pre>
- * */
+ */
 public class PacketDecoder extends ByteToMessageDecoder {
-
 
 
   private final static int FIXED_HANDER_LENGTH = 4;
@@ -30,7 +29,6 @@ public class PacketDecoder extends ByteToMessageDecoder {
   @Override
   protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf,
       List<Object> list) throws Exception {
-
 
     if (byteBuf.readableBytes() < FIXED_HANDER_LENGTH) {
       return;
@@ -51,9 +49,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
     byte[] protobufByte = new byte[dataLength];
     byteBuf.readBytes(protobufByte);
 
-
     CDTPPackageProto.CDTPPackage cdtpPackage = CDTPPackageProto.CDTPPackage.parseFrom(protobufByte);
-
 
     list.add(cdtpPackage);
     // if(byteBuf.readableBytes() >= FIXED_HANDER_LENGTH){

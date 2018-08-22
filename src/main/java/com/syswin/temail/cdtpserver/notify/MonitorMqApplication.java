@@ -58,5 +58,4 @@ public class MonitorMqApplication implements ApplicationRunner {
   }
 
 
-
 }

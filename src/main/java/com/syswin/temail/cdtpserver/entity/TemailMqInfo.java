@@ -8,7 +8,6 @@ import lombok.Data;
 public class TemailMqInfo implements Serializable {
 
 
-
   // 持有客户端链句柄的服务实例监听的消息队列topic
   private String mqTopic;
 

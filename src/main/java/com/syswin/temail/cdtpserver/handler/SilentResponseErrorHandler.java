@@ -8,5 +8,6 @@ public class SilentResponseErrorHandler extends DefaultResponseErrorHandler {
 
 
   @Override
-  public void handleError(ClientHttpResponse clientHttpResponse) {}
+  public void handleError(ClientHttpResponse clientHttpResponse) {
+  }
 }

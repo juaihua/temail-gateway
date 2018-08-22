@@ -26,6 +26,7 @@ import com.syswin.temail.cdtpserver.entity.CommandEnum;
 @Slf4j
 @ChannelHandler.Sharable
 public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter {
+
   int counter = 0;
   private Gson gson = new Gson();
 
@@ -73,7 +74,7 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter {
      * System.out.println("############################################################");
      * if(counter <=10){ CDTPPackage cdtpPackage = null; if(counter==0){ cdtpPackage =
      * createGroupTemailBody(); ctx.writeAndFlush(cdtpPackage);
-     * 
+     *
      * } else if(counter==1){ cdtpPackage = sendMsgToGroupTemailBody();
      * ctx.writeAndFlush(cdtpPackage); } else{ System.out.println("YYYYYYYYYYYYYYYYY  no send"); }
      * counter++; } else{ log.info("no send pinginfo "); }
@@ -118,7 +119,6 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter {
     body.put("toMsg", "temail-gateway-str");
     body.put("type", 0);
 
-
     Gson gson = new Gson();
     String cdtpBodygsonString = gson.toJson(cdtpBody);
 
@@ -145,7 +145,6 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter {
     builder.setTo("sean@t.email");
     builder.setSenderPK("SenderPK123");
     builder.setReceiverPK("ReceiverPK456");
-
 
     CDTPBody cdtpBody = new CDTPBody();
     cdtpBody.setHeader(new HashMap<>());
@@ -185,7 +184,6 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter {
     builder.setSenderPK("SenderPK123");
     builder.setReceiverPK("ReceiverPK456");
 
-
     CDTPBody cdtpBody = new CDTPBody();
     cdtpBody.setHeader(new HashMap<>());
     cdtpBody.setQuery(new HashMap<>());
@@ -197,7 +195,6 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter {
     body.put("to", "groupName@t.email");
     body.put("type", 0);
 
-
     Gson gson = new Gson();
     String cdtpBodygsonString = gson.toJson(cdtpBody);
     builder.setData(ByteString.copyFrom(cdtpBodygsonString, Charset.defaultCharset()));
@@ -205,7 +202,6 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter {
 
     return ctPackage;
   }
-
 
 
 }

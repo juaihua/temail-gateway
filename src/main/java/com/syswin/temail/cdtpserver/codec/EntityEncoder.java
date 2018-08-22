@@ -18,9 +18,10 @@ import io.netty.handler.codec.MessageToByteEncoder;
  * 3.version , short类型
  * 4.要传输的数据
  * </pre>
- * */
+ */
 
 public class EntityEncoder extends MessageToByteEncoder {
+
   @Override
   protected void encode(ChannelHandlerContext channelHandlerContext, Object o, ByteBuf byteBuf)
       throws Exception {
@@ -33,8 +34,6 @@ public class EntityEncoder extends MessageToByteEncoder {
     // byteBuf.writeShort(packet.getFixedHeader().getVsersion()); //write version
     //
     // byteBuf.writeBytes(data);//write content
-
-
 
   }
 }

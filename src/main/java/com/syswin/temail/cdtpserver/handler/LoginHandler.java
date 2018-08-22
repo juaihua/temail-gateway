@@ -59,9 +59,6 @@ public class LoginHandler extends BaseHandler {
 
   /**
    * 登陆逻辑 1.先判断From合法性 2.调用dispatch服务 3.成功操作状态管理服务 4.失败,返回错误信息,关闭连接
-   * 
-   * @param cdtpPackage
-   * @return
    */
   private void login() {
     LOGGER.info("在登录LoginHandler中收到 cdtp msg {} ", getCdtpPackage().toString());
@@ -98,7 +95,6 @@ public class LoginHandler extends BaseHandler {
       LOGGER.info(
           "在登录指令中, 接收到CDTP package 信息 中  temail:{} 或者 devId:{} 为空, 关闭连接. temailInfo is : {}",
           temailInfo.getTemail(), temailInfo.getDevId(), temailInfo);
-
 
       Response<String> loginErrorResponse =
           new Response<String>(HttpStatus.FORBIDDEN, builderLoginErrorInf(temailInfo));

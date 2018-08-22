@@ -53,7 +53,6 @@ public class HttpAsyncClient {
       Gson gson = new Gson();
       String cdtpPackageJson = gson.toJson(transferCDTPPackage);
 
-
       StringEntity entitySender = new StringEntity(cdtpPackageJson, "UTF-8");
       request.setEntity(entitySender);
       request.setHeader("Content-Type", MediaType.APPLICATION_JSON_UTF8_VALUE);
@@ -132,12 +131,12 @@ public class HttpAsyncClient {
   }
 
 
-
   public static TransferCDTPPackage convertStringToTransferCDTPPackage(String msgData) {
     Gson gson = new Gson();
 
     Response<TransferCDTPPackage> response =
-        gson.fromJson(msgData, new TypeToken<Response<TransferCDTPPackage>>() {}.getType());// 把JSON字符串转为对象
+        gson.fromJson(msgData, new TypeToken<Response<TransferCDTPPackage>>() {
+        }.getType());// 把JSON字符串转为对象
     return response.getData();
 
   }

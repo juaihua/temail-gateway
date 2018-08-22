@@ -63,7 +63,6 @@ public class Response<T> {
   }
 
 
-
   public String getMessage() {
     return message;
   }

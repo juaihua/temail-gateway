@@ -58,7 +58,7 @@ public class TemailServer implements ApplicationRunner {
     ServerBootstrap b = new ServerBootstrap();
 
     b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-    // 指定使用NIO传输Channel
+        // 指定使用NIO传输Channel
         .localAddress(new InetSocketAddress(temailServerProperties.getPort()))
         // 通过NoDelay禁用Nagle,使消息立即发送出去
         // .option(ChannelOption.TCP_NODELAY,true)
@@ -94,7 +94,6 @@ public class TemailServer implements ApplicationRunner {
 
         });
 
-
     try {
       // 异步地绑定服务器;调用sync方法阻塞等待直到绑定完成
       ChannelFuture f = b.bind().sync();
@@ -110,7 +109,6 @@ public class TemailServer implements ApplicationRunner {
     }
 
   }
-
 
 
 }

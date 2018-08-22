@@ -31,7 +31,6 @@ public abstract class BaseHandler {
   }
 
 
-
   public BaseHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage,
       TemailServerProperties temailServerConfig) {
     this.socketChannel = socketChannel;

@@ -22,9 +22,10 @@ import io.netty.handler.codec.MessageToByteEncoder;
  * 3.version , short类型
  * 4.要传输的数据
  * </pre>
- * */
+ */
 @Slf4j
 public class PacketEncoder extends MessageToByteEncoder<CDTPPackageProto.CDTPPackage> {
+
   @Override
   protected void encode(ChannelHandlerContext channelHandlerContext,
       CDTPPackageProto.CDTPPackage cdtpPackage, ByteBuf byteBuf) throws Exception {

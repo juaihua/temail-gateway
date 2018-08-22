@@ -10,6 +10,7 @@ import lombok.Data;
  */
 @Data
 public class TransferCDTPPackage implements Serializable {
+
   private int command;
   private int version;
   private int algorithm;

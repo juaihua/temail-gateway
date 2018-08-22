@@ -21,9 +21,8 @@ import java.util.List;
  * 3.version , short类型
  * 4.要传输的数据
  * </pre>
- * */
+ */
 public class EntityDecoder extends ByteToMessageDecoder {
-
 
 
   private final static int FIXED_HANDER_LENGTH = 8;
@@ -65,7 +64,6 @@ public class EntityDecoder extends ByteToMessageDecoder {
       // protobuf
       byte[] protobufByte = new byte[dataLength];
       byteBuf.readBytes(protobufByte);
-
 
       CDTPPackageProto.CDTPPackage cdtpPackage =
           CDTPPackageProto.CDTPPackage.parseFrom(protobufByte);

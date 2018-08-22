@@ -49,8 +49,6 @@ public class OnlineTemailManager {
 
   /**
    * 主动离线时调用
-   * 
-   * @param temailInfo
    */
   public static void remove(TemailInfo temailInfo) {
 
@@ -71,8 +69,6 @@ public class OnlineTemailManager {
 
   /**
    * socket 断开时调用(被动离线)
-   * 
-   * @param socketChannel
    */
   public static void removeChannel(SocketChannel socketChannel) {
     String activeChannelKey = socketChannel.remoteAddress().toString();
