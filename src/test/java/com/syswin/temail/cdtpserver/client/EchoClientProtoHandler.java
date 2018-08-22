@@ -39,8 +39,8 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
       builder.setVersion(3);
       
       TemailInfo temailInfo = new TemailInfo();
-      //temailInfo.setTemail("sean@t.email");
       temailInfo.setTemail("jack@t.email");
+      //temailInfo.setTemail("jack@t.email");
       temailInfo.setDevId("devId");
       Gson gson = new Gson();
       String gsonString = gson.toJson(temailInfo);
@@ -58,25 +58,25 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
         log.info("msg:"+msg);
       }
       
-      if(counter ==0){
-      //if(counter <=2){
+      //if(counter ==0){
+     if(counter <=2){
         if(msg instanceof CDTPPackage){
           System.out.println("msg:"+msg);
           counter++;
           CDTPPackage.Builder builder = CDTPPackage.newBuilder();
           builder.setAlgorithm(11);
           //builder.setCommand(CommandEnum.req.getCode());
-          builder.setCommand(1002);
+          builder.setCommand(1000);
           
           builder.setVersion(13);
           builder.setSign("sign");
           builder.setDem(1);
           builder.setTimestamp(System.currentTimeMillis());
           builder.setPkgId("pkgId");
-          builder.setFrom("gaojhg@syswin.com");
-          builder.setTo("yaohuacheng@syswin.com");
-          builder.setSenderPK("SenderPK(");
-          builder.setReceiverPK("ReceiverPK(");
+          builder.setFrom("jack@t.email");
+          builder.setTo("sean@t.email");
+          builder.setSenderPK("SenderPK123");
+          builder.setReceiverPK("ReceiverPK456");
           
                            
           
@@ -105,17 +105,17 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
     
     private CDTPBody initCDTPBody() {
       CDTPBody cdtpBody = new CDTPBody();
-      cdtpBody.setHeader(new LinkedMultiValueMap<>());
-      cdtpBody.setQuery(new LinkedMultiValueMap<>());
+      cdtpBody.setHeader(new HashMap<>());
+      cdtpBody.setQuery(new  HashMap<>());
       cdtpBody.setBody(new HashMap<>());
       
       Map<String, Object> body = cdtpBody.getBody();
-      body.put("from", "yaohuacheng@syswin.com");
-      body.put("fromMsg", "string");
+      body.put("from", "jack@t.email");
+      body.put("fromMsg", "temail-gateway-str");
       body.put("msgid", "syswin-1534131915194-4");
       body.put("seqNo", 3);
-      body.put("to", "wangxuanzhong@syswin.com");
-      body.put("toMsg", "string");
+      body.put("to", "sean@t.email");
+      body.put("toMsg", "temail-gateway-str");
       body.put("type", 0);
       return cdtpBody;
     }

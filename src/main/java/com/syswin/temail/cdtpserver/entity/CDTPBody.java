@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 public class CDTPBody  implements Serializable{
    
-    private Map<String, List<String>> header;
-    private Map<String, List<String>> query;
+    private Map<String, String> header;
+    private Map<String, String> query;
     private Map<String, Object> body;
 }
