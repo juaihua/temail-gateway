@@ -13,24 +13,25 @@ import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
 @Slf4j
 public class HeartbeatHandler extends BaseHandler {
 
-    public HeartbeatHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel){
-      super(socketChannel,cdtpPackage);
-    }
-  
-    public HeartbeatHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel, TemailServerProperties temailServerConfig){
-        super(socketChannel,cdtpPackage, temailServerConfig);
-    }
+  public HeartbeatHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel) {
+    super(socketChannel, cdtpPackage);
+  }
 
-    @Override
-    public void process() {
+  public HeartbeatHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel,
+      TemailServerProperties temailServerConfig) {
+    super(socketChannel, cdtpPackage, temailServerConfig);
+  }
 
-        CDTPPackageProto.CDTPPackage.Builder builder= CDTPPackageProto.CDTPPackage.newBuilder();
-//        builder.setAlgorithm(1);
-        builder.setCommand(2);//设置心跳应答command
-//        builder.setVersion(3);
+  @Override
+  public void process() {
 
-        CDTPPackageProto.CDTPPackage ctPackage = builder.build();
-        log.info("发送心跳信息:{}", ctPackage.toString());
-        this.getSocketChannel().writeAndFlush(ctPackage);
-    }
+    CDTPPackageProto.CDTPPackage.Builder builder = CDTPPackageProto.CDTPPackage.newBuilder();
+    // builder.setAlgorithm(1);
+    builder.setCommand(2);// 设置心跳应答command
+    // builder.setVersion(3);
+
+    CDTPPackageProto.CDTPPackage ctPackage = builder.build();
+    log.info("发送心跳信息:{}", ctPackage.toString());
+    this.getSocketChannel().writeAndFlush(ctPackage);
+  }
 }

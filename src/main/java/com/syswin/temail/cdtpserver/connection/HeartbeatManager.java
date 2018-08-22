@@ -8,9 +8,9 @@ import lombok.Data;
 @Data
 public class HeartbeatManager {
 
-    private int lostCounter;
+  private int lostCounter;
 
-    public void sendHeartbeat(){
+  public void sendHeartbeat() {
 
-    }
+  }
 }

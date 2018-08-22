@@ -11,9 +11,9 @@ import lombok.Data;
  * @date 2018/8/8
  */
 @Data
-public class CDTPBody  implements Serializable{
-   
-    private Map<String, String> header;
-    private Map<String, String> query;
-    private Map<String, Object> body;
+public class CDTPBody implements Serializable {
+
+  private Map<String, String> header;
+  private Map<String, String> query;
+  private Map<String, Object> body;
 }

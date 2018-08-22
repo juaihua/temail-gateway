@@ -18,17 +18,17 @@ public class TemailServerProperties {
 
   private String namesrvAddr;
 
-  //private String topic;
-  
-  private String  updateSocketStatusUrl;
-  
-  private int  port;
-  
-  private  int   allow_lose_count;
-  
-  private  int   allIdleTimeSeconds;
-  
-  private  String  mqTopic;
-  
-  
+  // private String topic;
+
+  private String updateSocketStatusUrl;
+
+  private int port;
+
+  private int allow_lose_count;
+
+  private int allIdleTimeSeconds;
+
+  private String mqTopic;
+
+
 }

@@ -48,7 +48,7 @@ public class LoginHandler extends BaseHandler {
   public LoginHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage,
       TemailServerProperties temailServerConfig, TemailSocketSyncClient temailSocketSyncClient,
       TemailMqInfo temailMqInfo) {
-      super(socketChannel, cdtpPackage, temailServerConfig, temailSocketSyncClient, temailMqInfo);
+    super(socketChannel, cdtpPackage, temailServerConfig, temailSocketSyncClient, temailMqInfo);
   }
 
   @Override
@@ -69,7 +69,8 @@ public class LoginHandler extends BaseHandler {
     TemailInfo temailInfo =
         gson.fromJson(getCdtpPackage().getData().toStringUtf8(), TemailInfo.class);
 
-    if(StringUtils.isNotBlank(temailInfo.getTemail())  && StringUtils.isNotBlank(temailInfo.getDevId())) {
+    if (StringUtils.isNotBlank(temailInfo.getTemail())
+        && StringUtils.isNotBlank(temailInfo.getDevId())) {
       Map map = new ConcurrentHashMap<String, String>();
       map.put("temail", temailInfo.getTemail());
       map.put("unsignedBytes", "");
@@ -83,20 +84,24 @@ public class LoginHandler extends BaseHandler {
       restTemplate.setErrorHandler(new SilentResponseErrorHandler());
 
       ResponseEntity<Response> responseEntity =
-          restTemplate.exchange(getTemailServerConfig().getVerifyUrl(), HttpMethod.POST,requestEntity, Response.class);
+          restTemplate.exchange(getTemailServerConfig().getVerifyUrl(), HttpMethod.POST,
+              requestEntity, Response.class);
       Response response = responseEntity.getBody();
-      
+
       if (null != response.getCode() && response.getCode() == HttpStatus.OK.value()) {
         loginSuccess(temailInfo, response);
       } else {
         loginFailure(temailInfo, response);
       }
-      
+
     } else {
-      LOGGER.info("在登录指令中, 接收到CDTP package 信息 中  temail:{} 或者 devId:{} 为空, 关闭连接. temailInfo is : {}", temailInfo.getTemail(),  temailInfo.getDevId(), temailInfo);
-      
-      
-      Response<String>  loginErrorResponse = new  Response<String>(HttpStatus.FORBIDDEN, builderLoginErrorInf(temailInfo));
+      LOGGER.info(
+          "在登录指令中, 接收到CDTP package 信息 中  temail:{} 或者 devId:{} 为空, 关闭连接. temailInfo is : {}",
+          temailInfo.getTemail(), temailInfo.getDevId(), temailInfo);
+
+
+      Response<String> loginErrorResponse =
+          new Response<String>(HttpStatus.FORBIDDEN, builderLoginErrorInf(temailInfo));
       loginFailure(temailInfo, loginErrorResponse);
     }
   }
@@ -127,22 +132,22 @@ public class LoginHandler extends BaseHandler {
 
   private void loginFailure(TemailInfo temailInfo, Response response) {
     if (null != response) {
-      
+
       CDTPPackage.Builder builder = CDTPPackage.newBuilder();
       builder.setCommand(CommandEnum.connect.getCode());
       builder.setPkgId(getCdtpPackage().getPkgId());
-      
+
       Gson gson = new Gson();
-      if(null == response.getCode()){
+      if (null == response.getCode()) {
         response.setCode(HttpStatus.FORBIDDEN.value());
       }
-      String  responseJson = gson.toJson(response);            
-      builder.setData(ByteString.copyFrom(responseJson, Charset.defaultCharset())); 
+      String responseJson = gson.toJson(response);
+      builder.setData(ByteString.copyFrom(responseJson, Charset.defaultCharset()));
       CDTPPackage newcdtpPackage = builder.build();
-      
-      LOGGER.info("登录失败, 发送 response.getData： {}, response.getMessage:{},  返回给前端的具体报文信息:{} ", response.getData(),
-          response.getMessage(), newcdtpPackage.toString());      
-      getSocketChannel().writeAndFlush(newcdtpPackage);   
+
+      LOGGER.info("登录失败, 发送 response.getData： {}, response.getMessage:{},  返回给前端的具体报文信息:{} ",
+          response.getData(), response.getMessage(), newcdtpPackage.toString());
+      getSocketChannel().writeAndFlush(newcdtpPackage);
     }
     getSocketChannel().close();
     LOGGER.info("##########登录失败 , the  temial is :{} and  devId is {} , send msg is {} ",
@@ -150,20 +155,19 @@ public class LoginHandler extends BaseHandler {
   }
 
 
-  private  String  builderLoginErrorInf(TemailInfo temailInfo){
-      StringBuffer  errorInfBuffer  =  new StringBuffer();
-      if(null != temailInfo){
-         if(StringUtils.isBlank(temailInfo.getTemail())){
-           errorInfBuffer.append("temail 信息为空   ");
-         }
-         
-         if(StringUtils.isBlank(temailInfo.getDevId())){
-           errorInfBuffer.append("devId 信息为空   ");
-         }
+  private String builderLoginErrorInf(TemailInfo temailInfo) {
+    StringBuffer errorInfBuffer = new StringBuffer();
+    if (null != temailInfo) {
+      if (StringUtils.isBlank(temailInfo.getTemail())) {
+        errorInfBuffer.append("temail 信息为空   ");
       }
-      else{
-        errorInfBuffer.append("Temail报文信息为空");
+
+      if (StringUtils.isBlank(temailInfo.getDevId())) {
+        errorInfBuffer.append("devId 信息为空   ");
       }
-      return  errorInfBuffer.toString();
+    } else {
+      errorInfBuffer.append("Temail报文信息为空");
+    }
+    return errorInfBuffer.toString();
   }
 }

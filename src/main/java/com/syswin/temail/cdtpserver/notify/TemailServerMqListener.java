@@ -21,29 +21,31 @@ import com.syswin.temail.cdtpserver.entity.TransferCDTPPackage;
  */
 @Slf4j
 public class TemailServerMqListener implements MessageListenerConcurrently {
-     
-    private Gson gson = new Gson();
-    
-    @Override
-    public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-        try {
-            for (MessageExt msg : msgs) {
-                         
-                String msgData = new String(msg.getBody());
-                log.info("*********************************从MQ接受到消息是:"+msgData);
-                TransferCDTPPackage  transferCDTPPackageJson = gson.fromJson(msgData, TransferCDTPPackage.class);//把JSON字符串转为对象  
-                String to = transferCDTPPackageJson.getTo();   
-                RespMsgHandler.sendMsg(transferCDTPPackageJson);
-            }
-            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-        } catch (Exception ex) {
-            log.error("队列传输出错！请求参数：{}" , msgs, ex);
-            return ConsumeConcurrentlyStatus.RECONSUME_LATER;
-        }
-    }
 
-    private String getTopicByTemail(String temail) {
-        // 根据temail地址从状态服务器获取该temail对应的通道所在topic
-        return "defaultChannel";
+  private Gson gson = new Gson();
+
+  @Override
+  public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs,
+      ConsumeConcurrentlyContext context) {
+    try {
+      for (MessageExt msg : msgs) {
+
+        String msgData = new String(msg.getBody());
+        log.info("*********************************从MQ接受到消息是:" + msgData);
+        TransferCDTPPackage transferCDTPPackageJson =
+            gson.fromJson(msgData, TransferCDTPPackage.class);// 把JSON字符串转为对象
+        String to = transferCDTPPackageJson.getTo();
+        RespMsgHandler.sendMsg(transferCDTPPackageJson);
+      }
+      return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+    } catch (Exception ex) {
+      log.error("队列传输出错！请求参数：{}", msgs, ex);
+      return ConsumeConcurrentlyStatus.RECONSUME_LATER;
     }
+  }
+
+  private String getTopicByTemail(String temail) {
+    // 根据temail地址从状态服务器获取该temail对应的通道所在topic
+    return "defaultChannel";
+  }
 }

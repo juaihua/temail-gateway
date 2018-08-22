@@ -6,7 +6,8 @@ import com.syswin.temail.cdtpserver.entity.TemailInfo;
 public class TemailKeyUtil {
 
   public static String builderTemailKey(TemailInfo temailInfo) {
-    String temailKey = temailInfo.getTemail() + TemailConstant.TEMAIL_KEY_SEPARATOR + temailInfo.getDevId();
+    String temailKey =
+        temailInfo.getTemail() + TemailConstant.TEMAIL_KEY_SEPARATOR + temailInfo.getDevId();
     return temailKey;
   }
 

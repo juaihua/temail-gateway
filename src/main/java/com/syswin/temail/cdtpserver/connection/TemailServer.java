@@ -41,77 +41,76 @@ import com.syswin.temail.cdtpserver.utils.TemailMqInfBuilder;
 @Slf4j
 public class TemailServer implements ApplicationRunner {
 
-    @Resource
-    HandlerFactory   handlerFactory;
-    
-    @Resource
-    TemailServerProperties   temailServerProperties;
-    
-    @Resource
-    TemailSocketSyncClient temailSocketSyncClient;
-    
-    @Override
-    public void run(ApplicationArguments args) {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();// 默认 cup
+  @Resource
+  HandlerFactory handlerFactory;
 
-        ServerBootstrap b = new ServerBootstrap();
+  @Resource
+  TemailServerProperties temailServerProperties;
 
-        b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                // 指定使用NIO传输Channel
-                .localAddress(new InetSocketAddress(temailServerProperties.getPort()))
-                // 通过NoDelay禁用Nagle,使消息立即发送出去
-                // .option(ChannelOption.TCP_NODELAY,true)
-                // 保持长连接状态
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-                // 使用指定端口设置套接字地址
-                .childHandler(new ChannelInitializer<SocketChannel>(){
+  @Resource
+  TemailSocketSyncClient temailSocketSyncClient;
 
-                    @Override
-                    protected void initChannel(SocketChannel socketChannel) {
-                        ChannelPipeline pipeline = socketChannel.pipeline();
+  @Override
+  public void run(ApplicationArguments args) {
+    EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+    EventLoopGroup workerGroup = new NioEventLoopGroup();// 默认 cup
 
-                        pipeline.addLast(new PacketDecoder());
-                        pipeline.addLast(new PacketEncoder());
-                                                
-                        pipeline.addLast("idleStateHandler",new IdleStateHandler(0,0,temailServerProperties.getAllIdleTimeSeconds()));
-                                              
-                        TemailServerHandler temailServerHandler = new TemailServerHandler();                      
-                        setTemailServerHandlerProperties(temailServerHandler);
-                        pipeline.addLast(temailServerHandler);
-                    }
-                    
-                                        
-                    private  void   setTemailServerHandlerProperties(TemailServerHandler temailServerHandler){
-                      TemailMqInfo  temailMqInfo = TemailMqInfBuilder.getTemailMqInf(temailServerProperties);
-                      handlerFactory.setTemailMqInfo(temailMqInfo);                      
-                      temailServerHandler.setHandlerFactory(handlerFactory);                       
-                      temailServerHandler.setTemailSocketSyncClient(temailSocketSyncClient);
-                      temailServerHandler.setTemailMqInfo(temailMqInfo);
-                      temailServerHandler.setTemailServerProperties(temailServerProperties);
-                    }
-                    
-                });
+    ServerBootstrap b = new ServerBootstrap();
+
+    b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+    // 指定使用NIO传输Channel
+        .localAddress(new InetSocketAddress(temailServerProperties.getPort()))
+        // 通过NoDelay禁用Nagle,使消息立即发送出去
+        // .option(ChannelOption.TCP_NODELAY,true)
+        // 保持长连接状态
+        .childOption(ChannelOption.SO_KEEPALIVE, true)
+        // 使用指定端口设置套接字地址
+        .childHandler(new ChannelInitializer<SocketChannel>() {
+
+          @Override
+          protected void initChannel(SocketChannel socketChannel) {
+            ChannelPipeline pipeline = socketChannel.pipeline();
+
+            pipeline.addLast(new PacketDecoder());
+            pipeline.addLast(new PacketEncoder());
+
+            pipeline.addLast("idleStateHandler",
+                new IdleStateHandler(0, 0, temailServerProperties.getAllIdleTimeSeconds()));
+
+            TemailServerHandler temailServerHandler = new TemailServerHandler();
+            setTemailServerHandlerProperties(temailServerHandler);
+            pipeline.addLast(temailServerHandler);
+          }
 
 
-        try {
-            // 异步地绑定服务器;调用sync方法阻塞等待直到绑定完成
-            ChannelFuture f = b.bind().sync();            
-            log.info("Temail 服务器已启动,正在监听用户的请求......");
-            // 获取Channel的CloseFuture，并且阻塞当前线程直到它完成
-            f.channel().closeFuture().sync();
-        } catch (InterruptedException ex) {
-            log.error("Temail 服务器已启动", ex);
-        } finally {
-            // 优雅的关闭EventLoopGroup，释放所有的资源
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
-        }
+          private void setTemailServerHandlerProperties(TemailServerHandler temailServerHandler) {
+            TemailMqInfo temailMqInfo = TemailMqInfBuilder.getTemailMqInf(temailServerProperties);
+            handlerFactory.setTemailMqInfo(temailMqInfo);
+            temailServerHandler.setHandlerFactory(handlerFactory);
+            temailServerHandler.setTemailSocketSyncClient(temailSocketSyncClient);
+            temailServerHandler.setTemailMqInfo(temailMqInfo);
+            temailServerHandler.setTemailServerProperties(temailServerProperties);
+          }
 
+        });
+
+
+    try {
+      // 异步地绑定服务器;调用sync方法阻塞等待直到绑定完成
+      ChannelFuture f = b.bind().sync();
+      log.info("Temail 服务器已启动,正在监听用户的请求......");
+      // 获取Channel的CloseFuture，并且阻塞当前线程直到它完成
+      f.channel().closeFuture().sync();
+    } catch (InterruptedException ex) {
+      log.error("Temail 服务器已启动", ex);
+    } finally {
+      // 优雅的关闭EventLoopGroup，释放所有的资源
+      bossGroup.shutdownGracefully();
+      workerGroup.shutdownGracefully();
     }
-    
-    
-    
-    
-    
+
+  }
+
+
+
 }

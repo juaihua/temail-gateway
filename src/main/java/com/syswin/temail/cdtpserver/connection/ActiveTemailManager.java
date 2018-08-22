@@ -25,7 +25,8 @@ public class ActiveTemailManager {
       new ConcurrentHashMap<String, Map<String, TemailInfo>>();
 
   public static void add(String temailKey, TemailInfo temailInfo) {
-    log.info("add  temailInfo to onlineTemailMap,  the temail key is {} ,  TemailInfo  is {}",  temailKey, temailInfo.toString());
+    log.info("add  temailInfo to onlineTemailMap,  the temail key is {} ,  TemailInfo  is {}",
+        temailKey, temailInfo.toString());
     Map<String, TemailInfo> temailMap = onlineTemailMap.get(temailInfo.getTemail());
     if (temailMap != null) {
       temailMap.put(temailInfo.getDevId(), temailInfo);
@@ -38,15 +39,14 @@ public class ActiveTemailManager {
   }
 
   public static TemailInfo getOne(String temailKey) {
-    log.info("get Temail from  onlineTemailMap  by  temail key {}",  temailKey);
+    log.info("get Temail from  onlineTemailMap  by  temail key {}", temailKey);
     String[] temailKeyArray = temailKey.split(TemailConstant.TEMAIL_KEY_SEPARATOR);
     String temail = temailKeyArray[0];
     String devId = temailKeyArray[1];
-    if(null != onlineTemailMap.get(temail)){
+    if (null != onlineTemailMap.get(temail)) {
       return onlineTemailMap.get(temail).get(devId);
-    }
-    else{
-      return  null;
+    } else {
+      return null;
     }
     // return onlineTemailMap.get(temailKey).get(temailKeyArray[0]);
 
@@ -54,7 +54,7 @@ public class ActiveTemailManager {
 
 
   public static Map<String, TemailInfo> getAll(String temailKey) {
-    log.info("get  temailinfo Map  by  temial key: {}",temailKey);
+    log.info("get  temailinfo Map  by  temial key: {}", temailKey);
     return onlineTemailMap.get(TemailKeyUtil.getTemailFromTemailKey(temailKey));
   }
 
@@ -65,7 +65,7 @@ public class ActiveTemailManager {
    * @param temailInfo
    */
   public static void remove(TemailInfo temailInfo) {
-    onlineTemailMap.remove(temailInfo.getTemail());    
+    onlineTemailMap.remove(temailInfo.getTemail());
   }
 
   /**
@@ -75,7 +75,7 @@ public class ActiveTemailManager {
    */
   public static void remove(String temailKey) {
     log.info("remove temail info  from  onlineTemailMap by  temail key :{}", temailKey);
-    //onlineTemailMap.remove(temailKey);
+    // onlineTemailMap.remove(temailKey);
     onlineTemailMap.remove(TemailKeyUtil.getTemailFromTemailKey(temailKey));
   }
 

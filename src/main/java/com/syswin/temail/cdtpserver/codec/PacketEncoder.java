@@ -24,23 +24,24 @@ import io.netty.handler.codec.MessageToByteEncoder;
  * </pre>
  * */
 @Slf4j
-public class PacketEncoder extends MessageToByteEncoder<CDTPPackageProto.CDTPPackage>{
-    @Override
-    protected void encode(ChannelHandlerContext channelHandlerContext, CDTPPackageProto.CDTPPackage cdtpPackage, ByteBuf byteBuf) throws Exception {
-      
-        byte[] data = cdtpPackage.toByteArray();
-        
-        log.info("PacketEncoder length:"+data.length);
-        byteBuf.writeInt(data.length);// write length
-        byteBuf.writeBytes(data);
-        
-        //write content
-//        if(o instanceof CDTPPackageProto.CDTPPackage){
-//            CDTPPackageProto.CDTPPackage cdtpPackage = (CDTPPackageProto.CDTPPackage)o;
-//            byte[] data = cdtpPackage.toByteArray();
-//
-//            byteBuf.writeInt(data.length);// write length
-//            byteBuf.writeBytes(data);//write content
-//        }
-    }
+public class PacketEncoder extends MessageToByteEncoder<CDTPPackageProto.CDTPPackage> {
+  @Override
+  protected void encode(ChannelHandlerContext channelHandlerContext,
+      CDTPPackageProto.CDTPPackage cdtpPackage, ByteBuf byteBuf) throws Exception {
+
+    byte[] data = cdtpPackage.toByteArray();
+
+    log.info("PacketEncoder length:" + data.length);
+    byteBuf.writeInt(data.length);// write length
+    byteBuf.writeBytes(data);
+
+    // write content
+    // if(o instanceof CDTPPackageProto.CDTPPackage){
+    // CDTPPackageProto.CDTPPackage cdtpPackage = (CDTPPackageProto.CDTPPackage)o;
+    // byte[] data = cdtpPackage.toByteArray();
+    //
+    // byteBuf.writeInt(data.length);// write length
+    // byteBuf.writeBytes(data);//write content
+    // }
+  }
 }

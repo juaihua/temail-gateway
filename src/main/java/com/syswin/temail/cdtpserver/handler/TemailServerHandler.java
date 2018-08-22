@@ -85,16 +85,15 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
     LOGGER.info("socketChannel {} client is inactive, 当前连接数:{}", ctx.channel().remoteAddress()
         .toString(), ActiveTemailManager.getOnlineTemailMap().size());
     if (null != ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get()) {
-      
+
       // 有一种情况心跳丢失,在userEventTriggered 中已经把Temail信息从ActiveTemailManager移除, 此时Temail为空
       TemailInfo temailInfo =
           ActiveTemailManager.getOne(ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
       if (null != temailInfo) {
-        
-        LOGGER.info(
-            "socketChannel{} , TemailKey {} 丢失 {} 次心跳, 强制断开连接 , 并且从状态管理中移除",
+
+        LOGGER.info("socketChannel{} , TemailKey {} 丢失 {} 次心跳, 强制断开连接 , 并且从状态管理中移除",
             ((SocketChannel) ctx.channel()).remoteAddress().toString(),
-            ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get(), counter);        
+            ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get(), counter);
         TemailSocketInfo temailSocketInfo =
             TemailSocketBuilderUtil.temailSocketBuilder(temailInfo, temailMqInfo,
                 TemailSocketOptEnum.del.toString());

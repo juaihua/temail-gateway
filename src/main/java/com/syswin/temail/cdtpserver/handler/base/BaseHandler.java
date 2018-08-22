@@ -21,17 +21,17 @@ public abstract class BaseHandler {
   private TemailServerProperties temailServerConfig;
 
   private TemailSocketSyncClient temailSocketSyncClient;
-  
-  private  TemailMqInfo  temailMqInfo;
 
-  
+  private TemailMqInfo temailMqInfo;
+
+
   public BaseHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage) {
     this.socketChannel = socketChannel;
     this.cdtpPackage = cdtpPackage;
   }
 
-  
- 
+
+
   public BaseHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage,
       TemailServerProperties temailServerConfig) {
     this.socketChannel = socketChannel;
@@ -39,7 +39,7 @@ public abstract class BaseHandler {
     this.temailServerConfig = temailServerConfig;
   }
 
-  
+
   public BaseHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage,
       TemailServerProperties temailServerConfig, TemailSocketSyncClient temailSocketSyncClient) {
     this.socketChannel = socketChannel;
@@ -47,16 +47,17 @@ public abstract class BaseHandler {
     this.temailServerConfig = temailServerConfig;
     this.temailSocketSyncClient = temailSocketSyncClient;
   }
-  
+
   public BaseHandler(SocketChannel socketChannel, CDTPPackageProto.CDTPPackage cdtpPackage,
-      TemailServerProperties temailServerConfig, TemailSocketSyncClient temailSocketSyncClient, TemailMqInfo  temailMqInfo) {
+      TemailServerProperties temailServerConfig, TemailSocketSyncClient temailSocketSyncClient,
+      TemailMqInfo temailMqInfo) {
     this.socketChannel = socketChannel;
     this.cdtpPackage = cdtpPackage;
     this.temailServerConfig = temailServerConfig;
     this.temailSocketSyncClient = temailSocketSyncClient;
     this.temailMqInfo = temailMqInfo;
   }
-  
+
 
   public abstract void process();
 }

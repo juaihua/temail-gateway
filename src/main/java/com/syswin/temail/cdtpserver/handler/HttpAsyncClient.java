@@ -76,7 +76,8 @@ public class HttpAsyncClient {
               CDTPPackage.Builder builder = CDTPPackage.newBuilder();
               CdtpPackageUtil.copyBeanProperties(transferCDTPPackage, builder);
               CDTPPackage ctPackage = builder.build();
-              LOGGER.info("回执消息 TEMAIL_KEY is :{}", socketChannel.attr(ConstantsAttributeKey.TEMAIL_KEY).get());
+              LOGGER.info("回执消息 TEMAIL_KEY is :{}",
+                  socketChannel.attr(ConstantsAttributeKey.TEMAIL_KEY).get());
               socketChannel.writeAndFlush(ctPackage);
               LOGGER.info("RequestHandler 返回给前端的回执消息:{}", ctPackage.toString());
             } catch (UnsupportedOperationException ex) {

@@ -20,20 +20,21 @@ import io.netty.handler.codec.MessageToByteEncoder;
  * </pre>
  * */
 
-public class EntityEncoder extends MessageToByteEncoder{
-    @Override
-    protected void encode(ChannelHandlerContext channelHandlerContext, Object o, ByteBuf byteBuf) throws Exception {
+public class EntityEncoder extends MessageToByteEncoder {
+  @Override
+  protected void encode(ChannelHandlerContext channelHandlerContext, Object o, ByteBuf byteBuf)
+      throws Exception {
 
-//        Packet packet = (Packet)o;
-//        byte[] data = packet.getBody().toByteArray();
-//
-//        byteBuf.writeInt(data.length);// write length
-//        byteBuf.writeShort(packet.getFixedHeader().getCommand()); //write cmd
-//        byteBuf.writeShort(packet.getFixedHeader().getVsersion()); //write version
-//
-//        byteBuf.writeBytes(data);//write content
+    // Packet packet = (Packet)o;
+    // byte[] data = packet.getBody().toByteArray();
+    //
+    // byteBuf.writeInt(data.length);// write length
+    // byteBuf.writeShort(packet.getFixedHeader().getCommand()); //write cmd
+    // byteBuf.writeShort(packet.getFixedHeader().getVsersion()); //write version
+    //
+    // byteBuf.writeBytes(data);//write content
 
 
 
-    }
+  }
 }

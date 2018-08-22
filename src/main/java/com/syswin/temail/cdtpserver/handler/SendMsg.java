@@ -15,11 +15,11 @@ public class SendMsg {
   /**
    * 发送心跳命令
    *
-   * @param command 心跳类型   ping   pong
+   * @param command 心跳类型 ping pong
    */
   public static void sendHeartbeat(SocketChannel socketChannel, CommandEnum command) {
     CDTPPackageProto.CDTPPackage.Builder builder = CDTPPackageProto.CDTPPackage.newBuilder();
-    builder.setCommand(command.getCode());//设置心跳命令
+    builder.setCommand(command.getCode());// 设置心跳命令
 
     CDTPPackageProto.CDTPPackage cdtpPackage = builder.build();
     log.info("发送心跳指令信息: {}", cdtpPackage.toString());
@@ -27,7 +27,8 @@ public class SendMsg {
   }
 
 
-  //public static void sendToTemail(String toTemail,CDTPPackageProto cdtpPackageProto,SocketChannel socketChannel){
+  // public static void sendToTemail(String toTemail,CDTPPackageProto cdtpPackageProto,SocketChannel
+  // socketChannel){
   public static void sendToTemail(CDTPPackage ctPackage, SocketChannel socketChannel) {
     log.info("从MQ中提取信息, 向对应的通道中发送:{}", ctPackage.toString());
     socketChannel.writeAndFlush(ctPackage);

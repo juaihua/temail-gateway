@@ -27,37 +27,36 @@ public class MonitorMqApplication implements ApplicationRunner {
 
   @Resource
   private TemailServerProperties temailServerConfig;
- 
+
   @Override
   public void run(ApplicationArguments args) throws Exception {
-    TemailMqInfo  temailMqInfo  = TemailMqInfBuilder.getTemailMqInf(temailServerConfig);     
-     log.info("开始监听mqTopic:{}, mqTag:{} 队列中的信息.", temailMqInfo.getMqTopic(), temailMqInfo.getMqTag());       
-     try{            
-       DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(temailServerConfig.getConsumerGroup());
-       consumer.setNamesrvAddr(temailServerConfig.getNamesrvAddr());                  
-       //consumer.subscribe("temail-server-channle-1" , "*");       
-       //consumer.subscribe("cdtp-server-consumer", "temail-server-172-31-243-110-7460");       
-       consumer.subscribe(temailMqInfo.getMqTopic() , temailMqInfo.getMqTag());  
-       consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);        
-       consumer.setMessageListener(new TemailServerMqListener());      
-       consumer.start();      
-     }
-     catch (MQClientException ex) {
-       log.error("monitor mq msg  exception", ex);
-     }
-     catch(Exception ex){
-       log.error("monitor mq msg  exception", ex);
-     }       
-     
-     
-     /*MonitorMqRunnable  monitorMqRunnable =new   MonitorMqRunnable();
-     monitorMqRunnable.setTemailServerConfig(properties);
-     monitorMqRunnable.setTemailMqInfo(temailMqInfo);
-     Thread monitorThread = new Thread(monitorMqRunnable, "monitorThread") ;
-     monitorThread.start();*/
+    TemailMqInfo temailMqInfo = TemailMqInfBuilder.getTemailMqInf(temailServerConfig);
+    log.info("开始监听mqTopic:{}, mqTag:{} 队列中的信息.", temailMqInfo.getMqTopic(), temailMqInfo.getMqTag());
+    try {
+      DefaultMQPushConsumer consumer =
+          new DefaultMQPushConsumer(temailServerConfig.getConsumerGroup());
+      consumer.setNamesrvAddr(temailServerConfig.getNamesrvAddr());
+      // consumer.subscribe("temail-server-channle-1" , "*");
+      // consumer.subscribe("cdtp-server-consumer", "temail-server-172-31-243-110-7460");
+      consumer.subscribe(temailMqInfo.getMqTopic(), temailMqInfo.getMqTag());
+      consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
+      consumer.setMessageListener(new TemailServerMqListener());
+      consumer.start();
+    } catch (MQClientException ex) {
+      log.error("monitor mq msg  exception", ex);
+    } catch (Exception ex) {
+      log.error("monitor mq msg  exception", ex);
+    }
+
+
+    /*
+     * MonitorMqRunnable monitorMqRunnable =new MonitorMqRunnable();
+     * monitorMqRunnable.setTemailServerConfig(properties);
+     * monitorMqRunnable.setTemailMqInfo(temailMqInfo); Thread monitorThread = new
+     * Thread(monitorMqRunnable, "monitorThread") ; monitorThread.start();
+     */
   }
-  
-  
- 
+
+
 
 }

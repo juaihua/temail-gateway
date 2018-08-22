@@ -44,5 +44,5 @@ public class RespMsgHandler {
       LOGGER.error("send tomail msg  error", ex);
     }
   }
-  
+
 }

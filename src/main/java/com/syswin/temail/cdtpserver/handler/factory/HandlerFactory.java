@@ -25,26 +25,26 @@ import com.syswin.temail.cdtpserver.status.TemailSocketSyncClient;
 @Component
 public class HandlerFactory {
 
-    @Resource
-    private TemailServerProperties temailServerConfig;
-    
-    @Resource
-    private TemailSocketSyncClient temailSocketSyncClient;
-    
-    @Setter
-    @Getter
-    private  TemailMqInfo  temailMqInfo;
-    
-    
-    public BaseHandler getHandler(CDTPPackageProto.CDTPPackage cdtpPackage, SocketChannel socketChannel){         
-        if(cdtpPackage.getCommand() == CommandEnum.connect.getCode()){
-            return new LoginHandler(socketChannel,cdtpPackage, temailServerConfig, temailSocketSyncClient, temailMqInfo);
-        }
-        else if(cdtpPackage.getCommand() == CommandEnum.disconnect.getCode()){
-          return new DisconnectHandler(socketChannel,cdtpPackage, temailServerConfig);
-        }
-        else{
-            return new RequestHandler(socketChannel, cdtpPackage, temailServerConfig); 
-        }       
+  @Resource
+  private TemailServerProperties temailServerConfig;
+
+  @Resource
+  private TemailSocketSyncClient temailSocketSyncClient;
+
+  @Setter
+  @Getter
+  private TemailMqInfo temailMqInfo;
+
+
+  public BaseHandler getHandler(CDTPPackageProto.CDTPPackage cdtpPackage,
+      SocketChannel socketChannel) {
+    if (cdtpPackage.getCommand() == CommandEnum.connect.getCode()) {
+      return new LoginHandler(socketChannel, cdtpPackage, temailServerConfig,
+          temailSocketSyncClient, temailMqInfo);
+    } else if (cdtpPackage.getCommand() == CommandEnum.disconnect.getCode()) {
+      return new DisconnectHandler(socketChannel, cdtpPackage, temailServerConfig);
+    } else {
+      return new RequestHandler(socketChannel, cdtpPackage, temailServerConfig);
     }
+  }
 }

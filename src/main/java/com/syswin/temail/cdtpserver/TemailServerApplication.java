@@ -14,7 +14,7 @@ import com.syswin.temail.cdtpserver.properties.TemailServerProperties;
 @EnableConfigurationProperties({TemailServerProperties.class})
 @SpringBootApplication
 public class TemailServerApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(TemailServerApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(TemailServerApplication.class, args);
+  }
 }

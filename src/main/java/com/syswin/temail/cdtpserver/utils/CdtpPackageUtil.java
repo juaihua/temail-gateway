@@ -41,8 +41,7 @@ public class CdtpPackageUtil {
       builder.setData(ByteString.copyFrom(transferCDTPPackage.getData(), Charset.defaultCharset()));
     }
   }
-  
-  
- 
-  
+
+
+
 }

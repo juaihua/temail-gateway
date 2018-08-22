@@ -44,14 +44,14 @@ public class Response<T> {
   }
 
   public Response() {
-    
+
   }
 
   private Response(HttpStatus status) {
     this.code = status.value();
   }
 
-  public  Response(HttpStatus status, String message) {
+  public Response(HttpStatus status, String message) {
     this.code = status.value();
     this.message = message;
   }
@@ -62,7 +62,7 @@ public class Response<T> {
     this.data = data;
   }
 
-  
+
 
   public String getMessage() {
     return message;
