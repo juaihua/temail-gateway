@@ -83,7 +83,7 @@ public class TemailServer implements ApplicationRunner {
                     
                                         
                     private  void   setTemailServerHandlerProperties(TemailServerHandler temailServerHandler){
-                      TemailMqInfo  temailMqInfo = TemailMqInfBuilder.getTemailMqInf();
+                      TemailMqInfo  temailMqInfo = TemailMqInfBuilder.getTemailMqInf(temailServerProperties);
                       handlerFactory.setTemailMqInfo(temailMqInfo);                      
                       temailServerHandler.setHandlerFactory(handlerFactory);                       
                       temailServerHandler.setTemailSocketSyncClient(temailSocketSyncClient);

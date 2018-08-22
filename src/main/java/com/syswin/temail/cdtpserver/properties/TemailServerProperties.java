@@ -28,4 +28,7 @@ public class TemailServerProperties {
   
   private  int   allIdleTimeSeconds;
   
+  private  String  mqTopic;
+  
+  
 }

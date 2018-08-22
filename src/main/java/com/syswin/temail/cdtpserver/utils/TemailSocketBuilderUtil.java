@@ -17,6 +17,7 @@ public class TemailSocketBuilderUtil {
       TemailSocketInstance  instance = new TemailSocketInstance();
       instance.setDevId(temailInf.getDevId());
       instance.setMqTopic(temailMqInfo.getMqTopic());
+      instance.setMqTag(temailMqInfo.getMqTag());
       instance.setHostOf(temailMqInfo.getHostOf());
       instance.setProcessId(temailMqInfo.getProcessId());      
       temailSocketInf.setStatus(instance);

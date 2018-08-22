@@ -58,7 +58,7 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
         log.info("msg:"+msg);
       }
       
-      /*if(counter ==0){
+      if(counter ==0){
       //if(counter <=2){
         if(msg instanceof CDTPPackage){
           System.out.println("msg:"+msg);
@@ -92,7 +92,7 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
       }
       else{
         log.info("no send pinginfo ");
-      }*/
+      }
            
 
     }
