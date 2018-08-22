@@ -58,6 +58,8 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter{
         log.info("msg:"+msg);
       }
       
+      
+      System.out.println("############################################################");
       //if(counter ==0){
      if(counter <=2){
         if(msg instanceof CDTPPackage){
