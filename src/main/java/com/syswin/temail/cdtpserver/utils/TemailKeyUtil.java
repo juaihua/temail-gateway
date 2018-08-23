@@ -26,5 +26,10 @@ public class TemailKeyUtil {
      */
     return temailKeyArray[1];
   }
+  
+  
+  public  static  void  main(String  args[]){
+    System.out.println(getTemailFromTemailKey("jack@t.email"));
+  }
 
 }

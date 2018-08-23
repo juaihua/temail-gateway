@@ -42,8 +42,8 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter {
 
     TemailInfo temailInfo = new TemailInfo();
     temailInfo.setTemail("jack@t.email");
-    // temailInfo.setTemail("sean@t.email");
-    temailInfo.setDevId("devId");
+    //temailInfo.setTemail("sean@t.email");
+    temailInfo.setDevId("devId123");
     Gson gson = new Gson();
     String gsonString = gson.toJson(temailInfo);
 
@@ -59,8 +59,17 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter {
       log.info("从通道接收到消息:" + msg);
     }
 
-    log.info("############################################################");
-    if (counter <= 1) {
+   log.info("############################################################");
+    
+    /*if(counter == 0){
+      CDTPPackage cdtpPackage = singleChat();
+      ctx.writeAndFlush(cdtpPackage);
+      log.info("发送单聊消息...............");
+      counter++;
+      
+    }*/
+    
+    /*if (counter <= 1) {
       CDTPPackage cdtpPackage = null;
       cdtpPackage = sendMsgToGroupTemailBody();
       ctx.writeAndFlush(cdtpPackage);
@@ -68,7 +77,7 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter {
       counter++;
     } else {
       log.info("no send pinginfo ");
-    }
+    }*/
 
     /*
      * System.out.println("############################################################");

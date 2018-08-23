@@ -98,7 +98,8 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
             TemailSocketBuilderUtil.temailSocketBuilder(temailInfo, temailMqInfo,
                 TemailSocketOptEnum.del.toString());
         temailSocketSyncClient.updateTemailSocketInfToRemote(temailSocketInfo);
-        ActiveTemailManager.remove(ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
+        ActiveTemailManager.removeByTemailKey(ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY)
+            .get());
       }
     }
   }
@@ -123,7 +124,8 @@ public class TemailServerHandler extends ChannelInboundHandlerAdapter {
               TemailSocketBuilderUtil.temailSocketBuilder(temailInfo, temailMqInfo,
                   TemailSocketOptEnum.del.toString());
           temailSocketSyncClient.updateTemailSocketInfToRemote(temailSocketInfo);
-          ActiveTemailManager.remove(ctx.channel().attr(ConstantsAttributeKey.TEMAIL_KEY).get());
+          ActiveTemailManager.removeByTemailKey(ctx.channel()
+              .attr(ConstantsAttributeKey.TEMAIL_KEY).get());
           LOGGER.info(
               "socketChannel{} , TemailKey is {} 空闲超时 , 丢失 {} 次心跳, 已与Client断开连接 , 并且从状态管理中移除",
               ((SocketChannel) ctx.channel()).remoteAddress().toString(),

@@ -63,7 +63,7 @@ public class DisconnectHandler extends BaseHandler {
     TemailInfo temailInfo =
         gson.fromJson(getCdtpPackage().getData().toStringUtf8(), TemailInfo.class);
     String temailKey = TemailKeyUtil.builderTemailKey(temailInfo);
-    ActiveTemailManager.remove(temailKey);
+    ActiveTemailManager.removeByTemailKey(temailKey);
     getSocketChannel().close();
 
     LOGGER.info("disconnection, close  SocketChannel {}",
