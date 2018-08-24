@@ -6,7 +6,7 @@
         <pattern>%d %p %C{1.} [%t] %m%n</pattern>
       </PatternLayout>
     </Console>
-    <RollingFile name="RollingFileInfo" fileName="/home/java/logs/cdtp-server.log"
+    <RollingFile name="RollingFileInfo" fileName="/home/java/logs/temail-gateway.log"
       filePattern="/home/logs/$${date:yyyy-MM}/encrypt_server-%d{yyyy-MM-dd}-%i.log">
       <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
       <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>

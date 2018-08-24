@@ -80,6 +80,7 @@ public class LoginHandler extends BaseHandler {
       RestTemplate restTemplate = new RestTemplate();
       restTemplate.setErrorHandler(new SilentResponseErrorHandler());
 
+      LOGGER.info("VerifyUrl is:{}", getTemailServerConfig().getVerifyUrl());
       ResponseEntity<Response> responseEntity =
           restTemplate.exchange(getTemailServerConfig().getVerifyUrl(), HttpMethod.POST,
               requestEntity, Response.class);
