@@ -2,13 +2,17 @@ package com.syswin.temail.gateway.entity;
 
 import com.syswin.temail.gateway.entity.CDTPHeaderProto.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPHeaderProto.CDTPHeader.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author 姚华成
  * @date 2018-8-24
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public final class CDTPPacket {
 
   private short commandSpace;
@@ -18,6 +22,8 @@ public final class CDTPPacket {
   private byte[] data;
 
   @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
   public static final class Header {
 
     private String deviceId;

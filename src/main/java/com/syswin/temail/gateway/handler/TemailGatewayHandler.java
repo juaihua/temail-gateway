@@ -1,5 +1,6 @@
 package com.syswin.temail.gateway.handler;
 
+import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
 import static com.syswin.temail.gateway.entity.CommandType.LOGIN;
 import static com.syswin.temail.gateway.entity.CommandType.LOGOUT;
 import static com.syswin.temail.gateway.entity.CommandType.PING;
@@ -37,12 +38,12 @@ public class TemailGatewayHandler extends SimpleChannelInboundHandler<CDTPPacket
   @Override
   public void channelRead0(ChannelHandlerContext ctx, CDTPPacket packet) {
     Channel channel = ctx.channel();
-    if (packet.getCommandSpace() == 0) {
-      if (packet.getCommand() == PING.getCommand()) {
+    if (packet.getCommandSpace() == CHANNEL.getCode()) {
+      if (packet.getCommand() == PING.getCode()) {
         heartBeatService.pong(channel, packet);
-      } else if (packet.getCommand() == LOGIN.getCommand()) {
+      } else if (packet.getCommand() == LOGIN.getCode()) {
         sessionService.login(channel, packet);
-      } else if (packet.getCommand() == LOGOUT.getCommand()) {
+      } else if (packet.getCommand() == LOGOUT.getCode()) {
         sessionService.logout(channel, packet);
       } else {
         // 其他连接请求

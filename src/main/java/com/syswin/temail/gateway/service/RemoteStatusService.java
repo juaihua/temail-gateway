@@ -38,7 +38,7 @@ public class RemoteStatusService {
 
   public void removeSessions(List<Session> sessions) {
     if (sessions != null) {
-      // 让状态服务器提供指更新的能力
+      // TODO(姚华成): 让状态服务器提供批量更新的能力
       for (Session session : sessions) {
         removeSession(session.getTemail(), session.getDeviceId());
       }

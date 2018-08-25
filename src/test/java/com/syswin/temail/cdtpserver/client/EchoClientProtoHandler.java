@@ -35,7 +35,7 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter {
     header.setPacketId("pckAgeId1234");
     header.setSignatureAlgorithm(1);
 
-    builder.setCommand(CommandType.LOGIN.getCommand());
+    builder.setCommand(CommandType.LOGIN.getCode());
     builder.setVersion((short) 3);
 
     String gsonString = gson.toJson(temailInfo);

@@ -1,5 +1,6 @@
 package com.syswin.temail.gateway.entity;
 
+import com.syswin.temail.gateway.exception.PacketException;
 import lombok.Getter;
 
 /**
@@ -11,23 +12,29 @@ public enum CommandType {
   // TODO(姚华成) 具体内容需要再定义
   PING(1),
   PONG(2),
-  LOGIN(100),
-  LOGOUT(101),
-  BIZ(1000);
-  private short command;
+  LOGIN(101),
+  LOGIN_RESP(102),
+  LOGOUT(103),
+  LOGOUT_RESP(104),
 
-  CommandType(int command) {
-    this.command = (short) command;
+  MESSAGE_PUSH(202),
+  INTERNAL_ERROR(600)
+  ;
+
+  private short code;
+
+  CommandType(int code) {
+    this.code = (short) code;
   }
 
-  public static CommandType valueOf(short command) {
+  public static CommandType valueOf(short code) {
     CommandType.valueOf("");
     for (CommandType commandType : CommandType.values()) {
-      if (commandType.getCommand() == command) {
+      if (commandType.getCode() == code) {
         return commandType;
       }
     }
-    return BIZ;
+    throw new PacketException("不支持的Command的编码：" + code);
   }
 
 }

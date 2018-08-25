@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class HeartBeatService {
   public void pong(Channel channel, CDTPPacket packet){
-    packet.setCommand(PONG.getCommand());
+    packet.setCommand(PONG.getCode());
     channel.writeAndFlush(packet);
   }
 }

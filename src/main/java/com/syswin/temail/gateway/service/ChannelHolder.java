@@ -28,8 +28,9 @@ public class ChannelHolder {
     return Collections.unmodifiableCollection(sessionChannelMap.getOrDefault(temail, Collections.emptyMap()).values());
   }
 
-  public List<Session> getSessions(Channel channel) {
-    return Collections.unmodifiableList(channelSessionMap.getOrDefault(channel, Collections.emptyList()));
+  public boolean hasNoSession(Channel channel) {
+    List<Session> sessions = channelSessionMap.get(channel);
+    return sessions == null || sessions.isEmpty();
   }
 
   public void addSession(String temail, String deviceId, Channel channel) {
@@ -51,25 +52,42 @@ public class ChannelHolder {
     Map<String, Channel> deviceChannelMap = sessionChannelMap.get(temail);
     if (deviceChannelMap != null) {
       Channel channel = deviceChannelMap.get(deviceId);
-      List<Session> sessions = getSessions(channel);
-      if (sessions.isEmpty()) {
-        channel.close();
-      }
+      // 先移除sessionChannel
       if (deviceChannelMap.size() > 1) {
         deviceChannelMap.remove(deviceId);
       } else {
         sessionChannelMap.remove(temail);
       }
+
+      // 再移除channelSession
+      List<Session> sessions = getSessions(channel);
+      sessions.removeIf(session -> temail.equals(session.getTemail()) && deviceId.equals(session.getDeviceId()));
+      if (sessions.isEmpty()) {
+        channelSessionMap.remove(channel);
+      }
     }
   }
 
   public List<Session> removeChannel(Channel channel) {
+    // 先移除channelSession
     List<Session> sessions = channelSessionMap.remove(channel);
+    // 再移除sessionChannel
     if (sessions != null) {
       for (Session session : sessions) {
-        removeSession(session.getTemail(), session.getDeviceId());
+        Map<String, Channel> deviceChannelMap = sessionChannelMap.get(session.getTemail());
+        if (deviceChannelMap != null) {
+          if (deviceChannelMap.size() > 1) {
+            deviceChannelMap.remove(session.getDeviceId());
+          } else {
+            sessionChannelMap.remove(session.getTemail());
+          }
+        }
       }
     }
     return sessions;
+  }
+
+  private List<Session> getSessions(Channel channel) {
+    return channelSessionMap.getOrDefault(channel, Collections.emptyList());
   }
 }

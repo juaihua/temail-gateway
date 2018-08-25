@@ -150,7 +150,7 @@ public class TemailGatewayIntegrationTest {
 
     // login
     CDTPPacket aPackage = receivedPackages.poll();
-    assertThat(aPackage.getCommand()).isEqualTo(CommandType.LOGIN.getCommand());
+    assertThat(aPackage.getCommand()).isEqualTo(CommandType.LOGIN.getCode());
 
     // ack for sent message
     await().atMost(2, SECONDS).until(() -> receivedPackages.peek() != null);
@@ -163,7 +163,7 @@ public class TemailGatewayIntegrationTest {
     // heartbeat
     await().atMost(5, SECONDS).until(() -> receivedPackages.peek() != null);
     aPackage = receivedPackages.poll();
-    assertThat(aPackage.getCommand()).isEqualTo(CommandType.PING.getCommand());
+    assertThat(aPackage.getCommand()).isEqualTo(CommandType.PING.getCode());
 
     // receive message from MQ
     mqProducer.send(new Message(temailServerConfig.getMqTopic(), temailServerConfig.getMqTag(), GSON.toJson(payload(sender, message)).getBytes()), 3000);
