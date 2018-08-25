@@ -5,7 +5,6 @@ import com.syswin.temail.cdtpserver.codec.PacketEncoder;
 import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
 import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -25,7 +24,6 @@ public class EchoClient {
   private final BlockingQueue<CDTPPackage> toBeSentPackages;
   private final TemailInfo temailInfo;
   private Runnable runnable;
-  private Channel channel;
 
   EchoClient(String temail,
       String devId,
@@ -60,8 +58,9 @@ public class EchoClient {
           }
         });
     try {
-      channel = bootstrap.connect().sync().channel();
+      bootstrap.connect().sync();
       runnable = group::shutdownGracefully;
+      Runtime.getRuntime().addShutdownHook(new Thread(runnable));
     } catch (InterruptedException e) {
       throw new IllegalStateException(e);
     }

@@ -4,6 +4,6 @@ import org.testcontainers.containers.FixedHostPortGenericContainer;
 
 public class RocketMqNameServerContainer extends FixedHostPortGenericContainer<RocketMqNameServerContainer> {
   public RocketMqNameServerContainer() {
-    super("apache/rocketmq-namesrv:4.3.0");
+    super("seanyinx/rocketmq-namesrv:4.3.0");
   }
 }

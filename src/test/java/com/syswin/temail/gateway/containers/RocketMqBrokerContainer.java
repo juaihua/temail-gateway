@@ -7,7 +7,7 @@ import org.testcontainers.containers.FixedHostPortGenericContainer;
 public class RocketMqBrokerContainer extends FixedHostPortGenericContainer<RocketMqBrokerContainer> {
 
   public RocketMqBrokerContainer() {
-    super("apache/rocketmq-broker:4.3.0");
+    super("seanyinx/rocketmq-broker:4.3.0");
   }
 
   @Override
