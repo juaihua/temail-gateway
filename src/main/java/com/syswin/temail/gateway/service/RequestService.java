@@ -1,12 +1,12 @@
 package com.syswin.temail.gateway.service;
 
 import com.syswin.temail.gateway.entity.CDTPPacket;
+import com.syswin.temail.gateway.entity.Response;
 import io.netty.channel.Channel;
 import javax.annotation.Resource;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  * @author 姚华成
@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 public class RequestService {
 
   @Resource(name = "dispatcherWebClient")
-  private WebClient webClient;
+  private WebClient dispatcherWebClient;
   @Resource
   private ChannelHolder channelHolder;
 
@@ -27,11 +27,25 @@ public class RequestService {
       return;
     }
 
-    Mono<ClientResponse> mono = webClient.post()
+    dispatcherWebClient.post()
         .header("", "")
         .body(null)
-        .exchange();
-//    mono.
+        .exchange()
+        .doOnSuccess(clientResponse -> {
+          Response<CDTPPacket> response = clientResponse
+              .bodyToMono(new ParameterizedTypeReference<Response<CDTPPacket>>() {
+              }).block();
+          if (response != null) {
+            CDTPPacket respPacket = response.getData();
+            packet.setData(respPacket.getData());
+            channel.writeAndFlush(packet);
+          } else {
+            // TODO(姚华成): 返回错误信息
+            channel.writeAndFlush(packet);
+          }
+        })
+        .subscribe()
+    ;
   }
 
   private boolean authSession(Channel channel, CDTPPacket packet) {

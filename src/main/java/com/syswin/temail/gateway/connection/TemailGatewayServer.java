@@ -58,7 +58,7 @@ public class TemailGatewayServer implements ApplicationRunner {
         // 指定使用NIO传输Channel
         .localAddress(new InetSocketAddress(properties.getPort()))
         // 通过NoDelay禁用Nagle,使消息立即发送出去
-        .option(ChannelOption.TCP_NODELAY, true)
+        .childOption(ChannelOption.TCP_NODELAY, true)
         // 保持长连接状态
         .childOption(ChannelOption.SO_KEEPALIVE, true)
         .childHandler(new ChannelInitializer<SocketChannel>() {

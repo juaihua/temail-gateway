@@ -1,6 +1,6 @@
 package com.syswin.temail.gateway.service;
 
-import com.syswin.temail.gateway.TemailGatewayInstance;
+import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.Session;
 import com.syswin.temail.gateway.entity.TemailSocketInfo;
 import com.syswin.temail.gateway.entity.TemailSocketInstance;
@@ -18,7 +18,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class RemoteStatusService {
 
   @Resource
-  private TemailGatewayInstance gatewayInstance;
+  private TemailGatewayProperties properties;
   @Resource(name = "statusWebClient")
   private WebClient statusWebClient;
 
@@ -42,10 +42,10 @@ public class RemoteStatusService {
   private void updateRemoteStatus(String temail, String deviceId, String opType) {
     TemailSocketInfo temailChannel = new TemailSocketInfo(temail, opType,
         new TemailSocketInstance(deviceId,
-            gatewayInstance.getHostOf(),
-            gatewayInstance.getProcessId(),
-            gatewayInstance.getMqTopic(),
-            gatewayInstance.getMqTag()));
+            properties.getHostOf(),
+            properties.getProcessId(),
+            properties.getMqTopic(),
+            properties.getMqTag()));
     // 同步远程状态
     statusWebClient.post()
         .contentType(MediaType.APPLICATION_JSON_UTF8)
