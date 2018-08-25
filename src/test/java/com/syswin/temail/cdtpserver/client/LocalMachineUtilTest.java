@@ -2,9 +2,6 @@ package com.syswin.temail.cdtpserver.client;
 
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
-
-import com.syswin.temail.cdtpserver.entity.TemailSocketOptEnum;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -15,7 +12,7 @@ public class LocalMachineUtilTest {
    * @throws Exception
    */
   public static void main(String[] args) throws Exception {
-    System.out.println("TemailSocketOptEnum:" + TemailSocketOptEnum.add.toString());
+    System.out.println("TemailSocketOptEnum:" + "add");
     System.out.println("localIp:" + getLocalIp());
     System.out.println("LocalProccesId:" + getLocalProccesId());
 
