@@ -1,0 +1,5 @@
+spring:
+  autoconfigure.exclude:
+  - com.systoon.integration.spring.boot.disconf.DisconfAutoConfiguration
+  - com.systoon.integration.spring.boot.disconf.context.config.ConfigurationPropertiesRebinderAutoConfiguration
+  - com.systoon.integration.spring.boot.disconf.context.config.RefreshAutoConfiguration
