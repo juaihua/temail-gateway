@@ -23,7 +23,7 @@ public class Response<T> {
     return new Response<>(OK);
   }
 
-  static <T> Response<T> ok(T body) {
+  public static <T> Response<T> ok(T body) {
     return ok(OK, body);
   }
 

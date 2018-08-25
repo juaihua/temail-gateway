@@ -2,6 +2,8 @@ package com.syswin.temail.cdtpserver.client;
 
 import com.syswin.temail.cdtpserver.codec.PacketDecoder;
 import com.syswin.temail.cdtpserver.codec.PacketEncoder;
+import com.syswin.temail.cdtpserver.entity.CDTPPackageProto.CDTPPackage;
+import com.syswin.temail.cdtpserver.entity.TemailInfo;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -10,24 +12,43 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-
 import java.net.InetSocketAddress;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by weis on 18/8/3.
  */
 public class EchoClient {
 
-  //private final static String HOST = "192.168.1.194";
-  //private final static String HOST = "192.168.15.9";
-  private final static String HOST = "127.0.0.1";
-  private final static int PORT = 8099;
+  private final BlockingQueue<CDTPPackage> receivedPackages;
+  private final BlockingQueue<CDTPPackage> toBeSentPackages;
+  private final TemailInfo temailInfo;
+  private Runnable runnable;
+  private Channel channel;
 
-  public static void start() {
+  EchoClient(String temail,
+      String devId,
+      BlockingQueue<CDTPPackage> toBeSentPackages,
+      BlockingQueue<CDTPPackage> receivedPackages) {
+    this.receivedPackages = receivedPackages;
+    this.toBeSentPackages = toBeSentPackages;
+    temailInfo = new TemailInfo();
+    temailInfo.setTemail(temail);
+    // temailInfo.setTemail("sean@t.email");
+    temailInfo.setDevId(devId);
+  }
+
+  public static void main(String[] args) {
+    new EchoClient("jack@t.email", "devId", new LinkedBlockingQueue<>(), new LinkedBlockingQueue<>())
+        .start("192.168.1.194", 8099);
+  }
+
+  void start(String host, int port) {
     EventLoopGroup group = new NioEventLoopGroup();
     Bootstrap bootstrap = new Bootstrap();
     bootstrap.group(group).channel(NioSocketChannel.class).option(ChannelOption.SO_BACKLOG, 1024)
-        .remoteAddress(new InetSocketAddress(HOST, PORT))
+        .remoteAddress(new InetSocketAddress(host, port))
         .handler(new ChannelInitializer<SocketChannel>() {
           @Override
           protected void initChannel(SocketChannel socketChannel) {
@@ -35,28 +56,18 @@ public class EchoClient {
             socketChannel.pipeline().addLast(new PacketDecoder());
             socketChannel.pipeline().addLast(new PacketEncoder());
 
-            socketChannel.pipeline().addLast(new EchoClientProtoHandler());
+            socketChannel.pipeline().addLast(new EchoClientProtoHandler(temailInfo, receivedPackages, toBeSentPackages));
           }
         });
     try {
-      // ChannelFuture f = bootstrap.connect().sync();
-      // f.channel().closeFuture().sync();
-      Channel channel = bootstrap.connect().sync().channel();
-      // 发送json字符串
-      // String msg =
-      // "{\"command\":110,\"from\":\"weisheng@temail.com\",\"to\":\"gaojianhui@temail.com\",\"version\":\"1.0.0\"}\n";
-      // // String jsonString = "{name:'Antony',age:'22',sex:'male',telephone:'88888'}";
-      // channel.writeAndFlush(msg);
-      channel.closeFuture().sync();
+      channel = bootstrap.connect().sync().channel();
+      runnable = group::shutdownGracefully;
     } catch (InterruptedException e) {
-      e.printStackTrace();
-    } finally {
-      group.shutdownGracefully();
+      throw new IllegalStateException(e);
     }
   }
 
-  public static void main(String[] args) {
-    start();
+  void stop() {
+    runnable.run();
   }
-
 }
