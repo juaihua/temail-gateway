@@ -5,10 +5,12 @@ import com.syswin.temail.gateway.entity.Session;
 import com.syswin.temail.gateway.entity.TemailSocketInfo;
 import com.syswin.temail.gateway.entity.TemailSocketInstance;
 import java.util.List;
-import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 /**
  * @author 姚华成
@@ -17,13 +19,17 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 public class RemoteStatusService {
 
-  @Resource
-  private TemailGatewayProperties properties;
-  @Resource(name = "statusWebClient")
-  private WebClient statusWebClient;
+  private final TemailGatewayProperties properties;
+  private final WebClient statusWebClient;
 
-  public void addSession(String temail, String deviceId) {
-    updateRemoteStatus(temail, deviceId, "add");
+  @Autowired
+  public RemoteStatusService(TemailGatewayProperties properties, WebClient statusWebClient) {
+    this.properties = properties;
+    this.statusWebClient = statusWebClient;
+  }
+
+  public Mono<ClientResponse> addSession(String temail, String deviceId) {
+    return updateRemoteStatus(temail, deviceId, "add");
   }
 
   public void removeSession(String temail, String deviceId) {
@@ -39,7 +45,7 @@ public class RemoteStatusService {
     }
   }
 
-  private void updateRemoteStatus(String temail, String deviceId, String opType) {
+  private Mono<ClientResponse> updateRemoteStatus(String temail, String deviceId, String opType) {
     TemailSocketInfo temailChannel = new TemailSocketInfo(temail, opType,
         new TemailSocketInstance(deviceId,
             properties.getHostOf(),
@@ -47,7 +53,8 @@ public class RemoteStatusService {
             properties.getMqTopic(),
             properties.getMqTag()));
     // 同步远程状态
-    statusWebClient.post()
+    return statusWebClient.post()
+        .uri(properties.getUpdateSocketStatusUrl())
         .contentType(MediaType.APPLICATION_JSON_UTF8)
         .syncBody(temailChannel)
         .exchange()

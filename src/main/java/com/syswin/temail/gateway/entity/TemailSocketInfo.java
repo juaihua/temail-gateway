@@ -1,8 +1,11 @@
 package com.syswin.temail.gateway.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+@JsonInclude(Include.NON_NULL)
 @Data
 @AllArgsConstructor
 public class TemailSocketInfo {
