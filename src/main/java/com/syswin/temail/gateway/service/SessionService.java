@@ -66,7 +66,6 @@ public class SessionService {
     } else {
       loginFailure(channel, packet, response);
     }
-
   }
 
   private void loginSuccess(Channel channel, CDTPPacket packet, Response response) {

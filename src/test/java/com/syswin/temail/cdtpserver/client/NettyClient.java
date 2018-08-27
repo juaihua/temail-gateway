@@ -3,16 +3,17 @@ package com.syswin.temail.cdtpserver.client;
 import com.syswin.temail.gateway.codec.PacketDecoder;
 import com.syswin.temail.gateway.codec.PacketEncoder;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import java.net.InetSocketAddress;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import lombok.Getter;
+
+import java.net.InetSocketAddress;
+
+import static com.syswin.temail.gateway.Constants.LENGTH_FIELD_LENGTH;
 
 /**
  * @author 姚华成
@@ -31,8 +32,11 @@ public class NettyClient {
         .handler(new ChannelInitializer<SocketChannel>() {
           @Override
           protected void initChannel(SocketChannel socketChannel) {
-
             socketChannel.pipeline()
+                    .addLast("lengthFieldBasedFrameDecoder",
+                            new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH, 0, 0))
+                    .addLast("lengthFieldPrepender",
+                            new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false))
                 .addLast(new PacketDecoder())
                 .addLast(new PacketEncoder())
                 .addLast(new ClientResponseHandler());

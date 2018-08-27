@@ -1,5 +1,7 @@
 package com.syswin.temail.gateway.connection;
 
+import static com.syswin.temail.gateway.Constants.LENGTH_FIELD_LENGTH;
+
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.codec.PacketDecoder;
 import com.syswin.temail.gateway.codec.PacketEncoder;
@@ -70,9 +72,9 @@ public class TemailGatewayServer implements ApplicationRunner {
                 .addLast("idleStateHandler", idleStateHandler)
                 .addLast("idleHandler", idleHandler)
                 .addLast("lengthFieldBasedFrameDecoder",
-                    new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 0))
-                .addLast("lengthFieldBasedFrameDecoder",
-                    new LengthFieldPrepender(4, 0, false))
+                    new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH, 0, 0))
+                .addLast("lengthFieldPrepender",
+                    new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false))
                 .addLast("packetDecoder", packetDecoder)
                 .addLast("packetEncoder", packetEncoder)
                 .addLast("temailGatewayHandler", temailGatewayHandler)

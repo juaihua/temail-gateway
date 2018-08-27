@@ -31,7 +31,7 @@ public class PacketEncoder extends MessageToByteEncoder<CDTPPacket> {
     byteBuf.writeShort(packet.getCommand());
     byteBuf.writeShort(packet.getVersion());
     byte[] headerBytes = packet.getHeader().toCDTPHeader().toByteArray();
-    byteBuf.writeInt(headerBytes.length);
+    byteBuf.writeShort(headerBytes.length);
     byteBuf.writeBytes(headerBytes);
     byteBuf.writeBytes(packet.getData());
   }

@@ -7,8 +7,9 @@ import com.syswin.temail.gateway.entity.CommandType;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import java.util.concurrent.BlockingQueue;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.BlockingQueue;
 
 @Slf4j
 @ChannelHandler.Sharable

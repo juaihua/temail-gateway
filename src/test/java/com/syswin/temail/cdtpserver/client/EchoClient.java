@@ -10,9 +10,14 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
+
 import java.net.InetSocketAddress;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import static com.syswin.temail.gateway.Constants.LENGTH_FIELD_LENGTH;
 
 public class EchoClient {
 
@@ -46,10 +51,12 @@ public class EchoClient {
         .handler(new ChannelInitializer<SocketChannel>() {
           @Override
           protected void initChannel(SocketChannel socketChannel) {
-
+            socketChannel.pipeline().addLast("lengthFieldBasedFrameDecoder",
+                    new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH, 0, 0));
+            socketChannel.pipeline().addLast("lengthFieldPrepender",
+                            new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false));
             socketChannel.pipeline().addLast(new PacketDecoder());
             socketChannel.pipeline().addLast(new PacketEncoder());
-
             socketChannel.pipeline().addLast(new EchoClientProtoHandler(temailInfo, receivedPackages, toBeSentPackages));
           }
         });

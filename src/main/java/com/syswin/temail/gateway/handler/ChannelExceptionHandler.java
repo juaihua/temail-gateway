@@ -20,10 +20,12 @@ public class ChannelExceptionHandler extends ChannelInboundHandlerAdapter {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    Header header = new Header();
-    byte[] errorData = cause.getMessage().getBytes(StandardCharsets.UTF_8);
-    CDTPPacket packet = new CDTPPacket(CHANNEL.getCode(), INTERNAL_ERROR.getCode(), CDTP_VERSION, header, errorData);
-    ctx.channel().writeAndFlush(packet);
+    if (ctx.channel().isActive()) {
+      Header header = new Header();
+      byte[] errorData = cause.getMessage().getBytes(StandardCharsets.UTF_8);
+      CDTPPacket packet = new CDTPPacket(CHANNEL.getCode(), INTERNAL_ERROR.getCode(), CDTP_VERSION, header, errorData);
+      ctx.channel().writeAndFlush(packet);
+    }
   }
 
 }

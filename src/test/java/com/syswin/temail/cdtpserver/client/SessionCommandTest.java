@@ -1,9 +1,5 @@
 package com.syswin.temail.cdtpserver.client;
 
-import static com.syswin.temail.gateway.Constants.CDTP_VERSION;
-import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
-import static com.syswin.temail.gateway.entity.CommandType.LOGIN;
-
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacket.Header;
 import io.netty.channel.Channel;
@@ -11,6 +7,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.nio.charset.StandardCharsets;
+
+import static com.syswin.temail.gateway.Constants.CDTP_VERSION;
+import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
+import static com.syswin.temail.gateway.entity.CommandType.LOGIN;
 
 /**
  * @author 姚华成
@@ -32,7 +34,7 @@ public class SessionCommandTest {
   public void testLogin() {
     Header header = new Header("deviceId1", 1, "signature", 0, System.currentTimeMillis(), "packetId",
         "sender@syswin.com", "senderPK", "receiver@syswin.com", "receiverPK", "at", "topic", "extraData");
-    byte[] data = new byte[0];
+    byte[] data = "receiver@syswin.com".getBytes(StandardCharsets.UTF_8);
     CDTPPacket packet = new CDTPPacket(CHANNEL.getCode(), LOGIN.getCode(), CDTP_VERSION, header, data);
     channel.writeAndFlush(packet);
     channel.closeFuture().syncUninterruptibly();

@@ -1,18 +1,5 @@
 package com.syswin.temail.cdtpserver.client;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.apache.http.HttpHeaders.CONTENT_TYPE;
-import static org.apache.http.HttpStatus.SC_OK;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.TemailGatewayProperties;
@@ -22,25 +9,30 @@ import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacket.Header;
 import com.syswin.temail.gateway.entity.CommandType;
 import com.syswin.temail.gateway.entity.Response;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import javax.annotation.Resource;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.common.message.Message;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.RuleChain;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.Network;
+
+import javax.annotation.Resource;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.apache.http.HttpStatus.SC_OK;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 // TODO: 2018/8/25 fix the test!!
 @Ignore
@@ -150,7 +142,7 @@ public class TemailGatewayIntegrationTest {
 
     // login
     CDTPPacket aPackage = receivedPackages.poll();
-    assertThat(aPackage.getCommand()).isEqualTo(CommandType.LOGIN.getCode());
+    assertThat(aPackage.getCommand()).isEqualTo(CommandType.LOGIN_RESP.getCode());
 
     // ack for sent message
     await().atMost(2, SECONDS).until(() -> receivedPackages.peek() != null);
@@ -163,7 +155,7 @@ public class TemailGatewayIntegrationTest {
     // heartbeat
     await().atMost(5, SECONDS).until(() -> receivedPackages.peek() != null);
     aPackage = receivedPackages.poll();
-    assertThat(aPackage.getCommand()).isEqualTo(CommandType.PING.getCode());
+    assertThat(aPackage.getCommand()).isEqualTo(CommandType.PONG.getCode());
 
     // receive message from MQ
     mqProducer.send(new Message(temailServerConfig.getMqTopic(), temailServerConfig.getMqTag(), GSON.toJson(payload(sender, message)).getBytes()), 3000);

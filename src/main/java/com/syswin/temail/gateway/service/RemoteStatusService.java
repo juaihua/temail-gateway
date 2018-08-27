@@ -5,6 +5,7 @@ import com.syswin.temail.gateway.entity.Session;
 import com.syswin.temail.gateway.entity.TemailSocketInfo;
 import com.syswin.temail.gateway.entity.TemailSocketInstance;
 import java.util.List;
+import javax.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,9 @@ import reactor.core.publisher.Mono;
 @Service
 public class RemoteStatusService {
 
+  @Resource
   private final TemailGatewayProperties properties;
+  @Resource(name = "statusWebClient")
   private final WebClient statusWebClient;
 
   @Autowired

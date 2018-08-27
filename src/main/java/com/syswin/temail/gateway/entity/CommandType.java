@@ -18,8 +18,7 @@ public enum CommandType {
   LOGOUT_RESP(104),
 
   MESSAGE_PUSH(202),
-  INTERNAL_ERROR(600)
-  ;
+  INTERNAL_ERROR(600);
 
   private short code;
 
