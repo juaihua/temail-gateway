@@ -33,8 +33,8 @@ public final class CDTPPacket {
     private long timestamp;
     private String packetId;
     private String sender;
-    private String receiver;
     private String senderPK;
+    private String receiver;
     private String receiverPK;
     private String at;
     private String topic;

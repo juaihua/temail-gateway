@@ -30,6 +30,4 @@ public class MonitorMqApplication implements ApplicationRunner {
     log.info("推送队列监听程序已经启动，开始监听mqTopic:{}, mqTag:{} 队列中的信息！",
         properties.getMqTopic(), properties.getMqTag());
   }
-
-
 }

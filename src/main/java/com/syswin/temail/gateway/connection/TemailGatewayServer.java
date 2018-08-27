@@ -13,6 +13,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.timeout.IdleStateHandler;
 import java.net.InetSocketAddress;
 import javax.annotation.Resource;
@@ -67,6 +69,10 @@ public class TemailGatewayServer implements ApplicationRunner {
             channel.pipeline()
                 .addLast("idleStateHandler", idleStateHandler)
                 .addLast("idleHandler", idleHandler)
+                .addLast("lengthFieldBasedFrameDecoder",
+                    new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 0))
+                .addLast("lengthFieldBasedFrameDecoder",
+                    new LengthFieldPrepender(4, 0, false))
                 .addLast("packetDecoder", packetDecoder)
                 .addLast("packetEncoder", packetEncoder)
                 .addLast("temailGatewayHandler", temailGatewayHandler)

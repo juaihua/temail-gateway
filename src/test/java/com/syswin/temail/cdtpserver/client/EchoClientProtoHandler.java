@@ -54,9 +54,9 @@ public class EchoClientProtoHandler extends ChannelInboundHandlerAdapter {
 
     log.info("############################################################");
     if (counter <= 1) {
-      CDTPPacket cdtpPackage = toBeSentMessages.poll();
-      if (cdtpPackage != null) {
-        ctx.writeAndFlush(cdtpPackage);
+      CDTPPacket cdtpPacket = toBeSentMessages.poll();
+      if (cdtpPacket != null) {
+        ctx.writeAndFlush(cdtpPacket);
         log.info("发送群聊消息...............");
         counter++;
       }
