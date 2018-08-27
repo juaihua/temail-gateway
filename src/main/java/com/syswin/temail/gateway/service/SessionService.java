@@ -2,9 +2,12 @@ package com.syswin.temail.gateway.service;
 
 
 import com.google.gson.Gson;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.CDTPPacket;
+import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLoginResp;
+import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogoutResp;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.Session;
 import io.netty.channel.Channel;
@@ -41,7 +44,7 @@ public class SessionService {
   /**
    * 正常用户登录: <br> 登陆逻辑 1.先判断From合法性 2.调用dispatch服务 3.成功操作状态管理服务 4.失败,返回错误信息,关闭连接
    */
-  public void login(Channel channel, CDTPPacket packet) {
+  public void login(Channel channel, CDTPPacket packet) throws InvalidProtocolBufferException {
     // TODO(姚华成) 对packet进行合法性校验
     Map<String, String> map = new HashMap<>();
     // TODO 当前认证请求做简化处理，未来需要完善
@@ -50,6 +53,9 @@ public class SessionService {
     map.put("unsignedBytes", "");
     map.put("signature", "");
     String authDataJson = gson.toJson(map);
+
+    CDTPLogin cdtpLogin = CDTPLogin.parseFrom(packet.getData());
+    // TODO(姚华成): 这个cdtpLogin对象干什么用的？
 
     HttpHeaders requestHeaders = new HttpHeaders();
     requestHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
@@ -105,7 +111,7 @@ public class SessionService {
     String deviceId = packet.getHeader().getDeviceId();
     channelHolder.removeSession(temail, deviceId);
     remoteStatusService.removeSession(temail, deviceId);
-    CDTPLoginResp.Builder builder = CDTPLoginResp.newBuilder();
+    CDTPLogoutResp.Builder builder = CDTPLogoutResp.newBuilder();
     builder.setCode(HttpStatus.OK.value());
     packet.setData(builder.build().toByteArray());
     channel.writeAndFlush(packet);

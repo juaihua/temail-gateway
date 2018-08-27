@@ -6,9 +6,9 @@ import static com.syswin.temail.gateway.entity.CommandType.INTERNAL_ERROR;
 
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacket.Header;
+import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPServerError;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import java.nio.charset.StandardCharsets;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,8 +22,11 @@ public class ChannelExceptionHandler extends ChannelInboundHandlerAdapter {
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     if (ctx.channel().isActive()) {
       Header header = new Header();
-      byte[] errorData = cause.getMessage().getBytes(StandardCharsets.UTF_8);
-      CDTPPacket packet = new CDTPPacket(CHANNEL.getCode(), INTERNAL_ERROR.getCode(), CDTP_VERSION, header, errorData);
+      CDTPServerError.Builder builder = CDTPServerError.newBuilder();
+      builder.setCode(INTERNAL_ERROR.getCode());
+      builder.setDesc(cause.getMessage());
+      CDTPPacket packet = new CDTPPacket(CHANNEL.getCode(), INTERNAL_ERROR.getCode(), CDTP_VERSION, header,
+          builder.build().toByteArray());
       ctx.channel().writeAndFlush(packet);
     }
   }
