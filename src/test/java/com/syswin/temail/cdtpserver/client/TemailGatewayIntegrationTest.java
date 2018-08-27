@@ -1,30 +1,9 @@
 package com.syswin.temail.cdtpserver.client;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.google.gson.Gson;
-import com.syswin.temail.gateway.TemailGatewayProperties;
-import com.syswin.temail.gateway.containers.RocketMqBrokerContainer;
-import com.syswin.temail.gateway.containers.RocketMqNameServerContainer;
-import com.syswin.temail.gateway.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.CDTPPacket.Header;
-import com.syswin.temail.gateway.entity.CommandType;
-import com.syswin.temail.gateway.entity.Response;
-import org.apache.rocketmq.client.exception.MQClientException;
-import org.apache.rocketmq.client.producer.DefaultMQProducer;
-import org.apache.rocketmq.common.message.Message;
-import org.jetbrains.annotations.NotNull;
-import org.junit.*;
-import org.junit.rules.RuleChain;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.testcontainers.containers.Network;
-
-import javax.annotation.Resource;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
@@ -34,15 +13,44 @@ import static org.awaitility.Awaitility.await;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.google.gson.Gson;
+import com.syswin.temail.gateway.TemailGatewayProperties;
+import com.syswin.temail.gateway.containers.RocketMqBrokerContainer;
+import com.syswin.temail.gateway.containers.RocketMqNameServerContainer;
+import com.syswin.temail.gateway.entity.CDTPPacket;
+import com.syswin.temail.gateway.entity.CDTPPacket.Header;
+import com.syswin.temail.gateway.entity.CommandType;
+import com.syswin.temail.gateway.entity.Response;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import javax.annotation.Resource;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.common.message.Message;
+import org.jetbrains.annotations.NotNull;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.rules.RuleChain;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.containers.Network;
+
 // TODO: 2018/8/25 fix the test!!
 @Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {
-    "temail.verifyUrl=http://localhost:8090/verify",
-    "temail.dispatchUrl=http://localhost:8090/dispatch",
-    "temail.updateSocketStatusUrl=http://localhost:8090/updateStatus",
-    "temail.mqTopic=temail-gateway",
-    "temail.allIdleTimeSeconds=3"
+    "temail.gateway.verifyUrl=http://localhost:8090/verify",
+    "temail.gateway.dispatchUrl=http://localhost:8090/dispatch",
+    "temail.gateway.updateSocketStatusUrl=http://localhost:8090/updateStatus",
+    "temail.gateway.mqTopic=temail-gateway",
+    "temail.gateway.allIdleTimeSeconds=3"
 })
 public class TemailGatewayIntegrationTest {
 

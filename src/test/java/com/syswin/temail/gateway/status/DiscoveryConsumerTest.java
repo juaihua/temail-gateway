@@ -1,4 +1,4 @@
-package com.syswin.temail.cdtpserver.status;
+package com.syswin.temail.gateway.status;
 
 import static java.util.Collections.singletonMap;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;

@@ -1,19 +1,22 @@
-package com.syswin.temail.cdtpserver.client;
+package com.syswin.temail.gateway.client;
+
+import static com.syswin.temail.gateway.Constants.LENGTH_FIELD_LENGTH;
 
 import com.syswin.temail.gateway.codec.PacketDecoder;
 import com.syswin.temail.gateway.codec.PacketEncoder;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
-import lombok.Getter;
-
 import java.net.InetSocketAddress;
-
-import static com.syswin.temail.gateway.Constants.LENGTH_FIELD_LENGTH;
+import lombok.Getter;
 
 /**
  * @author 姚华成
@@ -21,6 +24,8 @@ import static com.syswin.temail.gateway.Constants.LENGTH_FIELD_LENGTH;
  */
 @Getter
 public class NettyClient {
+
+  public static ClientResponseHandler responseHandler = new ClientResponseHandler();
 
   public static Channel startClient(String host, int port) {
     EventLoopGroup group = new NioEventLoopGroup();
@@ -33,16 +38,17 @@ public class NettyClient {
           @Override
           protected void initChannel(SocketChannel socketChannel) {
             socketChannel.pipeline()
-                    .addLast("lengthFieldBasedFrameDecoder",
-                            new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH, 0, 0))
-                    .addLast("lengthFieldPrepender",
-                            new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false))
+                .addLast("lengthFieldBasedFrameDecoder",
+                    new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH, 0, 0))
+                .addLast("lengthFieldPrepender",
+                    new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false))
                 .addLast(new PacketDecoder())
                 .addLast(new PacketEncoder())
-                .addLast(new ClientResponseHandler());
+                .addLast(responseHandler);
           }
         });
     ChannelFuture future = bootstrap.connect().syncUninterruptibly();
+    Runtime.getRuntime().addShutdownHook(new Thread(group::shutdownGracefully));
     return future.channel();
   }
 
