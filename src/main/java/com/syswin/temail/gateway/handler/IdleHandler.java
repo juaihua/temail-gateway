@@ -23,12 +23,12 @@ public class IdleHandler extends SimpleUserEventChannelHandler<IdleStateEvent> {
 
   @Override
   protected void eventReceived(ChannelHandlerContext ctx, IdleStateEvent evt) {
-    sessionService.channelTerminate(ctx.channel());
+    sessionService.terminateChannel(ctx.channel());
   }
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) {
-    sessionService.channelTerminate(ctx.channel());
+    sessionService.terminateChannel(ctx.channel());
   }
 
 }

@@ -13,11 +13,8 @@ public enum CommandType {
   PING(1),
   PONG(2),
   LOGIN(101),
-  LOGIN_RESP(102),
-  LOGOUT(103),
-  LOGOUT_RESP(104),
+  LOGOUT(102),
 
-  MESSAGE_PUSH(202),
   INTERNAL_ERROR(600);
 
   private short code;

@@ -1,12 +1,14 @@
 package com.syswin.temail.gateway.codec;
 
-import com.syswin.temail.gateway.entity.CDTPHeaderProto.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacket.Header;
+import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPHeader;
+import com.syswin.temail.gateway.entity.CommandSpaceType;
 import com.syswin.temail.gateway.exception.PacketException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import java.util.Base64;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
   @Override
   protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf,
       List<Object> list) throws Exception {
+
     // TODO(姚华成): 包长度的计算需要确认和修改
     int packetLength = byteBuf.readInt();
     if (packetLength <= 0) {
@@ -28,6 +31,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
       throw new PacketException("无法读取到包长度指定的全部包数据：packetLength=" + packetLength
           + "，剩余可读取的数据长度" + byteBuf.readableBytes());
     }
+    byteBuf.markReaderIndex();
     short commandSpace = byteBuf.readShort();
     if (commandSpace < 0) {
       throw new PacketException("命令空间不合法，commandSpace=" + commandSpace);
@@ -48,8 +52,17 @@ public class PacketDecoder extends ByteToMessageDecoder {
     byte[] headerBytes = new byte[headerLength];
     byteBuf.readBytes(headerBytes);
     CDTPHeader cdtpHeader = CDTPHeader.parseFrom(headerBytes);
-    byte[] data = new byte[packetLength - headerLength - 8];
-    byteBuf.readBytes(data);
+    byte[] data;
+    if (isSendSingleMsg(commandSpace, command)) {
+      // 单聊的消息比较特殊，把CDTP协议的整个数据打包编码后，放到Packet的Data里。
+      byteBuf.resetReaderIndex();
+      byte[] dataBytes = new byte[packetLength];
+      byteBuf.readBytes(dataBytes);
+      data = Base64.getEncoder().encode(dataBytes);
+    } else {
+      data = new byte[packetLength - headerLength - 8];
+      byteBuf.readBytes(data);
+    }
 
     CDTPPacket packet = new CDTPPacket();
     packet.setCommandSpace(commandSpace);
@@ -58,5 +71,9 @@ public class PacketDecoder extends ByteToMessageDecoder {
     packet.setHeader(Header.copyFrom(cdtpHeader));
     packet.setData(data);
     list.add(packet);
+  }
+
+  private boolean isSendSingleMsg(short commandSpace, short command) {
+    return commandSpace == CommandSpaceType.SINGLE_MESSAGE.getCode() && command == 1;
   }
 }

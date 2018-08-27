@@ -16,11 +16,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.Gson;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.cdtpserver.client.EchoClient;
 import com.syswin.temail.gateway.TemailGatewayApplication;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.CommandType;
+import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.gateway.entity.Response;
 import io.netty.channel.Channel;
 import java.util.concurrent.BlockingQueue;
@@ -109,17 +110,17 @@ public class TemailGatewayTest {
   }
 
   @Test
-  public void testLogin() throws InterruptedException {
+  public void testLogin() throws InterruptedException, InvalidProtocolBufferException {
     CDTPPacket packet = loginPacket();
     CDTPPacket result = execute(packet);
-    assertThat(result.getCommand()).isEqualTo(CommandType.LOGIN_RESP.getCode());
+    CDTPLoginResp loginResp = CDTPLoginResp.parseFrom(result.getData());
+    assertThat(loginResp.getCode()).isEqualTo(200);
   }
 
   @Test
   public void testSingleChar() throws InterruptedException {
     CDTPPacket packet = singleChat(sender, receive);
     CDTPPacket result = execute(packet);
-    assertThat(result.getCommand()).isEqualTo(CommandType.LOGIN_RESP.getCode());
   }
 
   private CDTPPacket execute(CDTPPacket reqPacket) throws InterruptedException {

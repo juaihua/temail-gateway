@@ -1,21 +1,20 @@
 package com.syswin.temail.gateway.service;
 
-import static com.syswin.temail.gateway.entity.CommandType.LOGIN_RESP;
-import static com.syswin.temail.gateway.entity.CommandType.LOGOUT_RESP;
 
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.CDTPPacket;
+import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.Session;
 import io.netty.channel.Channel;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -74,17 +73,19 @@ public class SessionService {
     channelHolder.addSession(temail, deviceId, channel);
     remoteStatusService.addSession(temail, deviceId);
     // 返回成功的消息
-    packet.setCommand(LOGIN_RESP.getCode());
-    // TODO(姚华成): 具体返回的内容需要跟前端商量
-    packet.setData(gson.toJson(response).getBytes(StandardCharsets.UTF_8));
+    CDTPLoginResp.Builder builder = CDTPLoginResp.newBuilder();
+    builder.setCode(response == null ? HttpStatus.OK.value() : response.getCode());
+    builder.setDesc(response == null ? null : response.getMessage());
+    packet.setData(builder.build().toByteArray());
     channel.writeAndFlush(packet);
   }
 
   private void loginFailure(Channel channel, CDTPPacket packet, Response response) {
     // 登录失败返回错误消息，然后检查当前通道是否有登录用户，没有则关闭
-    // TODO(姚华成): 具体返回内容需要跟前端核实确认
-    packet.setCommand(LOGIN_RESP.getCode());
-    packet.setData(gson.toJson(response).getBytes(StandardCharsets.UTF_8));
+    CDTPLoginResp.Builder builder = CDTPLoginResp.newBuilder();
+    builder.setCode(response == null ? HttpStatus.OK.value() : response.getCode());
+    builder.setDesc(response == null ? null : response.getMessage());
+    packet.setData(builder.build().toByteArray());
     channel.writeAndFlush(packet);
 
     if (channelHolder.hasNoSession(channel)) {
@@ -104,7 +105,9 @@ public class SessionService {
     String deviceId = packet.getHeader().getDeviceId();
     channelHolder.removeSession(temail, deviceId);
     remoteStatusService.removeSession(temail, deviceId);
-    packet.setCommand(LOGOUT_RESP.getCode());
+    CDTPLoginResp.Builder builder = CDTPLoginResp.newBuilder();
+    builder.setCode(HttpStatus.OK.value());
+    packet.setData(builder.build().toByteArray());
     channel.writeAndFlush(packet);
 
     if (channelHolder.hasNoSession(channel)) {
@@ -117,7 +120,7 @@ public class SessionService {
    *
    * @param channel 用户连接通道
    */
-  public void channelTerminate(Channel channel) {
+  public void terminateChannel(Channel channel) {
     List<Session> sessions = channelHolder.removeChannel(channel);
     remoteStatusService.removeSessions(sessions);
     channel.close();

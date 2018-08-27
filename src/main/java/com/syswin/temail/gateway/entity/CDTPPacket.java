@@ -1,7 +1,7 @@
 package com.syswin.temail.gateway.entity;
 
-import com.syswin.temail.gateway.entity.CDTPHeaderProto.CDTPHeader;
-import com.syswin.temail.gateway.entity.CDTPHeaderProto.CDTPHeader.Builder;
+import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPHeader;
+import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPHeader.Builder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +19,10 @@ public final class CDTPPacket {
   private short command;
   private short version;
   private Header header;
+  // TODO(姚华成) 字节数组转换成json对象的性能需要优化
   private byte[] data;
+//  private PacketDataType dataType;
+//  private String data;
 
   @Data
   @NoArgsConstructor

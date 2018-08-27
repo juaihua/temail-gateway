@@ -150,7 +150,7 @@ public class TemailGatewayIntegrationTest {
 
     // login
     CDTPPacket aPackage = receivedPackages.poll();
-    assertThat(aPackage.getCommand()).isEqualTo(CommandType.LOGIN_RESP.getCode());
+    assertThat(aPackage.getCommand()).isEqualTo(CommandType.LOGIN.getCode());
 
     // ack for sent message
     await().atMost(2, SECONDS).until(() -> receivedPackages.peek() != null);

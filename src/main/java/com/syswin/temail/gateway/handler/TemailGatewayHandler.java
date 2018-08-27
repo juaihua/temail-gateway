@@ -52,6 +52,4 @@ public class TemailGatewayHandler extends SimpleChannelInboundHandler<CDTPPacket
       requestService.handleRequest(channel, packet);
     }
   }
-
-
 }
