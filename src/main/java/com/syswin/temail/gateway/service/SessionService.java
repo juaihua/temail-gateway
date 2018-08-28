@@ -41,9 +41,6 @@ public class SessionService {
     loginService = new LoginService(restTemplate, properties.getVerifyUrl());
   }
 
-  /**
-   * 正常用户登录: <br> 登陆逻辑 1.先判断From合法性 2.调用dispatch服务 3.成功操作状态管理服务 4.失败,返回错误信息,关闭连接
-   */
   public void login(Channel channel, CDTPPacket packet) {
     // TODO(姚华成) 对packet进行合法性校验
     // TODO 当前认证请求做简化处理，未来需要完善
@@ -52,7 +49,7 @@ public class SessionService {
     try {
       CDTPLogin cdtpLogin = CDTPLogin.parseFrom(packet.getData());
     } catch (InvalidProtocolBufferException e) {
-      throw new PacketException(e);
+      throw new PacketException(e, packet);
     }
     // TODO(姚华成): 这个cdtpLogin对象干什么用的？
     ResponseEntity<Response> responseEntity = loginService.login(temail, "", "");

@@ -8,6 +8,7 @@ import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacket.Header;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin.Builder;
+import com.syswin.temail.gateway.entity.CommandSpaceType;
 import com.syswin.temail.gateway.entity.CommandType;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,39 +18,33 @@ class PackageMaker {
   private static final Gson gson = new Gson();
 
   // 创建单聊消息体
-  static CDTPPacket singleChatPacket(String sender, String recipient) {
+  static CDTPPacket singleChatPacket(String sender, String recipient, String message) {
 
     CDTPPacket packet = new CDTPPacket();
-    packet.setCommand((short) 0x0000);
-    packet.setVersion((short) 13);
+    packet.setCommandSpace(CommandSpaceType.CHANNEL.getCode());
+    packet.setCommand(SingleCommandType.SEND_MESSAGE.getCode());
+    packet.setVersion(CDTP_VERSION);
 
     Header header = new Header();
-    header.setSignatureAlgorithm(11);
+    header.setSignatureAlgorithm(1);
     header.setSignature("sign");
-    header.setDataEncryptionMethod(1);
+    header.setDataEncryptionMethod(0);
     header.setTimestamp(System.currentTimeMillis());
     header.setPacketId("pkgId");
     header.setSender(sender);
     header.setReceiver(recipient);
     header.setSenderPK("SenderPK123");
     header.setReceiverPK("ReceiverPK456");
+    Map<String, Object> extraData = new HashMap<>();
+    extraData.put("from", "sender@t.email");
+    extraData.put("to", "receiver@t.eamil");
+    extraData.put("storeType", "2");
+    extraData.put("type", "0");
+    extraData.put("msgId", "消息ID");
+    header.setExtraData(gson.toJson(extraData));
     packet.setHeader(header);
 
-    Map<String, Map<String, Object>> cdtpBody = new HashMap<>();
-    cdtpBody.put("header", new HashMap<>());
-    cdtpBody.put("query", new HashMap<>());
-    cdtpBody.put("body", new HashMap<>());
-
-    Map<String, Object> body = cdtpBody.get("body");
-    body.put("from", sender);
-    body.put("fromMsg", "temail-gateway-str");
-    body.put("msgid", "syswin-1534131915194-4");
-    body.put("seqNo", 3);
-    body.put("to", recipient);
-    body.put("toMsg", "temail-gateway-str");
-    body.put("type", 0);
-
-    packet.setData(gson.toJson(cdtpBody).getBytes());
+    packet.setData(message.getBytes());
 
     return packet;
   }
@@ -82,7 +77,6 @@ class PackageMaker {
     builder.setLang("en、ch-zn...");
     builder.setTemail("请求发起方的temail地址");
     builder.setChl("渠道号");
-
     CDTPLogin cdtpLogin = builder.build();
 
     packet.setData(cdtpLogin.toByteArray());

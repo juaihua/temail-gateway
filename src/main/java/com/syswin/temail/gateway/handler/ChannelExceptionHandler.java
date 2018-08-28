@@ -7,6 +7,7 @@ import static com.syswin.temail.gateway.entity.CommandType.INTERNAL_ERROR;
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacket.Header;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPServerError;
+import com.syswin.temail.gateway.exception.PacketException;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -26,14 +27,25 @@ public class ChannelExceptionHandler extends ChannelInboundHandlerAdapter {
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     log.error("数据处理异常", cause);
     if (ctx.channel().isActive()) {
-      Header header = new Header();
+      CDTPPacket packet;
+      if (cause instanceof PacketException) {
+        PacketException packetException = (PacketException) cause;
+        packet = packetException.getPacket();
+      } else {
+        Header header = new Header();
+        packet = new CDTPPacket();
+        packet.setHeader(header);
+        packet.setVersion(CDTP_VERSION);
+      }
+      packet.setCommandSpace(CHANNEL.getCode());
+      packet.setCommand(INTERNAL_ERROR.getCode());
+
       CDTPServerError.Builder builder = CDTPServerError.newBuilder();
       builder.setCode(INTERNAL_ERROR.getCode());
       if (cause != null) {
         builder.setDesc(cause.getMessage());
       }
-      CDTPPacket packet = new CDTPPacket(CHANNEL.getCode(), INTERNAL_ERROR.getCode(), CDTP_VERSION, header,
-          builder.build().toByteArray());
+      packet.setData(builder.build().toByteArray());
       ctx.channel().writeAndFlush(packet);
     }
   }

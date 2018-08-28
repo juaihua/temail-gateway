@@ -6,6 +6,7 @@ import static com.syswin.temail.gateway.entity.CommandType.LOGOUT;
 import static com.syswin.temail.gateway.entity.CommandType.PING;
 
 import com.syswin.temail.gateway.entity.CDTPPacket;
+import com.syswin.temail.gateway.exception.PacketException;
 import com.syswin.temail.gateway.service.HeartBeatService;
 import com.syswin.temail.gateway.service.RequestService;
 import com.syswin.temail.gateway.service.SessionService;
@@ -37,19 +38,24 @@ public class TemailGatewayHandler extends SimpleChannelInboundHandler<CDTPPacket
 
   @Override
   public void channelRead0(ChannelHandlerContext ctx, CDTPPacket packet) {
-    Channel channel = ctx.channel();
-    if (packet.getCommandSpace() == CHANNEL.getCode()) {
-      if (packet.getCommand() == PING.getCode()) {
-        heartBeatService.pong(channel, packet);
-      } else if (packet.getCommand() == LOGIN.getCode()) {
-        sessionService.login(channel, packet);
-      } else if (packet.getCommand() == LOGOUT.getCode()) {
-        sessionService.logout(channel, packet);
+
+    try {
+      Channel channel = ctx.channel();
+      if (packet.getCommandSpace() == CHANNEL.getCode()) {
+        if (packet.getCommand() == PING.getCode()) {
+          heartBeatService.pong(channel, packet);
+        } else if (packet.getCommand() == LOGIN.getCode()) {
+          sessionService.login(channel, packet);
+        } else if (packet.getCommand() == LOGOUT.getCode()) {
+          sessionService.logout(channel, packet);
+        } else {
+          // 其他连接请求
+        }
       } else {
-        // 其他连接请求
+        requestService.handleRequest(channel, packet);
       }
-    } else {
-      requestService.handleRequest(channel, packet);
+    } catch (Exception e) {
+      throw new PacketException(e, packet);
     }
   }
 }
