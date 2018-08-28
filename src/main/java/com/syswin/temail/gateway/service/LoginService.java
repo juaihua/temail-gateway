@@ -20,16 +20,17 @@ class LoginService {
   private final RestTemplate restTemplate;
   private final String authUrl;
   private final Gson gson;
+  private final HttpHeaders httpHeaders = new HttpHeaders();
 
   public LoginService(RestTemplate restTemplate, String authUrl) {
     this.restTemplate = restTemplate;
     this.authUrl = authUrl;
     this.gson = new Gson();
+
+    httpHeaders.setContentType(APPLICATION_JSON_UTF8);
   }
 
   public ResponseEntity<Response> login(String temail, String signature, String unsignedText) {
-    HttpHeaders requestHeaders = new HttpHeaders();
-    requestHeaders.setContentType(APPLICATION_JSON_UTF8);
 
     Map<String, String> map = new HashMap<>();
     map.put("temail", temail);
@@ -37,7 +38,7 @@ class LoginService {
     map.put("signature", signature);
     String authDataJson = gson.toJson(map);
 
-    HttpEntity<String> requestEntity = new HttpEntity<>(authDataJson, requestHeaders);
+    HttpEntity<String> requestEntity = new HttpEntity<>(authDataJson, httpHeaders);
 
     try {
       return restTemplate
