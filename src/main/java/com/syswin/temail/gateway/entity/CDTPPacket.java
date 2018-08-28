@@ -64,19 +64,39 @@ public final class CDTPPacket {
 
     public CDTPHeader toCDTPHeader() {
       Builder builder = CDTPHeader.newBuilder();
-      builder.setDeviceId(getDeviceId());
+      if (deviceId != null) {
+        builder.setDeviceId(getDeviceId());
+      }
       builder.setSignatureAlgorithm(getSignatureAlgorithm());
-      builder.setSignature(getSignature());
+      if (signature != null) {
+        builder.setSignature(getSignature());
+      }
       builder.setDataEncryptionMethod(getDataEncryptionMethod());
       builder.setTimestamp(getTimestamp());
-      builder.setPacketId(getPacketId());
-      builder.setSender(getSender());
-      builder.setSenderPK(getSenderPK());
-      builder.setReceiver(getReceiver());
-      builder.setReceiverPK(getReceiverPK());
-      builder.setAt(getAt());
-      builder.setTopic(getTopic());
-      builder.setExtraData(getExtraData());
+      if (packetId != null) {
+        builder.setPacketId(getPacketId());
+      }
+      if (sender != null) {
+        builder.setSender(getSender());
+      }
+      if (senderPK != null) {
+        builder.setSenderPK(getSenderPK());
+      }
+      if (receiver != null) {
+        builder.setReceiver(getReceiver());
+      }
+      if (receiverPK != null) {
+        builder.setReceiverPK(getReceiverPK());
+      }
+      if (at != null) {
+        builder.setAt(getAt());
+      }
+      if (topic != null) {
+        builder.setTopic(getTopic());
+      }
+      if (extraData != null) {
+        builder.setExtraData(getExtraData());
+      }
       return builder.build();
     }
   }

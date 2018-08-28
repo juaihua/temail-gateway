@@ -23,6 +23,7 @@ public class RequestService {
   public void handleRequest(Channel channel, CDTPPacket packet) {
     if (!authSession(channel, packet)) {
       // TODO(姚华成):构建错误的返回值
+
       channel.writeAndFlush(packet);
       return;
     }

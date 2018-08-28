@@ -1,6 +1,7 @@
 package com.syswin.temail.gateway.handler;
 
 import com.syswin.temail.gateway.service.SessionService;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleUserEventChannelHandler;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@Sharable
 public class IdleHandler extends SimpleUserEventChannelHandler<IdleStateEvent> {
 
   private SessionService sessionService;

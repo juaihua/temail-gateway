@@ -10,7 +10,7 @@ import com.syswin.temail.gateway.service.HeartBeatService;
 import com.syswin.temail.gateway.service.RequestService;
 import com.syswin.temail.gateway.service.SessionService;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@ChannelHandler.Sharable
+@Sharable
 public class TemailGatewayHandler extends SimpleChannelInboundHandler<CDTPPacket> {
 
   private SessionService sessionService;

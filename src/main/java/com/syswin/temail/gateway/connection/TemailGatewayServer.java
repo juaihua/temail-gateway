@@ -37,13 +37,7 @@ public class TemailGatewayServer implements ApplicationRunner {
   @Resource
   private TemailGatewayProperties properties;
   @Resource
-  private IdleStateHandler idleStateHandler;
-  @Resource
   private IdleHandler idleHandler;
-  @Resource
-  private PacketDecoder packetDecoder;
-  @Resource
-  private PacketEncoder packetEncoder;
   @Resource
   private TemailGatewayHandler temailGatewayHandler;
   @Resource
@@ -69,14 +63,14 @@ public class TemailGatewayServer implements ApplicationRunner {
           @Override
           protected void initChannel(SocketChannel channel) {
             channel.pipeline()
-                .addLast("idleStateHandler", idleStateHandler)
+                .addLast("idleStateHandler", new IdleStateHandler(properties.getReadIdleTimeSeconds(), 0, 0))
                 .addLast("idleHandler", idleHandler)
                 .addLast("lengthFieldBasedFrameDecoder",
                     new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH, 0, 0))
                 .addLast("lengthFieldPrepender",
                     new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false))
-                .addLast("packetDecoder", packetDecoder)
-                .addLast("packetEncoder", packetEncoder)
+                .addLast("packetDecoder", new PacketDecoder())
+                .addLast("packetEncoder", new PacketEncoder())
                 .addLast("temailGatewayHandler", temailGatewayHandler)
                 .addLast("channelExceptionHandler", channelExceptionHandler);
           }
@@ -84,6 +78,6 @@ public class TemailGatewayServer implements ApplicationRunner {
 
     // 异步地绑定服务器;调用sync方法阻塞等待直到绑定完成
     bootstrap.bind().syncUninterruptibly();
-    log.info("Temail 服务器已启动,正在监听用户的请求......");
+    log.info("Temail 服务器已启动,端口号{}", properties.getPort());
   }
 }

@@ -8,7 +8,6 @@ import com.syswin.temail.gateway.exception.PacketException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import java.util.Base64;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +21,6 @@ public class PacketDecoder extends ByteToMessageDecoder {
   protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf,
       List<Object> list) throws Exception {
 
-    // TODO(姚华成): 包长度的计算需要确认和修改
     int packetLength = byteBuf.readInt();
     if (packetLength <= 0) {
       throw new PacketException("包长度不合法：" + packetLength);
@@ -56,9 +54,8 @@ public class PacketDecoder extends ByteToMessageDecoder {
     if (isSendSingleMsg(commandSpace, command)) {
       // 单聊的消息比较特殊，把CDTP协议的整个数据打包编码后，放到Packet的Data里。
       byteBuf.resetReaderIndex();
-      byte[] dataBytes = new byte[packetLength];
-      byteBuf.readBytes(dataBytes);
-      data = Base64.getEncoder().encode(dataBytes);
+      data = new byte[packetLength];
+      byteBuf.readBytes(data);
     } else {
       data = new byte[packetLength - headerLength - 8];
       byteBuf.readBytes(data);

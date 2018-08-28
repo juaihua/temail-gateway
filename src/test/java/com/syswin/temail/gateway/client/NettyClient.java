@@ -4,11 +4,11 @@ import static com.syswin.temail.gateway.Constants.LENGTH_FIELD_LENGTH;
 
 import com.syswin.temail.gateway.codec.PacketDecoder;
 import com.syswin.temail.gateway.codec.PacketEncoder;
+import com.syswin.temail.gateway.handler.ChannelExceptionHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -28,7 +28,7 @@ public class NettyClient {
     Bootstrap bootstrap = new Bootstrap();
     bootstrap.group(group)
         .channel(NioSocketChannel.class)
-        .option(ChannelOption.SO_BACKLOG, 1024)
+//        .option(ChannelOption.SO_BACKLOG, 1024)
         .remoteAddress(new InetSocketAddress(host, port))
         .handler(new ChannelInitializer<SocketChannel>() {
           @Override
@@ -40,11 +40,12 @@ public class NettyClient {
                     new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false))
                 .addLast(new PacketDecoder())
                 .addLast(new PacketEncoder())
+                .addLast(new ChannelExceptionHandler())
                 .addLast(responseHandler);
           }
         });
     ChannelFuture future = bootstrap.connect().syncUninterruptibly();
-    Runtime.getRuntime().addShutdownHook(new Thread(group::shutdownGracefully));
+//    Runtime.getRuntime().addShutdownHook(new Thread(group::shutdownGracefully));
     return future.channel();
   }
 

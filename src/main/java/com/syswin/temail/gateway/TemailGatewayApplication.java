@@ -1,6 +1,5 @@
 package com.syswin.temail.gateway;
 
-import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -47,8 +46,4 @@ public class TemailGatewayApplication {
     return WebClient.create(properties.getUpdateSocketStatusUrl());
   }
 
-  @Bean
-  public IdleStateHandler idleStateHandler(TemailGatewayProperties properties) {
-    return new IdleStateHandler(properties.getReadIdleTimeSeconds(), 0, 0);
-  }
 }

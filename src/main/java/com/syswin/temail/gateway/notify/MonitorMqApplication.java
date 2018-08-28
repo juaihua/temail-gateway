@@ -8,10 +8,9 @@ import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
 
 @Slf4j
-@Component
+//@Component
 public class MonitorMqApplication implements ApplicationRunner {
 
   @Resource

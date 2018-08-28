@@ -7,7 +7,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
 import static com.syswin.temail.gateway.client.NettyClient.responseHandler;
 import static com.syswin.temail.gateway.client.PackageMaker.loginPacket;
-import static com.syswin.temail.gateway.client.PackageMaker.singleChat;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -117,11 +116,10 @@ public class TemailGatewayTest {
     assertThat(loginResp.getCode()).isEqualTo(200);
   }
 
-  @Test
-  public void testSingleChar() throws InterruptedException {
-    CDTPPacket packet = singleChat(sender, receive);
-    CDTPPacket result = execute(packet);
-  }
+//  public void singleChar() throws InterruptedException {
+//    CDTPPacket packet = singleChat(sender, receive);
+//    CDTPPacket result = execute(packet);
+//  }
 
   private CDTPPacket execute(CDTPPacket reqPacket) throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
