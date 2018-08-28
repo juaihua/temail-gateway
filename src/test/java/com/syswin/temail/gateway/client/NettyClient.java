@@ -18,10 +18,6 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import java.net.InetSocketAddress;
 import lombok.Getter;
 
-/**
- * @author 姚华成
- * @date 2018-8-25
- */
 @Getter
 public class NettyClient {
 

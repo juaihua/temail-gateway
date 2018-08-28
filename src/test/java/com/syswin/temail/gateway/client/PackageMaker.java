@@ -10,7 +10,7 @@ import com.syswin.temail.gateway.entity.CommandType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PackageMaker {
+class PackageMaker {
 
   private static final Gson gson = new Gson();
 

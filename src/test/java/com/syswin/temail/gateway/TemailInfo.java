@@ -1,4 +1,4 @@
-package com.syswin.temail.cdtpserver.client;
+package com.syswin.temail.gateway;
 
 import io.netty.channel.socket.SocketChannel;
 import java.sql.Timestamp;

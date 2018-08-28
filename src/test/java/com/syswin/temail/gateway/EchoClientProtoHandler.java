@@ -1,4 +1,4 @@
-package com.syswin.temail.cdtpserver.client;
+package com.syswin.temail.gateway;
 
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.CDTPPacket;

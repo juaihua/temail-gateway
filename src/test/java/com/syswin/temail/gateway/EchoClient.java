@@ -1,4 +1,4 @@
-package com.syswin.temail.cdtpserver.client;
+package com.syswin.temail.gateway;
 
 import com.syswin.temail.gateway.codec.PacketDecoder;
 import com.syswin.temail.gateway.codec.PacketEncoder;
