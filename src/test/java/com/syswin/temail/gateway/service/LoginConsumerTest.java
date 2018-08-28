@@ -57,33 +57,33 @@ public class LoginConsumerTest extends ConsumerPactTestMk2 {
           .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
           .body(gson.toJson(Response.ok(OK, "Success")))
         .given("User jack is not registered")
-        .uponReceiving("Jack requested to log in")
-        .method("POST")
-        .body("{\n"
-            + "  \"temail\": \"jack@t.email\",\n"
-            + "  \"signature\": \"" + signature + "\",\n"
-            + "  \"unsignedBytes\": \"" + unsignedText + "\"\n"
-            + "}")
-        .headers(headers)
-        .path(path)
-        .willRespondWith()
-        .status(403)
-        .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-        .body(gson.toJson(Response.failed(FORBIDDEN)))
-        .given("User jack is registered, but server is out of work")
-        .uponReceiving("Jack requested to log in")
-        .method("POST")
-        .body("{\n"
-            + "  \"temail\": \"mike@t.email\",\n"
-            + "  \"signature\": \"" + signature + "\",\n"
-            + "  \"unsignedBytes\": \"" + unsignedText + "\"\n"
-            + "}")
-        .headers(headers)
-        .path(path)
-        .willRespondWith()
-        .status(500)
-        .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-        .body(gson.toJson(Response.failed(INTERNAL_SERVER_ERROR)))
+          .uponReceiving("Jack requested to log in")
+          .method("POST")
+          .body("{\n"
+              + "  \"temail\": \"jack@t.email\",\n"
+              + "  \"signature\": \"" + signature + "\",\n"
+              + "  \"unsignedBytes\": \"" + unsignedText + "\"\n"
+              + "}")
+          .headers(headers)
+          .path(path)
+          .willRespondWith()
+          .status(403)
+          .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+          .body(gson.toJson(Response.failed(FORBIDDEN)))
+        .given("User mike is registered, but server is out of work")
+          .uponReceiving("Mike requested to log in")
+          .method("POST")
+          .body("{\n"
+              + "  \"temail\": \"mike@t.email\",\n"
+              + "  \"signature\": \"" + signature + "\",\n"
+              + "  \"unsignedBytes\": \"" + unsignedText + "\"\n"
+              + "}")
+          .headers(headers)
+          .path(path)
+          .willRespondWith()
+          .status(500)
+          .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+          .body(gson.toJson(Response.failed(INTERNAL_SERVER_ERROR)))
         .toPact();
   }
 
