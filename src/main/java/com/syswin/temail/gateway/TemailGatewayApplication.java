@@ -1,12 +1,11 @@
 package com.syswin.temail.gateway;
 
+import com.syswin.temail.gateway.service.SilentResponseErrorHandler;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -28,11 +27,7 @@ public class TemailGatewayApplication {
     return builder
         .setConnectTimeout(3000)
         .setReadTimeout(3000)
-        .errorHandler(new DefaultResponseErrorHandler() {
-          @Override
-          public void handleError(ClientHttpResponse clientHttpResponse) {
-          }
-        })
+        .errorHandler(new SilentResponseErrorHandler())
         .build();
   }
 

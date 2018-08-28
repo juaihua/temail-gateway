@@ -12,10 +12,9 @@ import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.Session;
 import com.syswin.temail.gateway.exception.PacketException;
 import io.netty.channel.Channel;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,23 +33,21 @@ public class SessionService {
   private ChannelHolder channelHolder;
   @Resource
   private RemoteStatusService remoteStatusService;
-  @Resource
-  private RestTemplate restTemplate;
-  @Resource
-  private TemailGatewayProperties properties;
+
+  private final LoginService loginService;
+
+  @Autowired
+  public SessionService(RestTemplate restTemplate, TemailGatewayProperties properties) {
+    loginService = new LoginService(restTemplate, properties.getVerifyUrl());
+  }
 
   /**
    * 正常用户登录: <br> 登陆逻辑 1.先判断From合法性 2.调用dispatch服务 3.成功操作状态管理服务 4.失败,返回错误信息,关闭连接
    */
   public void login(Channel channel, CDTPPacket packet) {
     // TODO(姚华成) 对packet进行合法性校验
-    Map<String, String> map = new HashMap<>();
     // TODO 当前认证请求做简化处理，未来需要完善
     String temail = packet.getHeader().getSender();
-    map.put("temail", temail);
-    map.put("unsignedBytes", "");
-    map.put("signature", "");
-    String authDataJson = gson.toJson(map);
 
     try {
       CDTPLogin cdtpLogin = CDTPLogin.parseFrom(packet.getData());
@@ -58,17 +55,9 @@ public class SessionService {
       throw new PacketException(e);
     }
     // TODO(姚华成): 这个cdtpLogin对象干什么用的？
+    ResponseEntity<Response> responseEntity = loginService.login(temail, "", "");
+    Response response = responseEntity.getBody();
 
-//    HttpHeaders requestHeaders = new HttpHeaders();
-//    requestHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-
-//    HttpEntity<String> requestEntity = new HttpEntity<>(authDataJson, requestHeaders);
-//
-//    ResponseEntity<Response> responseEntity = restTemplate
-//        .postForEntity(properties.getVerifyUrl(), requestEntity, Response.class);
-//    Response response = responseEntity.getBody();
-    Response response = Response.ok();
-    ResponseEntity<Response> responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
     if (responseEntity.getStatusCode().is2xxSuccessful()) {
       loginSuccess(channel, packet, response);
     } else {
