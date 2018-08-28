@@ -6,6 +6,8 @@ import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacket.Header;
+import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin;
+import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin.Builder;
 import com.syswin.temail.gateway.entity.CommandType;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +17,7 @@ class PackageMaker {
   private static final Gson gson = new Gson();
 
   // 创建单聊消息体
-  static CDTPPacket singleChat(String sender, String recipient) {
+  static CDTPPacket singleChatPacket(String sender, String recipient) {
 
     CDTPPacket packet = new CDTPPacket();
     packet.setCommand((short) 0x0000);
@@ -70,7 +72,20 @@ class PackageMaker {
     packet.setVersion(CDTP_VERSION);
     packet.setHeader(header);
 
-    packet.setData("登录不需要Data数据".getBytes());
+    Builder builder = CDTPLogin.newBuilder();
+
+//    builder.setdevId("设备ID");
+    builder.setPushToken("推送token");
+    builder.setPlatform("ios/android/pc");
+    builder.setOsVer("11.4");
+    builder.setAppVer("1.0.0");
+    builder.setLang("en、ch-zn...");
+    builder.setTemail("请求发起方的temail地址");
+    builder.setChl("渠道号");
+
+    CDTPLogin cdtpLogin = builder.build();
+
+    packet.setData(cdtpLogin.toByteArray());
     return packet;
   }
 

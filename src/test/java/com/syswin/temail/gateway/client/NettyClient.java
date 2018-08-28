@@ -4,7 +4,6 @@ import static com.syswin.temail.gateway.Constants.LENGTH_FIELD_LENGTH;
 
 import com.syswin.temail.gateway.codec.PacketDecoder;
 import com.syswin.temail.gateway.codec.PacketEncoder;
-import com.syswin.temail.gateway.handler.ChannelExceptionHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -40,7 +39,7 @@ public class NettyClient {
                     new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false))
                 .addLast(new PacketDecoder())
                 .addLast(new PacketEncoder())
-                .addLast(new ChannelExceptionHandler())
+                .addLast(new ClientExceptionHandler())
                 .addLast(responseHandler);
           }
         });
