@@ -5,6 +5,7 @@ import com.syswin.temail.gateway.entity.CDTPPacket.Header;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,12 +23,15 @@ import org.springframework.stereotype.Component;
  * 4.要传输的数据
  * </pre>
  */
+@Slf4j
 @Component
 public class PacketEncoder extends MessageToByteEncoder<CDTPPacket> {
 
   @Override
   protected void encode(ChannelHandlerContext channelHandlerContext,
       CDTPPacket packet, ByteBuf byteBuf) {
+    log.info("写入通道的信息是：CommandSpace={},Command={},Header={},"
+        + "Data={}", packet.getCommandSpace(), packet.getCommand(), packet.getHeader(), new String(packet.getData()));
     byteBuf.writeShort(packet.getCommandSpace());
     byteBuf.writeShort(packet.getCommand());
     byteBuf.writeShort(packet.getVersion());

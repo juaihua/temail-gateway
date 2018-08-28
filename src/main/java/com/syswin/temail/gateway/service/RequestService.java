@@ -8,9 +8,7 @@ import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPServerError;
 import com.syswin.temail.gateway.entity.Response;
 import io.netty.channel.Channel;
 import javax.annotation.Resource;
-import org.apache.http.HttpHeaders;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -43,22 +41,47 @@ public class RequestService {
     }
 
     dispatcherWebClient.post()
-        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-//        .body(null)
+        .syncBody(packet)
         .exchange()
         .subscribe(clientResponse -> {
-          clientResponse
-              .bodyToMono(new ParameterizedTypeReference<Response<CDTPPacket>>() {
-              })
-              .subscribe(resp -> {
-                if (resp != null) {
-                  channel.writeAndFlush(resp.getData());
+              clientResponse
+                  .bodyToMono(new ParameterizedTypeReference<Response<CDTPPacket>>() {
+                  }).subscribe(response -> {
+                CDTPPacket respPacket;
+                if (response != null && response.getData() != null) {
+                  // 后台正常返回
+                  respPacket = response.getData();
                 } else {
-                  // TODO(姚华成): 返回错误信息
-                  channel.writeAndFlush(packet);
+                  int code;
+                  String message;
+                  if (response == null) {
+                    code = INTERNAL_ERROR.getCode();
+                    message = "dispatcher请求没有从服务器端返回结果对象：";
+                  } else {
+                    code = response.getCode();
+                    message = response.getMessage();
+                  }
+                  respPacket = errorPacket(packet, code, message);
                 }
+                channel.writeAndFlush(respPacket);
               });
-        });
+            },
+            t -> {
+              CDTPPacket respPacket = errorPacket(packet, INTERNAL_ERROR.getCode(), t.getMessage());
+              channel.writeAndFlush(respPacket);
+            });
+  }
+
+  private CDTPPacket errorPacket(CDTPPacket packet, int code, String message) {
+    CDTPPacket respPacket = packet;
+    respPacket.setCommandSpace(CHANNEL.getCode());
+    respPacket.setCommand(INTERNAL_ERROR.getCode());
+
+    CDTPServerError.Builder builder = CDTPServerError.newBuilder();
+    builder.setCode(code);
+    builder.setDesc(message);
+    respPacket.setData(builder.build().toByteArray());
+    return respPacket;
   }
 
   private boolean authSession(Channel channel, String temail, String deviceId) {

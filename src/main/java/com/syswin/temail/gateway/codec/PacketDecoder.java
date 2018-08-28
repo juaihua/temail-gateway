@@ -74,6 +74,8 @@ public class PacketDecoder extends ByteToMessageDecoder {
 
     packet.setData(data);
     list.add(packet);
+    log.info("从通道读取的信息是：CommandSpace={},Command={},Header={},"
+        + "Data={}", packet.getCommandSpace(), packet.getCommand(), packet.getHeader(), new String(packet.getData()));
   }
 
 }

@@ -20,7 +20,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.Gson;
-import com.syswin.temail.gateway.TemailGatewayApplication;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.containers.RocketMqBrokerContainer;
 import com.syswin.temail.gateway.containers.RocketMqNameServerContainer;
@@ -50,7 +49,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.Network;
 
 @Slf4j
-@SpringBootTest(classes = TemailGatewayApplication.class,
+@SpringBootTest(
     properties = {
         "temail.gateway.verifyUrl=http://localhost:8090/verify",
         "temail.gateway.dispatchUrl=http://localhost:8090/dispatch",

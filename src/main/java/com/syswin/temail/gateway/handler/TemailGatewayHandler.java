@@ -38,7 +38,6 @@ public class TemailGatewayHandler extends SimpleChannelInboundHandler<CDTPPacket
 
   @Override
   public void channelRead0(ChannelHandlerContext ctx, CDTPPacket packet) {
-
     try {
       Channel channel = ctx.channel();
       if (packet.getCommandSpace() == CHANNEL.getCode()) {

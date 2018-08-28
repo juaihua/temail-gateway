@@ -1,7 +1,6 @@
 package com.syswin.temail.gateway.service;
 
 
-import com.google.gson.Gson;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.CDTPPacket;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -27,14 +27,11 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class SessionService {
 
-  private Gson gson = new Gson();
-
+  private final LoginService loginService;
   @Resource
   private ChannelHolder channelHolder;
   @Resource
   private RemoteStatusService remoteStatusService;
-
-  private final LoginService loginService;
 
   @Autowired
   public SessionService(RestTemplate restTemplate, TemailGatewayProperties properties) {
@@ -42,16 +39,19 @@ public class SessionService {
   }
 
   public void login(Channel channel, CDTPPacket packet) {
-    // TODO(姚华成) 对packet进行合法性校验
-    // TODO 当前认证请求做简化处理，未来需要完善
     String temail = packet.getHeader().getSender();
+    String deviceId = packet.getHeader().getDeviceId();
+    if (!StringUtils.hasText(temail) || !StringUtils.hasText(deviceId)) {
+      throw new PacketException("登录时temail和deviceId不可以为空！", packet);
+    }
 
     try {
       CDTPLogin cdtpLogin = CDTPLogin.parseFrom(packet.getData());
     } catch (InvalidProtocolBufferException e) {
       throw new PacketException(e, packet);
     }
-    // TODO(姚华成): 这个cdtpLogin对象干什么用的？
+    // TODO(姚华成): 这个cdtpLogin对象暂时没用，后续根据业务需要再完善？
+    // TODO 当前认证请求做简化处理，未来需要完善
     ResponseEntity<Response> responseEntity = loginService.login(temail, "", "");
     Response response = responseEntity.getBody();
 
@@ -70,8 +70,9 @@ public class SessionService {
     // 返回成功的消息
     CDTPLoginResp.Builder builder = CDTPLoginResp.newBuilder();
     builder.setCode(response == null ? HttpStatus.OK.value() : response.getCode());
-    if(response!=null&&response.getMessage()!=null)
-    builder.setDesc(response.getMessage());
+    if (response != null && response.getMessage() != null) {
+      builder.setDesc(response.getMessage());
+    }
     packet.setData(builder.build().toByteArray());
     channel.writeAndFlush(packet);
   }
@@ -79,8 +80,18 @@ public class SessionService {
   private void loginFailure(Channel channel, CDTPPacket packet, Response response) {
     // 登录失败返回错误消息，然后检查当前通道是否有登录用户，没有则关闭
     CDTPLoginResp.Builder builder = CDTPLoginResp.newBuilder();
-    builder.setCode(response == null ? HttpStatus.OK.value() : response.getCode());
-    builder.setDesc(response == null ? null : response.getMessage());
+    if (response != null) {
+      if (response.getCode() != null) {
+        builder.setCode(response.getCode());
+      } else {
+        builder.setCode(HttpStatus.FORBIDDEN.value());
+      }
+      if (response.getMessage() != null) {
+        builder.setDesc(response.getMessage());
+      }
+    } else {
+      builder.setCode(HttpStatus.FORBIDDEN.value());
+    }
     packet.setData(builder.build().toByteArray());
     channel.writeAndFlush(packet);
 
