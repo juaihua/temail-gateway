@@ -12,13 +12,14 @@ import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.springframework.stereotype.Component;
 
 /**
  * @author 姚华成
  * @date 2018/8/7
  */
 @Slf4j
-//@Component
+@Component
 public class TemailServerMqListener implements MessageListenerConcurrently {
 
   private Gson gson = new Gson();

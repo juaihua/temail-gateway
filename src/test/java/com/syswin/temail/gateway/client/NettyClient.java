@@ -4,9 +4,11 @@ import static com.syswin.temail.gateway.Constants.LENGTH_FIELD_LENGTH;
 
 import com.syswin.temail.gateway.codec.PacketDecoder;
 import com.syswin.temail.gateway.codec.PacketEncoder;
+import com.syswin.temail.gateway.codec.PlainBodyExtractor;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -20,9 +22,14 @@ import lombok.Getter;
 @Getter
 public class NettyClient {
 
-  public static ClientResponseHandler responseHandler = new ClientResponseHandler();
+  public final ChannelHandler responseHandler;
+  private Runnable shutdownClosure;
 
-  public static Channel startClient(String host, int port) {
+  public NettyClient(ChannelHandler responseHandler) {
+    this.responseHandler = responseHandler;
+  }
+
+  public Channel start(String host, int port) {
     EventLoopGroup group = new NioEventLoopGroup();
     Bootstrap bootstrap = new Bootstrap();
     bootstrap.group(group)
@@ -37,15 +44,20 @@ public class NettyClient {
                     new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH, 0, 0))
                 .addLast("lengthFieldPrepender",
                     new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false))
-                .addLast(new PacketDecoder())
+                .addLast(new PacketDecoder(new PlainBodyExtractor()))
                 .addLast(new PacketEncoder())
                 .addLast(new ClientExceptionHandler())
                 .addLast(responseHandler);
           }
         });
     ChannelFuture future = bootstrap.connect().syncUninterruptibly();
-//    Runtime.getRuntime().addShutdownHook(new Thread(group::shutdownGracefully));
+    shutdownClosure = group::shutdownGracefully;
     return future.channel();
   }
 
+  void stop() {
+    if (shutdownClosure != null) {
+      shutdownClosure.run();
+    }
+  }
 }

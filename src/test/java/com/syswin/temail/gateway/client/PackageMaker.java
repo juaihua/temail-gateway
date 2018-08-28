@@ -18,10 +18,10 @@ class PackageMaker {
   private static final Gson gson = new Gson();
 
   // 创建单聊消息体
-  static CDTPPacket singleChatPacket(String sender, String recipient, String message) {
+  static CDTPPacket singleChatPacket(String sender, String recipient, String message, String deviceId) {
 
     CDTPPacket packet = new CDTPPacket();
-    packet.setCommandSpace(CommandSpaceType.CHANNEL.getCode());
+    packet.setCommandSpace(CommandSpaceType.SINGLE_MESSAGE.getCode());
     packet.setCommand(SingleCommandType.SEND_MESSAGE.getCode());
     packet.setVersion(CDTP_VERSION);
 
@@ -31,13 +31,14 @@ class PackageMaker {
     header.setDataEncryptionMethod(0);
     header.setTimestamp(System.currentTimeMillis());
     header.setPacketId("pkgId");
+    header.setDeviceId(deviceId);
     header.setSender(sender);
     header.setReceiver(recipient);
     header.setSenderPK("SenderPK123");
     header.setReceiverPK("ReceiverPK456");
     Map<String, Object> extraData = new HashMap<>();
-    extraData.put("from", "sender@t.email");
-    extraData.put("to", "receiver@t.eamil");
+    extraData.put("from", sender);
+    extraData.put("to", recipient);
     extraData.put("storeType", "2");
     extraData.put("type", "0");
     extraData.put("msgId", "消息ID");
@@ -49,15 +50,15 @@ class PackageMaker {
     return packet;
   }
 
-  static CDTPPacket loginPacket() {
+  static CDTPPacket loginPacket(String sender, String deviceId) {
     CDTPPacket packet = new CDTPPacket();
     Header header = new Header();
-    header.setDeviceId("deviceId1");
+    header.setDeviceId(deviceId);
     header.setSignatureAlgorithm(1);
     header.setTimestamp(System.currentTimeMillis());
     header.setDataEncryptionMethod(0);
     header.setPacketId("PacketId1234");
-    header.setSender("jack@t.email");
+    header.setSender(sender);
     header.setSenderPK("SenderPK");
 //    header.setReceiver("sean@t.email");
 //    header.setReceiverPK("ReceiverPK");

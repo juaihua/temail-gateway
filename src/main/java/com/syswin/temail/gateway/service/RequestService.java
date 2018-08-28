@@ -8,7 +8,9 @@ import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPServerError;
 import com.syswin.temail.gateway.entity.Response;
 import io.netty.channel.Channel;
 import javax.annotation.Resource;
+import org.apache.http.HttpHeaders;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -41,24 +43,22 @@ public class RequestService {
     }
 
     dispatcherWebClient.post()
-        .header("", "")
-        .body(null)
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+//        .body(null)
         .exchange()
-        .doOnSuccess(clientResponse -> {
-          Response<CDTPPacket> response = clientResponse
+        .subscribe(clientResponse -> {
+          clientResponse
               .bodyToMono(new ParameterizedTypeReference<Response<CDTPPacket>>() {
-              }).block();
-          if (response != null) {
-            CDTPPacket respPacket = response.getData();
-            packet.setData(respPacket.getData());
-            channel.writeAndFlush(packet);
-          } else {
-            // TODO(姚华成): 返回错误信息
-            channel.writeAndFlush(packet);
-          }
-        })
-        .subscribe()
-    ;
+              })
+              .subscribe(resp -> {
+                if (resp != null) {
+                  channel.writeAndFlush(resp.getData());
+                } else {
+                  // TODO(姚华成): 返回错误信息
+                  channel.writeAndFlush(packet);
+                }
+              });
+        });
   }
 
   private boolean authSession(Channel channel, String temail, String deviceId) {

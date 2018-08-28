@@ -3,19 +3,27 @@ package com.syswin.temail.gateway.codec;
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacket.Header;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPHeader;
-import com.syswin.temail.gateway.entity.CommandSpaceType;
 import com.syswin.temail.gateway.exception.PacketException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- *
- */
+@Slf4j
 @Component
 public class PacketDecoder extends ByteToMessageDecoder {
+
+  private final BodyExtractor bodyExtractor;
+
+  public PacketDecoder() {
+    this(new CommandAwareBodyExtractor());
+  }
+
+  public PacketDecoder(BodyExtractor bodyExtractor) {
+    this.bodyExtractor = bodyExtractor;
+  }
 
   @Override
   protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf,
@@ -62,22 +70,10 @@ public class PacketDecoder extends ByteToMessageDecoder {
       packet.setHeader(Header.copyFrom(cdtpHeader));
     }
 
-    byte[] data;
-    if (isSendSingleMsg(commandSpace, command)) {
-      // 单聊的消息比较特殊，把CDTP协议的整个数据打包编码后，放到Packet的Data里。
-      byteBuf.resetReaderIndex();
-      data = new byte[packetLength];
-      byteBuf.readBytes(data);
-    } else {
-      data = new byte[packetLength - headerLength - 8];
-      byteBuf.readBytes(data);
-    }
+    byte[] data = bodyExtractor.invoke(commandSpace, command, byteBuf, packetLength, headerLength);
 
     packet.setData(data);
     list.add(packet);
   }
 
-  private boolean isSendSingleMsg(short commandSpace, short command) {
-    return commandSpace == CommandSpaceType.SINGLE_MESSAGE.getCode() && command == 1;
-  }
 }
