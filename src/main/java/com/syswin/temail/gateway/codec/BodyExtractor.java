@@ -4,5 +4,5 @@ import io.netty.buffer.ByteBuf;
 
 public interface BodyExtractor {
 
-  byte[] invoke(short commandSpace, short command, ByteBuf byteBuf, int packetLength, short headerLength);
+  byte[] fromBuffer(short commandSpace, short command, ByteBuf byteBuf);
 }

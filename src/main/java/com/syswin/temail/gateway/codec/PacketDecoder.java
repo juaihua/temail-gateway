@@ -18,7 +18,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
   private final BodyExtractor bodyExtractor;
 
   public PacketDecoder() {
-    this(new CommandAwareBodyExtractor());
+    this(new CommandAwareBodyExtractor(new SimpleBodyExtractor()));
   }
 
   public PacketDecoder(BodyExtractor bodyExtractor) {
@@ -70,7 +70,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
       packet.setHeader(Header.copyFrom(cdtpHeader));
     }
 
-    byte[] data = bodyExtractor.invoke(commandSpace, command, byteBuf, packetLength, headerLength);
+    byte[] data = bodyExtractor.fromBuffer(commandSpace, command, byteBuf);
 
     packet.setData(data);
     list.add(packet);
