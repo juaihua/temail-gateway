@@ -9,12 +9,12 @@ import java.util.Collection;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class MessageHandler {
+class MessageHandler {
 
   private final ChannelHolder channelHolder;
   private final Gson gson;
 
-  public MessageHandler(ChannelHolder channelHolder) {
+  MessageHandler(ChannelHolder channelHolder) {
     this.channelHolder = channelHolder;
     this.gson = new Gson();
   }

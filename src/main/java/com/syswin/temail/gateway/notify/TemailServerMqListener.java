@@ -8,11 +8,11 @@ import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.common.message.MessageExt;
 
 @Slf4j
-public class TemailServerMqListener implements MessageListenerConcurrently {
+class TemailServerMqListener implements MessageListenerConcurrently {
 
   private final MessageHandler messageHandler;
 
-  public TemailServerMqListener(MessageHandler messageHandler) {
+  TemailServerMqListener(MessageHandler messageHandler) {
     this.messageHandler = messageHandler;
   }
 

@@ -1,9 +1,6 @@
-package com.syswin.temail.gateway.config;
+package com.syswin.temail.gateway.notify;
 
 import com.syswin.temail.gateway.TemailGatewayProperties;
-import com.syswin.temail.gateway.notify.MessageHandler;
-import com.syswin.temail.gateway.notify.RocketMqConsumer;
-import com.syswin.temail.gateway.notify.TemailServerMqListener;
 import com.syswin.temail.gateway.service.ChannelHolder;
 import javax.annotation.PostConstruct;
 import org.apache.rocketmq.client.exception.MQClientException;
