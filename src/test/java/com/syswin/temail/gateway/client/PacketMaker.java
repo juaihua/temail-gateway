@@ -1,7 +1,7 @@
 package com.syswin.temail.gateway.client;
 
-import static com.syswin.temail.gateway.Constants.CDTP_VERSION;
-import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.CDTPPacket;
@@ -10,10 +10,11 @@ import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin.Builder;
 import com.syswin.temail.gateway.entity.CommandSpaceType;
 import com.syswin.temail.gateway.entity.CommandType;
-import java.util.HashMap;
-import java.util.Map;
 
-public class PackageMaker {
+import static com.syswin.temail.gateway.Constants.CDTP_VERSION;
+import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
+
+public class PacketMaker {
 
   private static final Gson gson = new Gson();
 
