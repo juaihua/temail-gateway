@@ -1,7 +1,7 @@
 package com.syswin.temail.gateway.codec;
 
+import com.syswin.temail.gateway.entity.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.CDTPPacket.Header;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -30,12 +30,12 @@ public class PacketEncoder extends MessageToByteEncoder<CDTPPacket> {
   @Override
   protected void encode(ChannelHandlerContext channelHandlerContext,
       CDTPPacket packet, ByteBuf byteBuf) {
-    log.info("写入通道的信息是：CommandSpace={},Command={},Header={},"
+    log.info("写入通道的信息是：CommandSpace={},Command={},CDTPHeader={},"
         + "Data={}", packet.getCommandSpace(), packet.getCommand(), packet.getHeader(), new String(packet.getData()));
     byteBuf.writeShort(packet.getCommandSpace());
     byteBuf.writeShort(packet.getCommand());
     byteBuf.writeShort(packet.getVersion());
-    Header header = packet.getHeader();
+    CDTPHeader header = packet.getHeader();
     if (header != null) {
       byte[] headerBytes = header.toCDTPHeader().toByteArray();
       byteBuf.writeShort(headerBytes.length);

@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gson.Gson;
+import com.syswin.temail.gateway.entity.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.CDTPPacket.Header;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin.Builder;
 import com.syswin.temail.gateway.entity.CommandSpaceType;
@@ -26,7 +26,7 @@ public class PacketMaker {
     packet.setCommand(SingleCommandType.SEND_MESSAGE.getCode());
     packet.setVersion(CDTP_VERSION);
 
-    Header header = new Header();
+    CDTPHeader header = new CDTPHeader();
     header.setSignatureAlgorithm(1);
     header.setSignature("sign");
     header.setDataEncryptionMethod(0);
@@ -38,11 +38,11 @@ public class PacketMaker {
     header.setSenderPK("SenderPK123");
     header.setReceiverPK("ReceiverPK456");
     Map<String, Object> extraData = new HashMap<>();
-    extraData.put("from", sender);
-    extraData.put("to", recipient);
+//    extraData.put("from", sender);
+//    extraData.put("to", recipient);
     extraData.put("storeType", "2");
     extraData.put("type", "0");
-    extraData.put("msgId", "消息ID");
+    extraData.put("msgId", "4298F38F87DC4775B264A3753E77B443");
     header.setExtraData(gson.toJson(extraData));
     packet.setHeader(header);
 
@@ -53,7 +53,7 @@ public class PacketMaker {
 
   public static CDTPPacket loginPacket(String sender, String deviceId) {
     CDTPPacket packet = new CDTPPacket();
-    Header header = new Header();
+    CDTPHeader header = new CDTPHeader();
     header.setDeviceId(deviceId);
     header.setSignatureAlgorithm(1);
     header.setTimestamp(System.currentTimeMillis());

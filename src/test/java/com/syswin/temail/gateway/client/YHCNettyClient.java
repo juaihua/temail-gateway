@@ -8,7 +8,6 @@ import com.syswin.temail.gateway.codec.SimpleBodyExtractor;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -17,19 +16,16 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import java.net.InetSocketAddress;
-import lombok.Getter;
 
-@Getter
-public class NettyClient {
+/**
+ * @author 姚华成
+ * @date 2018-8-29
+ */
+public class YHCNettyClient {
 
-  public final ChannelHandler responseHandler;
-  private Runnable shutdownClosure;
+  public static YHCClientResponseHandler responseHandler = new YHCClientResponseHandler();
 
-  public NettyClient(ChannelHandler responseHandler) {
-    this.responseHandler = responseHandler;
-  }
-
-  public Channel start(String host, int port) {
+  public static Channel startClient(String host, int port) {
     EventLoopGroup group = new NioEventLoopGroup();
     Bootstrap bootstrap = new Bootstrap();
     bootstrap.group(group)
@@ -45,18 +41,12 @@ public class NettyClient {
                     new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false))
                 .addLast(new PacketDecoder(new SimpleBodyExtractor()))
                 .addLast(new PacketEncoder())
-                .addLast(new ClientExceptionHandler())
                 .addLast(responseHandler);
           }
         });
     ChannelFuture future = bootstrap.connect().syncUninterruptibly();
-    shutdownClosure = group::shutdownGracefully;
+    Runtime.getRuntime().addShutdownHook(new Thread(group::shutdownGracefully));
     return future.channel();
   }
 
-  void stop() {
-    if (shutdownClosure != null) {
-      shutdownClosure.run();
-    }
-  }
 }

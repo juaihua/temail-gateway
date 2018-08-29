@@ -4,8 +4,8 @@ import static com.syswin.temail.gateway.Constants.CDTP_VERSION;
 import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
 import static com.syswin.temail.gateway.entity.CommandType.INTERNAL_ERROR;
 
+import com.syswin.temail.gateway.entity.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.CDTPPacket.Header;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPServerError;
 import com.syswin.temail.gateway.exception.PacketException;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -32,14 +32,13 @@ public class ChannelExceptionHandler extends ChannelInboundHandlerAdapter {
         PacketException packetException = (PacketException) cause;
         packet = packetException.getPacket();
       } else {
-        Header header = new Header();
+        CDTPHeader header = new CDTPHeader();
         packet = new CDTPPacket();
         packet.setHeader(header);
         packet.setVersion(CDTP_VERSION);
       }
       packet.setCommandSpace(CHANNEL.getCode());
       packet.setCommand(INTERNAL_ERROR.getCode());
-
       CDTPServerError.Builder builder = CDTPServerError.newBuilder();
       builder.setCode(INTERNAL_ERROR.getCode());
       if (cause != null) {

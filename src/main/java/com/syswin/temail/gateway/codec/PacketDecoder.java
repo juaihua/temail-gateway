@@ -1,8 +1,8 @@
 package com.syswin.temail.gateway.codec;
 
+import com.syswin.temail.gateway.entity.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.CDTPPacket.Header;
-import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPHeader;
+import com.syswin.temail.gateway.entity.CDTPProtoBuf;
 import com.syswin.temail.gateway.exception.PacketException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -55,7 +55,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
     packet.setVersion(version);
 
     short headerLength = byteBuf.readShort();
-    CDTPHeader cdtpHeader;
+    CDTPProtoBuf.CDTPHeader cdtpHeader;
     if (headerLength < 0) {
       throw new PacketException("headerLength长度错误，headerLength=" + headerLength);
     }
@@ -66,15 +66,15 @@ public class PacketDecoder extends ByteToMessageDecoder {
       }
       byte[] headerBytes = new byte[headerLength];
       byteBuf.readBytes(headerBytes);
-      cdtpHeader = CDTPHeader.parseFrom(headerBytes);
-      packet.setHeader(Header.copyFrom(cdtpHeader));
+      cdtpHeader = CDTPProtoBuf.CDTPHeader.parseFrom(headerBytes);
+      packet.setHeader(new CDTPHeader(cdtpHeader));
     }
 
     byte[] data = bodyExtractor.fromBuffer(commandSpace, command, byteBuf);
 
     packet.setData(data);
     list.add(packet);
-    log.info("从通道读取的信息是：CommandSpace={},Command={},Header={},"
+    log.info("从通道读取的信息是：CommandSpace={},Command={},CDTPHeader={},"
         + "Data={}", packet.getCommandSpace(), packet.getCommand(), packet.getHeader(), new String(packet.getData()));
   }
 

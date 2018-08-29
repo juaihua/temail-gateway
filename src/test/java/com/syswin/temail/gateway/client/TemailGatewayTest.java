@@ -24,8 +24,8 @@ import com.google.gson.Gson;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.containers.RocketMqBrokerContainer;
 import com.syswin.temail.gateway.containers.RocketMqNameServerContainer;
+import com.syswin.temail.gateway.entity.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.CDTPPacket.Header;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.gateway.entity.CommandType;
 import com.syswin.temail.gateway.entity.Response;
@@ -61,26 +61,23 @@ import org.testcontainers.containers.Network;
 @RunWith(SpringRunner.class)
 @ActiveProfiles({"debug", "dev"})
 public class TemailGatewayTest {
+
+  @ClassRule
+  public static final WireMockRule wireMockRule = new WireMockRule(8090);
   private static final Network NETWORK = Network.newNetwork();
   private static final int MQ_SERVER_PORT = 9876;
   private static final RocketMqNameServerContainer rocketMqNameSrv = new RocketMqNameServerContainer()
       .withNetwork(NETWORK)
       .withNetworkAliases("namesrv")
       .withFixedExposedPort(MQ_SERVER_PORT, MQ_SERVER_PORT);
-
-
   private static final RocketMqBrokerContainer rocketMqBroker = new RocketMqBrokerContainer()
       .withNetwork(NETWORK)
       .withEnv("NAMESRV_ADDR", "namesrv:9876")
       .withFixedExposedPort(10909, 10909)
       .withFixedExposedPort(10911, 10911);
-
   @ClassRule
   public static final RuleChain RULES = RuleChain.outerRule(rocketMqNameSrv)
       .around(rocketMqBroker);
-
-  @ClassRule
-  public static final WireMockRule wireMockRule = new WireMockRule(8090);
   private static final DefaultMQProducer mqProducer = new DefaultMQProducer("test-producer-group");
 
   private static final Gson GSON = new Gson();
@@ -90,12 +87,10 @@ public class TemailGatewayTest {
   private final String receiver = "sean@t.email";
   private final String message = "hello world";
   private final String deviceId = uniquify("deviceId");
-
-  @Resource
-  private TemailGatewayProperties properties;
-
   private final ClientResponseHandler responseHandler = new ClientResponseHandler(() -> loginPacket(sender, deviceId));
   private final NettyClient nettyClient = new NettyClient(responseHandler);
+  @Resource
+  private TemailGatewayProperties properties;
 
   @BeforeClass
   public static void beforeClass() throws MQClientException {
@@ -149,6 +144,22 @@ public class TemailGatewayTest {
     return payload;
   }
 
+  private static void createMqTopic() throws MQClientException {
+    mqProducer.setNamesrvAddr(rocketMqNameSrv.getContainerIpAddress() + ":" + MQ_SERVER_PORT);
+    mqProducer.start();
+    // ensure topic exists before consumer connects, or no message will be received
+    await().atMost(10, SECONDS).until(() -> {
+
+      try {
+        mqProducer.createTopic(mqProducer.getCreateTopicKey(), "temail-gateway", 1);
+        return true;
+      } catch (MQClientException e) {
+        e.printStackTrace();
+        return false;
+      }
+    });
+  }
+
   @Before
   public void init() {
     channel = nettyClient.start("127.0.0.1", 8099);
@@ -182,7 +193,8 @@ public class TemailGatewayTest {
     assertThat(response.getData()).isEqualTo(ackMessage);
 
     // receive message from MQ
-    mqProducer.send(new Message(properties.getMqTopic(), properties.getMqTag(), GSON.toJson(mqMsgPayload(sender, message)).getBytes()), 3000);
+    mqProducer.send(new Message(properties.getMqTopic(), properties.getMqTag(),
+        GSON.toJson(mqMsgPayload(sender, message)).getBytes()), 3000);
     await().atMost(5, SECONDS).until(() -> !responseHandler.receivedMessages().isEmpty());
     packet = responseHandler.receivedMessages().poll();
     assertThat(packet.getCommandSpace()).isEqualTo(SINGLE_MESSAGE.getCode());
@@ -193,29 +205,13 @@ public class TemailGatewayTest {
     assertThat(response.getData()).isEqualTo(message);
   }
 
-  private static void createMqTopic() throws MQClientException {
-    mqProducer.setNamesrvAddr(rocketMqNameSrv.getContainerIpAddress() + ":" + MQ_SERVER_PORT);
-    mqProducer.start();
-    // ensure topic exists before consumer connects, or no message will be received
-    await().atMost(10, SECONDS).until(() -> {
-
-      try {
-        mqProducer.createTopic(mqProducer.getCreateTopicKey(), "temail-gateway", 1);
-        return true;
-      } catch (MQClientException e) {
-        e.printStackTrace();
-        return false;
-      }
-    });
-  }
-
   @NotNull
   private CDTPPacket mqMsgPayload(String recipient, String message) {
     Response<String> body = Response.ok(message);
     CDTPPacket payload = new CDTPPacket();
     payload.setCommandSpace(SINGLE_MESSAGE.getCode());
     payload.setCommand(SEND_MESSAGE.getCode());
-    Header header = new Header();
+    CDTPHeader header = new CDTPHeader();
     header.setReceiver(recipient);
     payload.setHeader(header);
     payload.setData(GSON.toJson(body).getBytes());
