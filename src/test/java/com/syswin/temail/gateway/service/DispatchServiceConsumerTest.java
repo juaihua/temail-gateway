@@ -1,20 +1,5 @@
 package com.syswin.temail.gateway.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.google.gson.Gson;
-import com.syswin.temail.gateway.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.Response;
-import au.com.dius.pact.consumer.ConsumerPactTestMk2;
-import au.com.dius.pact.consumer.MockServer;
-import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.RequestResponsePact;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.springframework.web.reactive.function.client.WebClient;
-
 import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
 import static com.syswin.temail.gateway.client.PacketMaker.singleChatPacket;
 import static com.syswin.temail.gateway.client.SingleCommandType.SEND_MESSAGE;
@@ -27,6 +12,19 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import au.com.dius.pact.consumer.ConsumerPactTestMk2;
+import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.model.RequestResponsePact;
+import com.google.gson.Gson;
+import com.syswin.temail.gateway.entity.CDTPPacket;
+import com.syswin.temail.gateway.entity.Response;
+import java.util.HashMap;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.web.reactive.function.client.WebClient;
+
 @Slf4j
 public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
 
@@ -34,26 +32,16 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
   private final Gson gson = new Gson();
 
   private final String sender = "jack@t.email";
-  private final String senderOutOfWork = "mike@t.email";
   private final String receiver = "sean@t.email";
   private final String message = "hello world";
   private final String deviceId = uniquify("deviceId");
   private final CDTPPacket packet = singleChatPacket(sender, receiver, message, deviceId);
 
-  private final CDTPPacket packetWithOutOfWork = singleChatPacket(senderOutOfWork, receiver, message, deviceId);
-
   private static final String ackMessage = uniquify("Sent");
 
-  private Response resultResponse = null;
+  private volatile Response resultResponse = null;
 
-  private int resultErrorCode;
-
-  private String resultErrorMsg;
-
-  @Before
-  public void setUp() {
-
-  }
+  private Throwable exception;
 
   @Override
   public RequestResponsePact createPact(PactDslWithProvider pactDslWithProvider) {
@@ -62,7 +50,7 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
 
     return pactDslWithProvider
         .given("dispatch user request")
-        .uponReceiving("dispatch user request to response")
+        .uponReceiving("dispatch user request for response")
         .method("POST")
         .body(gson.toJson(packet))
         .headers(headers)
@@ -79,24 +67,15 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
     String url = mockServer.getUrl() + path;
     WebClient dispatcherWebClient = WebClient.create();
     DispatchService dispatchService = new DispatchService(dispatcherWebClient);
-    dispatchService.dispatch(packet, url, new DispatchCallback() {
-      @Override
-      public Response onsuccess(Response response) {
-        resultResponse = response;
-        return response;
-      }
-
-      @Override
-      public void onError(int errorCode, String errorMsg) {
-        resultErrorCode = errorCode;
-        resultErrorMsg = errorMsg;
-      }
-    });
+    dispatchService.dispatch(url, packet, new TestDispatchCallback());
 
     waitAtMost(2, SECONDS).until(() -> resultResponse != null);
     log.info("result code is {},  msg  is {}", resultResponse.getCode(), resultResponse.getMessage());
 
     assertThat(resultResponse.getCode()).isEqualTo(OK.value());
+
+    dispatchService.dispatch("http://localhost:99", packet, new TestDispatchCallback());
+    waitAtMost(2, SECONDS).until(() -> exception != null);
   }
 
   @Override
@@ -119,4 +98,16 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
     return payload;
   }
 
+  private class TestDispatchCallback implements DispatchCallback {
+
+    @Override
+    public void onSuccess(Response response) {
+      resultResponse = response;
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+      exception = throwable;
+    }
+  }
 }

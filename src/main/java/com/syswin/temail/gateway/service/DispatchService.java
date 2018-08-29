@@ -1,7 +1,5 @@
 package com.syswin.temail.gateway.service;
 
-import static com.syswin.temail.gateway.entity.CommandType.INTERNAL_ERROR;
-
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.Response;
@@ -12,35 +10,27 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Slf4j
-public class DispatchService {
+class DispatchService {
 
-  private final WebClient dispatcherWebClient;
+  private final WebClient webClient;
   private final Gson gson = new Gson();
+  private final ParameterizedTypeReference<Response<CDTPPacket>> typeReference = new ParameterizedTypeReference<Response<CDTPPacket>>() {
+  };
 
-  public DispatchService(WebClient dispatcherWebClient) {
-    this.dispatcherWebClient = dispatcherWebClient;
+  DispatchService(WebClient webClient) {
+    this.webClient = webClient;
   }
 
-  public void dispatch(CDTPPacket packet, String dispatchUrl, DispatchCallback dispatchCallback) {
+  void dispatch(String dispatchUrl, CDTPPacket packet, DispatchCallback dispatchCallback) {
 
-    dispatcherWebClient.post()
+    webClient.post()
         .uri(dispatchUrl)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .syncBody(gson.toJson(packet))
         .exchange()
-        .subscribe(clientResponse -> {
-          clientResponse
-              .bodyToMono(new ParameterizedTypeReference<Response<CDTPPacket>>() {
-              })
-              .subscribe(resp -> {
-                dispatchCallback.onsuccess(resp);
-              });
-        }, t -> {
-          dispatchCallback.onError(INTERNAL_ERROR.getCode(), t.getMessage());
-        });
-
-
+        .subscribe(
+            clientResponse -> clientResponse.bodyToMono(typeReference)
+                .subscribe(dispatchCallback::onSuccess),
+            dispatchCallback::onError);
   }
-
-
 }

@@ -46,11 +46,10 @@ public class RequestService {
       return;
     }
 
-
-    dispatchService.dispatch(packet, properties.getDispatchUrl(), new DispatchCallback() {
+    dispatchService.dispatch(properties.getDispatchUrl(), packet, new DispatchCallback() {
 
       @Override
-      public Response onsuccess(Response response) {
+      public void onSuccess(Response response) {
         CDTPPacket respPacket;
         if (response != null && response.getData() != null) {
           // 后台正常返回
@@ -68,47 +67,15 @@ public class RequestService {
           respPacket = errorPacket(packet, code, message);
         }
         channel.writeAndFlush(respPacket);
-        return response;
       }
 
       @Override
-      public void onError(int errorCode, String errorMsg) {
-        CDTPPacket respPacket = errorPacket(packet, errorCode, errorMsg);
+      public void onError(Throwable throwable) {
+        CDTPPacket respPacket = errorPacket(packet, INTERNAL_ERROR.getCode(), throwable.getMessage());
         channel.writeAndFlush(respPacket);
       }
 
     });
-
-//    dispatcherWebClient.post()
-//        .syncBody(packet)
-//        .exchange()
-//        .subscribe(clientResponse -> {
-//              clientResponse
-//                  .bodyToMono(new ParameterizedTypeReference<Response<CDTPPacket>>() {
-//                  }).subscribe(response -> {
-//                CDTPPacket respPacket;
-//                if (response != null && response.getData() != null) {
-//                  // 后台正常返回
-//                  respPacket = response.getData();
-//                } else {
-//                  int code;
-//                  String message;
-//                  if (response == null) {
-//                    code = INTERNAL_ERROR.getCode();
-//                    message = "dispatcher请求没有从服务器端返回结果对象：";
-//                  } else {
-//                    code = response.getCode();
-//                    message = response.getMessage();
-//                  }
-//                  respPacket = errorPacket(packet, code, message);
-//                }
-//                channel.writeAndFlush(respPacket);
-//              });
-//            },
-//            t -> {
-//              CDTPPacket respPacket = errorPacket(packet, INTERNAL_ERROR.getCode(), t.getMessage());
-//              channel.writeAndFlush(respPacket);
-//            });
   }
 
   private CDTPPacket errorPacket(CDTPPacket packet, int code, String message) {
