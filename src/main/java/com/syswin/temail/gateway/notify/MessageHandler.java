@@ -25,7 +25,7 @@ class MessageHandler {
       CDTPPacket packet = gson.fromJson(message, CDTPPacket.class);
 
       String receiver = packet.getHeader().getReceiver();
-      Collection<Channel> channels = channelHolder.getChannels(receiver);
+      Iterable<Channel> channels = channelHolder.getChannels(receiver);
       for (Channel channel : channels) {
         channel.writeAndFlush(packet);
       }

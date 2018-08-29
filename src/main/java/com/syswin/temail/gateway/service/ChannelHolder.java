@@ -24,8 +24,8 @@ public class ChannelHolder {
     return sessionChannelMap.getOrDefault(temail, Collections.emptyMap()).get(deviceId);
   }
 
-  public Collection<Channel> getChannels(String temail) {
-    return Collections.unmodifiableCollection(sessionChannelMap.getOrDefault(temail, Collections.emptyMap()).values());
+  public Iterable<Channel> getChannels(String temail) {
+    return sessionChannelMap.getOrDefault(temail, Collections.emptyMap()).values();
   }
 
   public boolean hasNoSession(Channel channel) {
