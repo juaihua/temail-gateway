@@ -46,20 +46,25 @@ public final class CDTPPacket {
     public static Header copyFrom(CDTPHeader cdtpHeader) {
       Header header = new Header();
       // TODO(姚华成) 试试BeanUtils
-      header.setDeviceId(cdtpHeader.getDeviceId());
+      // TODO: 2018/8/29 null for empty string from protobuf?
+      header.setDeviceId(nullable(cdtpHeader.getDeviceId()));
       header.setSignatureAlgorithm(cdtpHeader.getSignatureAlgorithm());
-      header.setSignature(cdtpHeader.getSignature());
+      header.setSignature(nullable(cdtpHeader.getSignature()));
       header.setDataEncryptionMethod(cdtpHeader.getDataEncryptionMethod());
       header.setTimestamp(cdtpHeader.getTimestamp());
-      header.setPacketId(cdtpHeader.getPacketId());
-      header.setSender(cdtpHeader.getSender());
-      header.setSenderPK(cdtpHeader.getSenderPK());
-      header.setReceiver(cdtpHeader.getReceiver());
-      header.setReceiverPK(cdtpHeader.getReceiverPK());
-      header.setAt(cdtpHeader.getAt());
-      header.setTopic(cdtpHeader.getTopic());
-      header.setExtraData(cdtpHeader.getExtraData());
+      header.setPacketId(nullable(cdtpHeader.getPacketId()));
+      header.setSender(nullable(cdtpHeader.getSender()));
+      header.setSenderPK(nullable(cdtpHeader.getSenderPK()));
+      header.setReceiver(nullable(cdtpHeader.getReceiver()));
+      header.setReceiverPK(nullable(cdtpHeader.getReceiverPK()));
+      header.setAt(nullable(cdtpHeader.getAt()));
+      header.setTopic(nullable(cdtpHeader.getTopic()));
+      header.setExtraData(nullable(cdtpHeader.getExtraData()));
       return header;
+    }
+
+    private static String nullable(String value) {
+      return value.isEmpty()? null : value;
     }
 
     public CDTPHeader toCDTPHeader() {

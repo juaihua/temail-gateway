@@ -13,12 +13,12 @@ import com.syswin.temail.gateway.entity.CommandType;
 import java.util.HashMap;
 import java.util.Map;
 
-class PackageMaker {
+public class PacketMaker {
 
   private static final Gson gson = new Gson();
 
   // 创建单聊消息体
-  static CDTPPacket singleChatPacket(String sender, String recipient, String message, String deviceId) {
+  public static CDTPPacket singleChatPacket(String sender, String recipient, String message, String deviceId) {
 
     CDTPPacket packet = new CDTPPacket();
     packet.setCommandSpace(CommandSpaceType.SINGLE_MESSAGE.getCode());
@@ -50,7 +50,7 @@ class PackageMaker {
     return packet;
   }
 
-  static CDTPPacket loginPacket(String sender, String deviceId) {
+  public static CDTPPacket loginPacket(String sender, String deviceId) {
     CDTPPacket packet = new CDTPPacket();
     Header header = new Header();
     header.setDeviceId(deviceId);
