@@ -5,7 +5,6 @@ import com.google.gson.JsonSyntaxException;
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.service.ChannelHolder;
 import io.netty.channel.Channel;
-import java.util.Collection;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

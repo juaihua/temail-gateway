@@ -6,7 +6,6 @@ import static com.syswin.temail.gateway.client.PacketMaker.singleChatPacket;
 import static com.syswin.temail.gateway.client.YHCNettyClient.responseHandler;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.Gson;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.gateway.TemailGatewayApplication;
@@ -23,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,8 +43,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class YHCIntegrationTest {
 
-  @ClassRule
-  public static final WireMockRule wireMockRule = new WireMockRule(8090);
+//  @ClassRule
+//  public static final WireMockRule wireMockRule = new WireMockRule(8090);
   private static final Gson GSON = new Gson();
   private static final String ackMessage = uniquify("Sent");
   private static Channel channel;

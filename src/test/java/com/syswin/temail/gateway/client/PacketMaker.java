@@ -1,7 +1,7 @@
 package com.syswin.temail.gateway.client;
 
-import java.util.HashMap;
-import java.util.Map;
+import static com.syswin.temail.gateway.Constants.CDTP_VERSION;
+import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
 
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.CDTPHeader;
@@ -10,9 +10,8 @@ import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin.Builder;
 import com.syswin.temail.gateway.entity.CommandSpaceType;
 import com.syswin.temail.gateway.entity.CommandType;
-
-import static com.syswin.temail.gateway.Constants.CDTP_VERSION;
-import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PacketMaker {
 
@@ -40,8 +39,8 @@ public class PacketMaker {
     Map<String, Object> extraData = new HashMap<>();
 //    extraData.put("from", sender);
 //    extraData.put("to", recipient);
-    extraData.put("storeType", "2");
-    extraData.put("type", "0");
+    extraData.put("storeType", "0");
+//    extraData.put("type", "0");
     extraData.put("msgId", "4298F38F87DC4775B264A3753E77B443");
     header.setExtraData(gson.toJson(extraData));
     packet.setHeader(header);

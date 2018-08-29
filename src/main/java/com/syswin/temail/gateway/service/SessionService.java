@@ -11,7 +11,6 @@ import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.Session;
 import com.syswin.temail.gateway.exception.PacketException;
 import io.netty.channel.Channel;
-import java.util.List;
 import javax.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
