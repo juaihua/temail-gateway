@@ -20,10 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * @author 姚华成
- * @date 2018-8-24
- */
 @Service
 public class SessionService {
 
@@ -128,7 +124,7 @@ public class SessionService {
    * @param channel 用户连接通道
    */
   public void terminateChannel(Channel channel) {
-    List<Session> sessions = channelHolder.removeChannel(channel);
+    Iterable<Session> sessions = channelHolder.removeChannel(channel);
     remoteStatusService.removeSessions(sessions);
     channel.close();
   }

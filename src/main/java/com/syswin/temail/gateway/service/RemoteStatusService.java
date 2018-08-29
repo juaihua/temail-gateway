@@ -1,13 +1,11 @@
 package com.syswin.temail.gateway.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import javax.annotation.Resource;
-
 import com.syswin.temail.gateway.TemailGatewayProperties;
-import com.syswin.temail.gateway.entity.*;
+import com.syswin.temail.gateway.entity.Response;
+import com.syswin.temail.gateway.entity.Session;
+import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
+import javax.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-/**
- * @author 姚华成
- * @date 2018-8-24
- */
 @Slf4j
 @Service
 public class RemoteStatusService {
@@ -56,7 +50,7 @@ public class RemoteStatusService {
         }}), optType);
   }
 
-  public void removeSessions(List<Session> sessions) {
+  public void removeSessions(Iterable<Session> sessions) {
     reqUpdSts4Upd(new TemailAcctStses(new ArrayList<TemailAcctSts>() {{
       for (Session session : sessions) {
         add(buildAcctSts(session.getTemail(), session.getDeviceId()));
