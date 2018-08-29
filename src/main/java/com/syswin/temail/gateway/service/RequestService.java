@@ -10,19 +10,12 @@ import com.syswin.temail.gateway.entity.Response;
 import io.netty.channel.Channel;
 import javax.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-/**
- * @author 姚华成
- * @date 2018-8-24
- */
 @Service
 public class RequestService {
 
-  @Resource(name = "dispatcherWebClient")
-  private WebClient dispatcherWebClient;
   @Resource
   private ChannelHolder channelHolder;
 
@@ -32,9 +25,8 @@ public class RequestService {
   private TemailGatewayProperties properties;
 
   @Autowired
-  public RequestService() {
+  public RequestService(WebClient dispatcherWebClient) {
     dispatchService = new DispatchService(dispatcherWebClient);
-
   }
 
 

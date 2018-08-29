@@ -1,8 +1,11 @@
 package com.syswin.temail.gateway.service;
 
 import com.syswin.temail.gateway.TemailGatewayProperties;
+import com.syswin.temail.gateway.entity.ComnRespData;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.Session;
+import com.syswin.temail.gateway.entity.TemailAcctSts;
+import com.syswin.temail.gateway.entity.TemailAcctStses;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.annotation.Resource;
@@ -23,7 +26,7 @@ public class RemoteStatusService {
   @Resource
   private final TemailGatewayProperties properties;
 
-  @Resource(name = "statusWebClient")
+  @Resource
   private final WebClient statusWebClient;
 
   // a async queue used for retry failed task

@@ -1,6 +1,7 @@
 package com.syswin.temail.gateway.client;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
@@ -117,6 +118,13 @@ public class TemailGatewayTest {
                 .withBody(GSON.toJson(Response.ok(ackPayload())))));
 
     stubFor(post(urlEqualTo("/updateStatus"))
+        .willReturn(
+            aResponse()
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                .withStatus(SC_OK)
+                .withBody(GSON.toJson(Response.ok("Success")))));
+
+    stubFor(delete(urlEqualTo("/updateStatus"))
         .willReturn(
             aResponse()
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)

@@ -28,7 +28,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
-public class DispatchServiceConsummerTest  extends ConsumerPactTestMk2 {
+public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
 
   private final String path = "/dispatch";
   private final Gson gson = new Gson();
@@ -44,12 +44,11 @@ public class DispatchServiceConsummerTest  extends ConsumerPactTestMk2 {
 
   private static final String ackMessage = uniquify("Sent");
 
-  private Response   resultResponse = null;
+  private Response resultResponse = null;
 
-  private  int  resultErrorCode ;
+  private int resultErrorCode;
 
-  private  String  resultErrorMsg;
-
+  private String resultErrorMsg;
 
   @Before
   public void setUp() {
@@ -60,11 +59,10 @@ public class DispatchServiceConsummerTest  extends ConsumerPactTestMk2 {
   public RequestResponsePact createPact(PactDslWithProvider pactDslWithProvider) {
     Map<String, String> headers = new HashMap<>();
     headers.put(CONTENT_TYPE, APPLICATION_JSON_VALUE);
-    System.err.println(gson.toJson(packet));
 
     return pactDslWithProvider
-        .given("dispatch  user  request")
-        .uponReceiving("dispatch  user  request to  response")
+        .given("dispatch user request")
+        .uponReceiving("dispatch user request to response")
         .method("POST")
         .body(gson.toJson(packet))
         .headers(headers)
@@ -74,39 +72,31 @@ public class DispatchServiceConsummerTest  extends ConsumerPactTestMk2 {
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
         .body(gson.toJson(Response.ok(OK, ackPayload())))
         .toPact();
-
   }
 
   @Override
   public void runTest(MockServer mockServer) {
     String url = mockServer.getUrl() + path;
-    System.out.println(url);
     WebClient dispatcherWebClient = WebClient.create();
-    DispatchService  dispatchService   =  new  DispatchService(dispatcherWebClient);
-    dispatchService.dispatch(packet, url,  new DispatchCallback(){
+    DispatchService dispatchService = new DispatchService(dispatcherWebClient);
+    dispatchService.dispatch(packet, url, new DispatchCallback() {
       @Override
       public Response onsuccess(Response response) {
-        resultResponse  = response;
-        return  response;
+        resultResponse = response;
+        return response;
       }
 
       @Override
       public void onError(int errorCode, String errorMsg) {
-        resultErrorCode  = errorCode;
-        resultErrorMsg  =  errorMsg;
+        resultErrorCode = errorCode;
+        resultErrorMsg = errorMsg;
       }
-
-
     });
 
     waitAtMost(2, SECONDS).until(() -> resultResponse != null);
-    log.info("result code is {},  msg  is {}", resultResponse.getCode(),  resultResponse.getMessage());
-
+    log.info("result code is {},  msg  is {}", resultResponse.getCode(), resultResponse.getMessage());
 
     assertThat(resultResponse.getCode()).isEqualTo(OK.value());
-
-
-
   }
 
   @Override
@@ -121,7 +111,7 @@ public class DispatchServiceConsummerTest  extends ConsumerPactTestMk2 {
 
 
   @NotNull
-  private  CDTPPacket ackPayload() {
+  private CDTPPacket ackPayload() {
     CDTPPacket payload = new CDTPPacket();
     payload.setCommandSpace(SINGLE_MESSAGE.getCode());
     payload.setCommand(SEND_MESSAGE.getCode());

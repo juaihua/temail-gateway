@@ -31,15 +31,8 @@ public class TemailGatewayApplication {
         .build();
   }
 
-  @Bean("dispatcherWebClient")
-  public WebClient dispatcherWebClient(TemailGatewayProperties properties) {
-    //return WebClient.create(properties.getDispatchUrl());
+  @Bean
+  public WebClient webClient() {
     return WebClient.create();
   }
-
-  @Bean("statusWebClient")
-  public WebClient statusWebClient(TemailGatewayProperties properties) {
-    return WebClient.create(properties.getUpdateSocketStatusUrl());
-  }
-
 }
