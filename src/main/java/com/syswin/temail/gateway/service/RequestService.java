@@ -3,11 +3,13 @@ package com.syswin.temail.gateway.service;
 import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
 import static com.syswin.temail.gateway.entity.CommandType.INTERNAL_ERROR;
 
+import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPServerError;
 import com.syswin.temail.gateway.entity.Response;
 import io.netty.channel.Channel;
 import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,6 +25,18 @@ public class RequestService {
   private WebClient dispatcherWebClient;
   @Resource
   private ChannelHolder channelHolder;
+
+  private final DispatchService dispatchService;
+
+  @Resource
+  private TemailGatewayProperties properties;
+
+  @Autowired
+  public RequestService() {
+    dispatchService = new DispatchService(dispatcherWebClient);
+
+  }
+
 
   public void handleRequest(Channel channel, CDTPPacket packet) {
     String temail = packet.getHeader().getSender();
@@ -40,40 +54,81 @@ public class RequestService {
       return;
     }
 
-    dispatcherWebClient.post()
-        .syncBody(packet)
-        .exchange()
-        .subscribe(clientResponse -> clientResponse
-                .bodyToMono(new ParameterizedTypeReference<Response<CDTPPacket>>() {
-                }).subscribe(response -> {
-                  CDTPPacket respPacket;
-                  if (response != null && response.getData() != null) {
-                    // 后台正常返回
-                    respPacket = response.getData();
-                  } else {
-                    if (response == null) {
-                      respPacket = errorPacket(packet, INTERNAL_ERROR.getCode(), "dispatcher请求没有从服务器端返回结果对象：");
-                    } else {
-                      respPacket = errorPacket(packet, response.getCode(), response.getMessage());
-                    }
-                  }
-                  channel.writeAndFlush(respPacket);
-                }),
-            t -> {
-              CDTPPacket respPacket = errorPacket(packet, INTERNAL_ERROR.getCode(), t.getMessage());
-              channel.writeAndFlush(respPacket);
-            });
+
+    dispatchService.dispatch(packet, properties.getDispatchUrl(), new DispatchCallback() {
+
+      @Override
+      public Response onsuccess(Response response) {
+        CDTPPacket respPacket;
+        if (response != null && response.getData() != null) {
+          // 后台正常返回
+          respPacket = (CDTPPacket) response.getData();
+        } else {
+          int code;
+          String message;
+          if (response == null) {
+            code = INTERNAL_ERROR.getCode();
+            message = "dispatcher请求没有从服务器端返回结果对象：";
+          } else {
+            code = response.getCode();
+            message = response.getMessage();
+          }
+          respPacket = errorPacket(packet, code, message);
+        }
+        channel.writeAndFlush(respPacket);
+        return response;
+      }
+
+      @Override
+      public void onError(int errorCode, String errorMsg) {
+        CDTPPacket respPacket = errorPacket(packet, errorCode, errorMsg);
+        channel.writeAndFlush(respPacket);
+      }
+
+    });
+
+//    dispatcherWebClient.post()
+//        .syncBody(packet)
+//        .exchange()
+//        .subscribe(clientResponse -> {
+//              clientResponse
+//                  .bodyToMono(new ParameterizedTypeReference<Response<CDTPPacket>>() {
+//                  }).subscribe(response -> {
+//                CDTPPacket respPacket;
+//                if (response != null && response.getData() != null) {
+//                  // 后台正常返回
+//                  respPacket = response.getData();
+//                } else {
+//                  int code;
+//                  String message;
+//                  if (response == null) {
+//                    code = INTERNAL_ERROR.getCode();
+//                    message = "dispatcher请求没有从服务器端返回结果对象：";
+//                  } else {
+//                    code = response.getCode();
+//                    message = response.getMessage();
+//                  }
+//                  respPacket = errorPacket(packet, code, message);
+//                }
+//                channel.writeAndFlush(respPacket);
+//              });
+//            },
+//            t -> {
+//              CDTPPacket respPacket = errorPacket(packet, INTERNAL_ERROR.getCode(), t.getMessage());
+//              channel.writeAndFlush(respPacket);
+//            });
   }
 
   private CDTPPacket errorPacket(CDTPPacket packet, int code, String message) {
-    packet.setCommandSpace(CHANNEL.getCode());
-    packet.setCommand(INTERNAL_ERROR.getCode());
+    CDTPPacket respPacket = packet;
+    respPacket.setCommandSpace(CHANNEL.getCode());
+    respPacket.setCommand(INTERNAL_ERROR.getCode());
 
     CDTPServerError.Builder builder = CDTPServerError.newBuilder();
     builder.setCode(code);
     builder.setDesc(message);
-    packet.setData(builder.build().toByteArray());
-    return packet;
+    respPacket.setData(builder.build().toByteArray());
+    return respPacket;
   }
 
   private boolean authSession(Channel channel, String temail, String deviceId) {

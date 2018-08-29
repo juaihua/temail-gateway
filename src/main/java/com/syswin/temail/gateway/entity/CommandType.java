@@ -17,6 +17,7 @@ public enum CommandType {
 
   INTERNAL_ERROR(600);
 
+
   private short code;
 
   CommandType(int code) {
