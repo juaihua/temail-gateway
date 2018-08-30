@@ -7,10 +7,7 @@ import com.syswin.temail.gateway.entity.Session;
 import com.syswin.temail.gateway.entity.TemailAcctSts;
 import com.syswin.temail.gateway.entity.TemailAcctStses;
 import java.util.ArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
 import javax.annotation.Resource;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -30,12 +27,16 @@ public class RemoteStatusService {
   private final WebClient statusWebClient;
 
   // a async queue used for retry failed task
-  private final AsyncQueue asyncQueue = new AsyncQueue();
+  private final PendingTaskQueue<Pair> pendingTaskQueue = new PendingTaskQueue<>(
+      1000,
+      pair -> reqUpdSts4Upd(pair.getTemailAcctStses(), pair.getTemailAcctUptOptType())
+  );
 
   @Autowired
   public RemoteStatusService(TemailGatewayProperties properties, WebClient statusWebClient) {
     this.properties = properties;
     this.statusWebClient = statusWebClient;
+    this.pendingTaskQueue.run();
   }
 
   public void addSession(String temail, String deviceId) {
@@ -87,7 +88,7 @@ public class RemoteStatusService {
         .subscribe(clientResponse -> {
           if (!clientResponse.statusCode().is2xxSuccessful()) {
             log.info("upd temailAcctStses fail {} , will try agagin later! ", clientResponse.statusCode());
-            asyncQueue.addTask(new Pair(type, temailAcctStses));
+            pendingTaskQueue.addTask(new Pair(type, temailAcctStses));
           } else {
             clientResponse.bodyToMono(new ParameterizedTypeReference<Response<ComnRespData>>() {
             }).subscribe(result -> {
@@ -109,55 +110,6 @@ public class RemoteStatusService {
 
     public HttpMethod getMethod() {
       return method;
-    }
-  }
-
-  @Data
-  @AllArgsConstructor
-  class Pair {
-    private TemailAcctUptOptType temailAcctUptOptType;
-    private TemailAcctStses temailAcctStses;
-  }
-
-  //now we use a async queue to retry the failed request
-  private class AsyncQueue implements Runnable {
-
-    public AsyncQueue() {
-      new Thread(this).start();
-    }
-
-    private final LinkedBlockingQueue<Pair> retryTaskQueue = new LinkedBlockingQueue<Pair>(512 * 4);
-
-    public boolean addTask(Pair pair) {
-      try {
-        log.info("add 1 task, now there is {} taskes wait to be retry!", retryTaskQueue.size());
-        return retryTaskQueue.offer(pair);
-      } catch (Exception e) {
-        return false;
-      }
-    }
-
-    public Pair obtainTask() {
-      try {
-         log.info("remove 1 task, now there is {} taskes wait to be retry!", retryTaskQueue.size());
-        return retryTaskQueue.take();
-      } catch (InterruptedException e) {
-        return null;
-      }
-    }
-
-    @Override
-    public void run() {
-      while (true) {
-        try {
-          Pair pair = obtainTask();
-          log.info("obtain one retry task: {}", pair.toString());
-          reqUpdSts4Upd(pair.getTemailAcctStses(), pair.getTemailAcctUptOptType());
-          Thread.sleep(1000);
-        } catch (Exception e) {
-          log.error("failed to add retry task: ", e);
-        }
-      }
     }
   }
 }
