@@ -43,6 +43,7 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
 
   private Throwable exception;
 
+
   @Override
   public RequestResponsePact createPact(PactDslWithProvider pactDslWithProvider) {
     Map<String, String> headers = new HashMap<>();
@@ -52,7 +53,7 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
         .given("dispatch user request")
         .uponReceiving("dispatch user request for response")
         .method("POST")
-        .body(gson.toJson(packet))
+        .body(gson.toJson(new CDTPPacketTrans(packet)))
         .headers(headers)
         .path(path)
         .willRespondWith()
