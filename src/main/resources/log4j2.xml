@@ -16,7 +16,7 @@
                 <pattern>${pattern}</pattern>
             </PatternLayout>
         </File>
-        <RollingFile name="rollingFile" fileName="${displayName}.log" filePattern="${displayName}_%d{yyyy-MM-dd}.log">
+        <RollingFile  name="rollingFile" fileName="${displayName}.log" filePattern="${displayName}_%d{yyyy-MM-dd}.log">
             <PatternLayout>
                 <pattern>${pattern}</pattern>
             </PatternLayout>
