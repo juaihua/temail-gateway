@@ -2,20 +2,18 @@ package com.syswin.temail.gateway.service;
 
 import com.syswin.temail.gateway.entity.Session;
 import io.netty.channel.Channel;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ChannelHolder {
+public class ChannelHolder implements ChannelCollector {
 
   private final Map<String, Map<String, Channel>> sessionChannelMap = new ConcurrentHashMap<>();
-  private final Map<Channel, Collection<Session>> channelSessionMap = new ConcurrentHashMap<>();
+  private final ChannelCollector channelCollector = new MappedChannelCollector();
 
-  public Channel getChannel(String temail, String deviceId) {
+  Channel getChannel(String temail, String deviceId) {
     return sessionChannelMap.getOrDefault(temail, Collections.emptyMap()).get(deviceId);
   }
 
@@ -23,64 +21,59 @@ public class ChannelHolder {
     return sessionChannelMap.getOrDefault(temail, Collections.emptyMap()).values();
   }
 
+  @Override
   public boolean hasNoSession(Channel channel) {
-    Collection<Session> sessions = channelSessionMap.get(channel);
-    return sessions == null || sessions.isEmpty();
+    return channelCollector.hasNoSession(channel);
   }
 
+  @Override
   public void addSession(String temail, String deviceId, Channel channel) {
     Map<String, Channel> deviceChannelMap = sessionChannelMap.computeIfAbsent(temail, s -> new ConcurrentHashMap<>());
     Channel oldChannel = deviceChannelMap.put(deviceId, channel);
     if (!channel.equals(oldChannel)) {
       if (oldChannel != null) {
-        removeChannelIfNoSession(temail, deviceId, oldChannel);
+        channelCollector.removeSession(temail, deviceId, oldChannel);
       }
 
-      Collection<Session> sessions = channelSessionMap.computeIfAbsent(channel, s -> new ConcurrentLinkedQueue<>());
-      sessions.add(new Session(temail, deviceId));
+      channelCollector.addSession(temail, deviceId, channel);
     }
   }
 
-  public void removeSession(String temail, String deviceId) {
+  @Override
+  public void removeSession(String temail, String deviceId, Channel channel) {
     Map<String, Channel> deviceChannelMap = sessionChannelMap.get(temail);
     if (deviceChannelMap != null) {
-      Channel channel = deviceChannelMap.get(deviceId);
       // 先移除sessionChannel
-      if (deviceChannelMap.size() > 1) {
-        deviceChannelMap.remove(deviceId);
-      } else {
-        sessionChannelMap.remove(temail);
-      }
+      removeSession(deviceChannelMap, temail, deviceId);
 
       // 再移除channelSession
-      removeChannelIfNoSession(temail, deviceId, channel);
+      channelCollector.removeSession(temail, deviceId, channel);
     }
   }
 
+  @Override
   public Iterable<Session> removeChannel(Channel channel) {
     // 先移除channelSession
-    Iterable<Session> sessions = channelSessionMap.remove(channel);
+    Iterable<Session> sessions = channelCollector.removeChannel(channel);
     // 再移除sessionChannel
-    if (sessions != null) {
-      for (Session session : sessions) {
-        Map<String, Channel> deviceChannelMap = sessionChannelMap.get(session.getTemail());
-        if (deviceChannelMap != null) {
-          if (deviceChannelMap.size() > 1) {
-            deviceChannelMap.remove(session.getDeviceId());
-          } else {
-            sessionChannelMap.remove(session.getTemail());
-          }
-        }
-      }
-    }
+    removeSessions(sessions);
     return sessions;
   }
 
-  private void removeChannelIfNoSession(String temail, String deviceId, Channel channel) {
-    Collection<Session> sessions = channelSessionMap.getOrDefault(channel, Collections.emptyList());
-    sessions.removeIf(session -> temail.equals(session.getTemail()) && deviceId.equals(session.getDeviceId()));
-    if (sessions.isEmpty()) {
-      channelSessionMap.remove(channel);
+  private void removeSessions(Iterable<Session> sessions) {
+    for (Session session : sessions) {
+      Map<String, Channel> deviceChannelMap = sessionChannelMap.get(session.getTemail());
+      if (deviceChannelMap != null) {
+        removeSession(deviceChannelMap, session.getTemail(), session.getDeviceId());
+      }
+    }
+  }
+
+  private void removeSession(Map<String, Channel> deviceChannelMap, String temail, String deviceId) {
+    if (deviceChannelMap.size() > 1) {
+      deviceChannelMap.remove(deviceId);
+    } else {
+      sessionChannelMap.remove(temail);
     }
   }
 }
