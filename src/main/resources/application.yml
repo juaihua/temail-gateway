@@ -1,8 +1,6 @@
 spring:
     main:
         web-application-type: none
-logging:
-    config: classpath:log4j2.xml
 
 temail:
     gateway:
