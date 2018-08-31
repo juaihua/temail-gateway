@@ -83,7 +83,7 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
 
   @Override
   protected String providerName() {
-    return "temail-dispatcher";
+    return "temail-dispatcher-request";
   }
 
   @Override
