@@ -85,8 +85,8 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
     properties.setMqTag(mqTag);
 
     RemoteStatusService statusService = new RemoteStatusService(properties, WebClient.create());
-    statusService.addSession(temail, deviceId);
-    statusService.removeSession(temail, deviceId);
+    statusService.addSession(temail, deviceId, null);
+    statusService.removeSession(temail, deviceId, null);
     statusService.locateTemailAcctSts(temail);
     try {
       Thread.sleep(1000);

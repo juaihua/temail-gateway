@@ -1,13 +1,13 @@
 package com.syswin.temail.gateway.service;
 
-import com.syswin.temail.gateway.TemailGatewayProperties;
-import com.syswin.temail.gateway.entity.ComnRespData;
-import com.syswin.temail.gateway.entity.Response;
-import com.syswin.temail.gateway.entity.Session;
-import com.syswin.temail.gateway.entity.TemailAcctSts;
-import com.syswin.temail.gateway.entity.TemailAcctStses;
 import java.util.ArrayList;
+import java.util.Optional;
+import java.util.function.Consumer;
+
 import javax.annotation.Resource;
+
+import com.syswin.temail.gateway.TemailGatewayProperties;
+import com.syswin.temail.gateway.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -27,9 +27,9 @@ public class RemoteStatusService {
   private final WebClient statusWebClient;
 
   // a async queue used for retry failed task
-  private final PendingTaskQueue<Pair> pendingTaskQueue = new PendingTaskQueue<>(
-      1000,
-      pair -> reqUpdSts4Upd(pair.getTemailAcctStses(), pair.getTemailAcctUptOptType())
+  private final PendingTaskQueue<Pair> pendingTaskQueue = new PendingTaskQueue<Pair>(
+      5000,
+      pair -> reqUpdSts4Upd(pair.getTemailAcctStses(), pair.getTemailAcctUptOptType(), null)
   );
 
   @Autowired
@@ -39,27 +39,27 @@ public class RemoteStatusService {
     this.pendingTaskQueue.run();
   }
 
-  public void addSession(String temail, String deviceId) {
-    updSessionByType(temail, deviceId, TemailAcctUptOptType.add);
+  public void addSession(String temail, String deviceId, Consumer consumer) {
+    updSessionByType(temail, deviceId, TemailAcctUptOptType.add, consumer);
   }
 
-  public void removeSession(String temail, String deviceId) {
-    updSessionByType(temail, deviceId, TemailAcctUptOptType.del);
+  public void removeSession(String temail, String deviceId, Consumer consumer) {
+    updSessionByType(temail, deviceId, TemailAcctUptOptType.del, consumer);
   }
 
-  public void updSessionByType(String temail, String deviceId, TemailAcctUptOptType optType) {
+  public void updSessionByType(String temail, String deviceId, TemailAcctUptOptType optType,Consumer consumer) {
     reqUpdSts4Upd(new TemailAcctStses(
         new ArrayList<TemailAcctSts>() {{
           add(buildAcctSts(temail, deviceId));
-        }}), optType);
+        }}), optType, consumer);
   }
 
-  public void removeSessions(Iterable<Session> sessions) {
+  public void removeSessions(Iterable<Session> sessions,Consumer consumer) {
     reqUpdSts4Upd(new TemailAcctStses(new ArrayList<TemailAcctSts>() {{
       for (Session session : sessions) {
         add(buildAcctSts(session.getTemail(), session.getDeviceId()));
       }
-    }}), TemailAcctUptOptType.del);
+    }}), TemailAcctUptOptType.del,consumer);
   }
 
   private TemailAcctSts buildAcctSts(String temail, String deviceId) {
@@ -79,7 +79,7 @@ public class RemoteStatusService {
     return res.getData();
   }
 
-  private void reqUpdSts4Upd(TemailAcctStses temailAcctStses, TemailAcctUptOptType type) {
+  private void reqUpdSts4Upd(TemailAcctStses temailAcctStses, TemailAcctUptOptType type, Consumer consumer) {
     statusWebClient.method(type.getMethod())
         .uri(properties.getUpdateSocketStatusUrl())
         .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -93,6 +93,7 @@ public class RemoteStatusService {
             clientResponse.bodyToMono(new ParameterizedTypeReference<Response<ComnRespData>>() {
             }).subscribe(result -> {
               log.debug("response from status server: {}", result.toString());
+              Optional.ofNullable(consumer).ifPresent(consumer1 -> consumer1.accept(result));
             });
           }
         });

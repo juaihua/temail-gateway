@@ -1,6 +1,8 @@
 package com.syswin.temail.gateway.service;
 
 
+import javax.annotation.Resource;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.CDTPPacket;
@@ -11,7 +13,6 @@ import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.Session;
 import com.syswin.temail.gateway.exception.PacketException;
 import io.netty.channel.Channel;
-import javax.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +62,7 @@ public class SessionService {
     String temail = packet.getHeader().getSender();
     String deviceId = packet.getHeader().getDeviceId();
     channelHolder.addSession(temail, deviceId, channel);
-    remoteStatusService.addSession(temail, deviceId);
+    remoteStatusService.addSession(temail, deviceId, null);
     // 返回成功的消息
     CDTPLoginResp.Builder builder = CDTPLoginResp.newBuilder();
     builder.setCode(response == null ? HttpStatus.OK.value() : response.getCode());
@@ -106,7 +107,7 @@ public class SessionService {
     String temail = packet.getHeader().getSender();
     String deviceId = packet.getHeader().getDeviceId();
     channelHolder.removeSession(temail, deviceId);
-    remoteStatusService.removeSession(temail, deviceId);
+    remoteStatusService.removeSession(temail, deviceId,null);
     CDTPLogoutResp.Builder builder = CDTPLogoutResp.newBuilder();
     builder.setCode(HttpStatus.OK.value());
     packet.setData(builder.build().toByteArray());
@@ -124,7 +125,7 @@ public class SessionService {
    */
   public void terminateChannel(Channel channel) {
     Iterable<Session> sessions = channelHolder.removeChannel(channel);
-    remoteStatusService.removeSessions(sessions);
+    remoteStatusService.removeSessions(sessions,null);
     channel.close();
   }
 
