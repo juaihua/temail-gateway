@@ -25,7 +25,7 @@ public class PacketDecoderTest {
   public void shouldDecodeNormalPacketBytes() throws Exception {
     CDTPPacket packet = PacketMaker.loginPacket(sender, deviceId);
     ByteBuf buffer = Unpooled.buffer();
-
+    // TODO(此处固定写长度，需要优化：结合LengthFieldPrepender等类进行处理)
     buffer.writeInt(169);
     encoder.encode(context, packet, buffer);
     decoder.decode(context, buffer, packets);
@@ -40,6 +40,7 @@ public class PacketDecoderTest {
     CDTPPacket packet = PacketMaker.singleChatPacket(sender, "recipient", message, deviceId);
     ByteBuf buffer = Unpooled.buffer();
 
+    // TODO(此处固定写长度，需要优化：结合LengthFieldPrepender等类进行处理)
     buffer.writeInt(198);
     encoder.encode(context, packet, buffer);
     decoder.decode(context, buffer, packets);

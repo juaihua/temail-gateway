@@ -94,7 +94,7 @@ public class TemailGatewayTest {
 
   @BeforeClass
   public static void beforeClass() throws MQClientException {
-    System.setProperty("temail.namesrvAddr",
+    System.setProperty("temail.gateway.namesrvAddr",
         rocketMqNameSrv.getContainerIpAddress() + ":" + MQ_SERVER_PORT);
 
     stubFor(post(urlEqualTo("/verify"))
@@ -131,7 +131,7 @@ public class TemailGatewayTest {
 
   @AfterClass
   public static void afterClass() {
-    System.clearProperty("temail.namesrvAddr");
+    System.clearProperty("temail.gateway.namesrvAddr");
     mqProducer.shutdown();
   }
 
@@ -193,7 +193,7 @@ public class TemailGatewayTest {
     assertThat(response.getData()).isEqualTo(ackMessage);
 
     // receive message from MQ
-    mqProducer.send(new Message(properties.getMqTopic(), properties.getMqTag(),
+    mqProducer.send(new Message(properties.getRocketmq().getMqTopic(), properties.getInstance().getMqTag(),
         GSON.toJson(mqMsgPayload(sender, message)).getBytes()), 3000);
     await().atMost(5, SECONDS).until(() -> !responseHandler.receivedMessages().isEmpty());
     packet = responseHandler.receivedMessages().poll();

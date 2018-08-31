@@ -12,10 +12,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 class DispatchService {
 
   private final WebClient webClient;
-  private final Gson gson;
+  private Gson gson = new Gson();
+
   DispatchService(WebClient webClient) {
     this.webClient = webClient;
-    this.gson = new Gson();
   }
 
   void dispatch(String dispatchUrl, CDTPPacketTrans packet,

@@ -38,7 +38,7 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
   private final String receiver = "sean@t.email";
   private final String message = "hello world";
   private final String deviceId = uniquify("deviceId");
-  private final CDTPPacket packet = singleChatPacket(sender, receiver, message, deviceId);
+  private final CDTPPacketTrans packet = new CDTPPacketTrans(singleChatPacket(sender, receiver, message, deviceId));
   private volatile Response resultResponse = null;
 
   private Throwable exception;
@@ -68,7 +68,7 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
     String url = mockServer.getUrl() + path;
     WebClient dispatcherWebClient = WebClient.create();
     DispatchService dispatchService = new DispatchService(dispatcherWebClient);
-    dispatchService.dispatch(url, new CDTPPacketTrans(packet),
+    dispatchService.dispatch(url, packet,
         new ResponseConsumer(), new ErrorConsumer());
 
     waitAtMost(2, SECONDS).until(() -> resultResponse != null);
@@ -76,7 +76,7 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
 
     assertThat(resultResponse.getCode()).isEqualTo(OK.value());
 
-    dispatchService.dispatch("http://localhost:99", new CDTPPacketTrans(packet),
+    dispatchService.dispatch("http://localhost:99", packet,
         new ResponseConsumer(), new ErrorConsumer());
     waitAtMost(2, SECONDS).until(() -> exception != null);
   }
