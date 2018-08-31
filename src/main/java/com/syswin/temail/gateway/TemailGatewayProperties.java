@@ -2,6 +2,7 @@ package com.syswin.temail.gateway;
 
 import com.syswin.temail.gateway.utils.LocalMachineUtil;
 import lombok.Data;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 
@@ -10,42 +11,60 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class TemailGatewayProperties {
 
   private String verifyUrl;
-
   private String dispatchUrl;
-
-  private String consumerGroup;
-
-  private String namesrvAddr;
-
   private String updateSocketStatusUrl;
 
-  private int port;
+  private Netty netty = new Netty();
+  private Rocketmq rocketmq = new Rocketmq();
+  private Instance instance = new Instance();
 
-  private int allowLoseCount;
+  @Data
+  public static class Netty {
 
-  private int readIdleTimeSeconds;
+    private int port;
+    private int readIdleTimeSeconds;
 
-  /**
-   * 持有客户端链句柄的服务实例宿主机地址
-   */
-  private String hostOf;
-  /**
-   * 持有客户端链句柄的服务实例的进程号
-   */
-  private String processId;
-  /**
-   * 持有客户端链句柄的服务实例监听的消息队列topic
-   */
-  private String mqTopic;
-  /**
-   * 持有客户端链句柄的服务实例监听的消息队列mqTag
-   */
-  private String mqTag;
+    public Netty() {
+    }
+  }
 
-  {
-    hostOf = LocalMachineUtil.getLocalIp();
-    processId = LocalMachineUtil.getLocalProccesId();
-    mqTag = "temail-server-" + hostOf + "-" + processId;
+  @Data
+  public static class Rocketmq {
+
+    private String namesrvAddr;
+    private String consumerGroup;
+    /**
+     * 持有客户端链句柄的服务实例监听的消息队列topic
+     */
+    @Setter
+    private String mqTopic;
+
+    public Rocketmq() {
+    }
+  }
+
+  @Data
+  public static class Instance {
+
+    /**
+     * 持有客户端链句柄的服务实例宿主机地址
+     */
+    private String hostOf;
+    /**
+     * 持有客户端链句柄的服务实例的进程号
+     */
+    private String processId;
+    /**
+     * 持有客户端链句柄的服务实例监听的消息队列mqTag
+     */
+    private String mqTag;
+
+    private Instance() {
+      hostOf = LocalMachineUtil.getLocalIp();
+      processId = LocalMachineUtil.getLocalProccesId();
+      mqTag = "temail-server-" + hostOf + "-" + processId;
+    }
+
   }
 
 }

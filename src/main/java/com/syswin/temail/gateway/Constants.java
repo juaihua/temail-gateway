@@ -7,6 +7,7 @@ package com.syswin.temail.gateway;
 public class Constants {
 
   public static final short CDTP_VERSION = 1;
-  public final static int LENGTH_FIELD_LENGTH = 4;
+  public static final int LENGTH_FIELD_LENGTH = 4;
+  public static final short NOTIFY_COMMAND = 2;
 
 }

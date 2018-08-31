@@ -73,7 +73,7 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
         .willRespondWith()
         .status(200)
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-        .body(gson.toJson(Response.ok(OK,location())))
+        .body(gson.toJson(Response.ok(OK, location())))
         .toPact();
   }
 
@@ -81,15 +81,15 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
   public void runTest(MockServer mockServer) {
     String url = mockServer.getUrl() + path;
     properties.setUpdateSocketStatusUrl(url);
-    properties.setHostOf(gatewayHost);
-    properties.setProcessId(processId);
-    properties.setMqTopic(mqTopic);
-    properties.setMqTag(mqTag);
+    properties.getInstance().setHostOf(gatewayHost);
+    properties.getInstance().setProcessId(processId);
+    properties.getRocketmq().setMqTopic(mqTopic);
+    properties.getInstance().setMqTag(mqTag);
 
     RemoteStatusService statusService = new RemoteStatusService(properties, WebClient.create());
     statusService.addSession(temail, deviceId, null);
     statusService.removeSession(temail, deviceId, null);
-    statusService.locateTemailAcctSts(pathValName);
+    statusService.locateTemailAcctSts(temail);
     try {
       Thread.sleep(1000);
     } catch (InterruptedException e) {

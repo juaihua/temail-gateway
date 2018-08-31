@@ -12,7 +12,8 @@ public enum CommandSpaceType {
   CHANNEL(0),
   SINGLE_MESSAGE(1),
   GROUP_MESSAGE(2),
-  STRATEGY(3);
+  SYNC_STATUS(3),
+  STRATEGY(4);
 
   private short code;
 

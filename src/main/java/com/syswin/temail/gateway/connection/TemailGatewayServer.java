@@ -3,6 +3,7 @@ package com.syswin.temail.gateway.connection;
 import static com.syswin.temail.gateway.Constants.LENGTH_FIELD_LENGTH;
 
 import com.syswin.temail.gateway.TemailGatewayProperties;
+import com.syswin.temail.gateway.TemailGatewayProperties.Netty;
 import com.syswin.temail.gateway.codec.PacketDecoder;
 import com.syswin.temail.gateway.codec.PacketEncoder;
 import com.syswin.temail.gateway.handler.ChannelExceptionHandler;
@@ -50,11 +51,12 @@ public class TemailGatewayServer implements ApplicationRunner {
 
     ServerBootstrap bootstrap = new ServerBootstrap();
 
+    Netty netty = properties.getNetty();
     bootstrap.group(bossGroup, workerGroup)
         // 使用指定端口设置套接字地址
         .channel(NioServerSocketChannel.class)
         // 指定使用NIO传输Channel
-        .localAddress(new InetSocketAddress(properties.getPort()))
+        .localAddress(new InetSocketAddress(netty.getPort()))
         // 通过NoDelay禁用Nagle,使消息立即发送出去
         .childOption(ChannelOption.TCP_NODELAY, true)
         // 保持长连接状态
@@ -63,7 +65,7 @@ public class TemailGatewayServer implements ApplicationRunner {
           @Override
           protected void initChannel(SocketChannel channel) {
             channel.pipeline()
-                .addLast("idleStateHandler", new IdleStateHandler(properties.getReadIdleTimeSeconds(), 0, 0))
+                .addLast("idleStateHandler", new IdleStateHandler(netty.getReadIdleTimeSeconds(), 0, 0))
                 .addLast("idleHandler", idleHandler)
                 .addLast("lengthFieldBasedFrameDecoder",
                     new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH, 0, 0))
@@ -78,6 +80,6 @@ public class TemailGatewayServer implements ApplicationRunner {
 
     // 异步地绑定服务器;调用sync方法阻塞等待直到绑定完成
     bootstrap.bind().syncUninterruptibly();
-    log.info("Temail 服务器已启动,端口号{}", properties.getPort());
+    log.info("Temail 服务器已启动,端口号：{}", netty.getPort());
   }
 }

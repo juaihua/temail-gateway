@@ -106,16 +106,13 @@ public class SessionService {
     // TODO(姚华成) 对packet进行合法性校验
     String temail = packet.getHeader().getSender();
     String deviceId = packet.getHeader().getDeviceId();
-    channelHolder.removeSession(temail, deviceId);
     remoteStatusService.removeSession(temail, deviceId,null);
     CDTPLogoutResp.Builder builder = CDTPLogoutResp.newBuilder();
     builder.setCode(HttpStatus.OK.value());
     packet.setData(builder.build().toByteArray());
     channel.writeAndFlush(packet);
 
-    if (channelHolder.hasNoSession(channel)) {
-      channel.close();
-    }
+    channelHolder.removeSession(temail, deviceId, channel);
   }
 
   /**
@@ -126,7 +123,6 @@ public class SessionService {
   public void terminateChannel(Channel channel) {
     Iterable<Session> sessions = channelHolder.removeChannel(channel);
     remoteStatusService.removeSessions(sessions,null);
-    channel.close();
   }
 
 }

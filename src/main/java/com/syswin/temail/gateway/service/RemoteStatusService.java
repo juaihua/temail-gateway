@@ -1,5 +1,12 @@
 package com.syswin.temail.gateway.service;
 
+import com.syswin.temail.gateway.TemailGatewayProperties;
+import com.syswin.temail.gateway.TemailGatewayProperties.Instance;
+import com.syswin.temail.gateway.entity.ComnRespData;
+import com.syswin.temail.gateway.entity.Response;
+import com.syswin.temail.gateway.entity.Session;
+import com.syswin.temail.gateway.entity.TemailAcctSts;
+import com.syswin.temail.gateway.entity.TemailAcctStses;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -64,9 +71,10 @@ public class RemoteStatusService {
   }
 
   private TemailAcctSts buildAcctSts(String temail, String deviceId) {
+    Instance instance = properties.getInstance();
     return new TemailAcctSts(temail, deviceId,
-        properties.getHostOf(), properties.getProcessId(),
-        properties.getMqTopic(), properties.getMqTag());
+        instance.getHostOf(), instance.getProcessId(),
+        properties.getRocketmq().getMqTopic(), instance.getMqTag());
   }
 
   public TemailAcctStses locateTemailAcctSts(String temail) {
@@ -101,11 +109,11 @@ public class RemoteStatusService {
     add(HttpMethod.POST),
     del(HttpMethod.DELETE);
 
+    private HttpMethod method;
+
     private TemailAcctUptOptType(HttpMethod method) {
       this.method = method;
     }
-
-    private HttpMethod method;
 
     public HttpMethod getMethod() {
       return method;

@@ -1,5 +1,24 @@
 spring:
+  main:
+    web-application-type: none
   autoconfigure.exclude:
   - com.systoon.integration.spring.boot.disconf.DisconfAutoConfiguration
   - com.systoon.integration.spring.boot.disconf.context.config.ConfigurationPropertiesRebinderAutoConfiguration
   - com.systoon.integration.spring.boot.disconf.context.config.RefreshAutoConfiguration
+
+logging:
+  config: classpath:log4j2.xml
+
+temail:
+  gateway:
+    verifyUrl: http://temail-dispatch:8081/verify
+    dispatchUrl: http://temail-dispatch:8081/dispatch
+    updateSocketStatusUrl: http://temail-channel:9100/updateStatus
+    netty:
+      port: 8099
+      read-idle-time-seconds: 1800
+    rocketmq:
+      namesrv-addr: rocketmq-temail:9876
+      consumer-group: temail-gateway-consumer
+      mq-topic: temail-gateway-notify
+

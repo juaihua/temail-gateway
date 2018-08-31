@@ -17,19 +17,32 @@ public class YHCClientResponseHandler extends SimpleChannelInboundHandler<CDTPPa
 
   @Setter
   private CountDownLatch latch;
-  @Getter
   private CDTPPacket result;
+  @Getter
+  private boolean newResult;
+
+  public CDTPPacket getResult() {
+    newResult = false;
+    return result;
+  }
 
   @Override
   protected void channelRead0(ChannelHandlerContext channelHandlerContext, CDTPPacket packet) {
     log.info("从服务器端收到的信息：{}", packet);
+    newResult = true;
     result = packet;
-    if (latch != null) {
-      latch.countDown();
-    }
   }
 
   public void resetLatch(CountDownLatch initLatch) {
     this.latch = initLatch;
   }
+
+  @Override
+  public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+    super.channelReadComplete(ctx);
+    if (latch != null) {
+      latch.countDown();
+    }
+  }
+
 }
