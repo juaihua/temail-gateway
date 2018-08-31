@@ -53,7 +53,7 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
         .given("dispatch user request")
         .uponReceiving("dispatch user request for response")
         .method("POST")
-        .body(gson.toJson(new CDTPPacketTrans(packet)))
+        .body(gson.toJson(packet))
         .headers(headers)
         .path(path)
         .willRespondWith()

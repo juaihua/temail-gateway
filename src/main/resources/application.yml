@@ -8,7 +8,7 @@ temail:
     gateway:
         verifyUrl: http://temail-dispatch:8081/verify
         dispatchUrl: http://temail-dispatch:8081/dispatch
-        updateSocketStatusUrl: http://temail-channel:9100/updateStatus
+        updateSocketStatusUrl: http://temail-channel:9100/locations
         netty:
             port: 8099
             read-idle-time-seconds: 1800
