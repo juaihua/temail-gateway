@@ -55,6 +55,7 @@ public class RemoteStatusService {
   }
 
   public void removeSessions(Iterable<Session> sessions,Consumer consumer) {
+    if(sessions == null) return;
     reqUpdSts4Upd(new TemailAcctStses(new ArrayList<TemailAcctSts>() {{
       for (Session session : sessions) {
         add(buildAcctSts(session.getTemail(), session.getDeviceId()));
