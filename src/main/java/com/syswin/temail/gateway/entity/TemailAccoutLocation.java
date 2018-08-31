@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TemailAcctSts {
+public class TemailAccoutLocation {
 
   //账户信息
   private String account;

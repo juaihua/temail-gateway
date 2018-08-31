@@ -1,28 +1,41 @@
 package com.syswin.temail.gateway.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.google.gson.Gson;
-import com.syswin.temail.gateway.TemailGatewayApplication;
-import com.syswin.temail.gateway.entity.*;
-import lombok.extern.slf4j.Slf4j;
-import org.awaitility.Awaitility;
-import org.junit.*;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.delete;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.google.gson.Gson;
+import com.syswin.temail.gateway.TemailGatewayApplication;
+import com.syswin.temail.gateway.entity.ComnRespData;
+import com.syswin.temail.gateway.entity.Response;
+import com.syswin.temail.gateway.entity.Session;
+import com.syswin.temail.gateway.entity.TemailAccoutLocation;
+import com.syswin.temail.gateway.entity.TemailAccoutLocations;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
+import org.awaitility.Awaitility;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -56,11 +69,11 @@ public class RemoteStatusServiceTest {
                 .withStatus(SC_OK)
                 .withBody(GSON.toJson(Response.ok(new ComnRespData(true))))));
 
-    List<TemailAcctSts> stses = new ArrayList<TemailAcctSts>() {{
-      add(new TemailAcctSts("sean@temail.com", "123456", "192.168.197.23", "232", "topic", "mqTopic"));
-      add(new TemailAcctSts("jean@temail.com", "654321", "192.168.197.24", "235", "topid", "mqTopid"));
+    List<TemailAccoutLocation> stses = new ArrayList<TemailAccoutLocation>() {{
+      add(new TemailAccoutLocation("sean@temail.com", "123456", "192.168.197.23", "232", "topic", "mqTopic"));
+      add(new TemailAccoutLocation("jean@temail.com", "654321", "192.168.197.24", "235", "topid", "mqTopid"));
     }};
-    TemailAcctStses data = new TemailAcctStses(stses);
+    TemailAccoutLocations data = new TemailAccoutLocations(stses);
     stubFor(get(urlMatching("/locations/.*"))
         .willReturn(
             aResponse()
@@ -84,7 +97,7 @@ public class RemoteStatusServiceTest {
 
   @Test
   public void testLocateTemailAcctSts() {
-    TemailAcctStses response = remoteStatusService.locateTemailAcctSts("sean_1@temail.com");
+    TemailAccoutLocations response = remoteStatusService.locateTemailAcctSts("sean_1@temail.com");
     Awaitility.waitAtMost(1000, TimeUnit.SECONDS).until(() -> response.getStatuses().size() > 0);
   }
 
