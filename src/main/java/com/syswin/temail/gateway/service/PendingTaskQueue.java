@@ -28,7 +28,7 @@ class PendingTaskQueue<T> implements Runnable {
   }
 
   boolean addTask(T pair) {
-    log.info("add 1 task, now there is {} tasks wait to be retry!", pendingTaskQueue.size());
+    log.debug("add 1 task, now there is {} tasks wait to be retry!", pendingTaskQueue.size());
     return pendingTaskQueue.offer(pair);
   }
 
@@ -38,11 +38,11 @@ class PendingTaskQueue<T> implements Runnable {
         while (!Thread.currentThread().isInterrupted()) {
           T pair = obtainTask();
           try {
-            log.info("obtain one retry task: {}", pair.toString());
+            log.debug("obtain one retry task: {}", pair.toString());
             taskConsumer.accept(pair);
             Thread.sleep(delayInMillis);
           } catch (Exception e) {
-            log.error("failed to add retry task: ", e);
+            log.debug("failed to add retry task: ", e);
             pendingTaskQueue.offer(pair);
           }
         }
@@ -53,7 +53,7 @@ class PendingTaskQueue<T> implements Runnable {
   }
 
   private T obtainTask() throws InterruptedException {
-    log.info("remove 1 task, now there is {} tasks wait to be retry!", pendingTaskQueue.size());
+    log.debug("remove 1 task, now there is {} tasks wait to be retry!", pendingTaskQueue.size());
     return pendingTaskQueue.take();
   }
 }
