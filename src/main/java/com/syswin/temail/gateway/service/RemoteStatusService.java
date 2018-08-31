@@ -71,12 +71,9 @@ public class RemoteStatusService {
 
   public TemailAcctStses locateTemailAcctSts(String temail) {
     Response<TemailAcctStses> res =
-        statusWebClient
-            .method(HttpMethod.GET)
-            .uri(properties.getUpdateSocketStatusUrl() + "/" + temail)
-            .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<Response<TemailAcctStses>>() {
-            }).block();
+        statusWebClient.get().uri(properties.getUpdateSocketStatusUrl()+"/{temail}",temail)
+            .accept(MediaType.APPLICATION_JSON_UTF8)
+            .retrieve().bodyToMono(new ParameterizedTypeReference<Response<TemailAcctStses>>(){}).block();
     return res.getData();
   }
 

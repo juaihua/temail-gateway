@@ -31,12 +31,13 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author 姚华成
  * @date 2018-8-27
  */
+//@Ignore
 @Slf4j
 @SpringBootTest(classes = TemailGatewayApplication.class,
     properties = {
         "temail.gateway.verifyUrl=http://localhost:8081/verify",
         "temail.gateway.dispatchUrl=http://localhost:8081/dispatch",
-        "temail.gateway.updateSocketStatusUrl=http://localhost:8090/updateStatus",
+        "temail.gateway.updateSocketStatusUrl=http://localhost:8090/locations",
         "temail.gateway.mqTopic=temail-gateway",
         "temail.gateway.allIdleTimeSeconds=3"
     })

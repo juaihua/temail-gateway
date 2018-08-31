@@ -49,12 +49,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.Network;
 
+//@Ignore
 @Slf4j
 @SpringBootTest(
     properties = {
         "temail.gateway.verifyUrl=http://localhost:8090/verify",
         "temail.gateway.dispatchUrl=http://localhost:8090/dispatch",
-        "temail.gateway.updateSocketStatusUrl=http://localhost:8090/updateStatus",
+        "temail.gateway.updateSocketStatusUrl=http://localhost:8090/locations",
         "temail.gateway.mqTopic=temail-gateway",
         "temail.gateway.allIdleTimeSeconds=3"
     })
