@@ -2,6 +2,7 @@ package com.syswin.temail.gateway.service;
 
 import com.syswin.temail.gateway.entity.Session;
 import io.netty.channel.Channel;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,9 +53,9 @@ public class ChannelHolder implements ChannelCollector {
   }
 
   @Override
-  public Iterable<Session> removeChannel(Channel channel) {
+  public Collection<Session> removeChannel(Channel channel) {
     // 先移除channelSession
-    Iterable<Session> sessions = channelCollector.removeChannel(channel);
+    Collection<Session> sessions = channelCollector.removeChannel(channel);
     // 再移除sessionChannel
     removeSessions(sessions);
     return sessions;

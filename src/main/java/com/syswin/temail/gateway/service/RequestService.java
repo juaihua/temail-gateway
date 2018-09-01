@@ -31,13 +31,7 @@ public class RequestService {
     String temail = packet.getHeader().getSender();
     String deviceId = packet.getHeader().getDeviceId();
     if (!authSession(channel, temail, deviceId)) {
-      packet.setCommandSpace(CHANNEL.getCode());
-      packet.setCommand(INTERNAL_ERROR.getCode());
-
-      CDTPServerError.Builder builder = CDTPServerError.newBuilder();
-      builder.setCode(INTERNAL_ERROR.getCode());
-      builder.setDesc("用户" + temail + "在设备" + deviceId + "上没有登录，无法进行操作！");
-      packet.setData(builder.build().toByteArray());
+      errorPacket(packet, INTERNAL_ERROR.getCode(), "用户" + temail + "在设备" + deviceId + "上没有登录，无法进行操作！");
 
       channel.writeAndFlush(packet);
       return;
@@ -75,5 +69,4 @@ public class RequestService {
   private boolean authSession(Channel channel, String temail, String deviceId) {
     return channel == channelHolder.getChannel(temail, deviceId);
   }
-
 }

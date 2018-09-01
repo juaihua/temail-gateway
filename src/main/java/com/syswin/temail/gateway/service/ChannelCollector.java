@@ -2,6 +2,7 @@ package com.syswin.temail.gateway.service;
 
 import com.syswin.temail.gateway.entity.Session;
 import io.netty.channel.Channel;
+import java.util.Collection;
 
 public interface ChannelCollector {
 
@@ -11,5 +12,5 @@ public interface ChannelCollector {
 
   void removeSession(String temail, String deviceId, Channel channel);
 
-  Iterable<Session> removeChannel(Channel channel);
+  Collection<Session> removeChannel(Channel channel);
 }
