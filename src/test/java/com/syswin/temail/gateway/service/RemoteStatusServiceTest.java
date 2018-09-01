@@ -96,12 +96,6 @@ public class RemoteStatusServiceTest {
   }
 
   @Test
-  public void testLocateTemailAcctSts() {
-    TemailAccoutLocations response = remoteStatusService.locateTemailAcctSts("sean_1@temail.com");
-    Awaitility.waitAtMost(1000, TimeUnit.SECONDS).until(() -> response.getStatuses().size() > 0);
-  }
-
-  @Test
   public void testRemoveSession() {
     remoteStatusService.removeSession("sean_1@temail.com", "12345678", p -> results.add(p));
     Awaitility.waitAtMost(1000, TimeUnit.SECONDS).until(() -> !results.isEmpty());

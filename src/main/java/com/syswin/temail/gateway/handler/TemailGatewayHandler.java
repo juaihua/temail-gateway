@@ -46,7 +46,7 @@ public class TemailGatewayHandler extends SimpleChannelInboundHandler<CDTPPacket
           // TODO: 2018/8/31 only allowed after login
           sessionService.logout(channel, packet);
         } else {
-          // 其他连接请求
+          log.warn("Received unknown command {} {}", Integer.toHexString(packet.getCommandSpace()), Integer.toHexString(packet.getCommand()));
         }
       } else {
         requestService.handleRequest(channel, packet);

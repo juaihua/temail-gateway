@@ -32,7 +32,7 @@ public class RemoteStatusService {
   private final WebClient statusWebClient;
 
   // a async queue used for retry failed task
-  private final PendingTaskQueue<Pair> pendingTaskQueue = new PendingTaskQueue<Pair>(
+  private final PendingTaskQueue<Pair> pendingTaskQueue = new PendingTaskQueue<>(
       5000,
       pair -> reqUpdSts4Upd(pair.getTemailAccoutLocations(), pair.getTemailAcctUptOptType(), null)
   );
@@ -73,14 +73,6 @@ public class RemoteStatusService {
     return new TemailAccoutLocation(temail, deviceId,
         instance.getHostOf(), instance.getProcessId(),
         properties.getRocketmq().getMqTopic(), instance.getMqTag());
-  }
-
-  public TemailAccoutLocations locateTemailAcctSts(String temail) {
-    Response<TemailAccoutLocations> res =
-        statusWebClient.get().uri(properties.getUpdateSocketStatusUrl()+"/{temail}",temail)
-            .accept(MediaType.APPLICATION_JSON_UTF8)
-            .retrieve().bodyToMono(new ParameterizedTypeReference<Response<TemailAccoutLocations>>(){}).block();
-    return res.getData();
   }
 
   private void reqUpdSts4Upd(TemailAccoutLocations temailAccoutLocations, TemailAcctUptOptType type, Consumer consumer) {

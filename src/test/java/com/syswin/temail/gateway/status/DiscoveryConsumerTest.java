@@ -30,7 +30,6 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
   private final Gson gson = new Gson();
   private final String path = "/locations";
   private final String temail = "sean@t.email";
-  private final String pathValName = "temailAcctNo";
   private final String deviceId = "iOS-sean";
   private final String mqTopic = "temail-gateway";
   private final String mqTag = "gateway-localhost";
@@ -65,14 +64,6 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
         .status(200)
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
         .body(gson.toJson(Response.ok(OK, "Success")))
-        .given("Locate connection")
-        .uponReceiving("locate connection by account")
-        .method("GET")
-        .path(path+"/" + pathValName)
-        .willRespondWith()
-        .status(200)
-        .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-        .body(gson.toJson(Response.ok(OK, location())))
         .toPact();
   }
 
@@ -88,7 +79,6 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
     RemoteStatusService statusService = new RemoteStatusService(properties, WebClient.create());
     statusService.addSession(temail, deviceId, null);
     statusService.removeSession(temail, deviceId, null);
-    statusService.locateTemailAcctSts(temail);
     try {
       Thread.sleep(1000);
     } catch (InterruptedException e) {
