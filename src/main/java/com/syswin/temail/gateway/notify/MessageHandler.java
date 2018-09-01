@@ -3,6 +3,7 @@ package com.syswin.temail.gateway.notify;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.syswin.temail.gateway.entity.CDTPPacket;
+import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import com.syswin.temail.gateway.service.ChannelHolder;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ class MessageHandler {
   void onMessageReceived(String message) {
     try {
       log.info("从MQ接受到消息: {}", message);
-      CDTPPacket packet = gson.fromJson(message, CDTPPacket.class);
+      CDTPPacket packet = gson.fromJson(message, CDTPPacketTrans.class).toCDTPPacket();
 
       String receiver = packet.getHeader().getReceiver();
       Iterable<Channel> channels = channelHolder.getChannels(receiver);
