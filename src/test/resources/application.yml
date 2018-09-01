@@ -7,7 +7,7 @@ spring:
   - com.systoon.integration.spring.boot.disconf.context.config.RefreshAutoConfiguration
 
 logging:
-  config: classpath:log4j2.xml
+  config: classpath:log4j2-test.xml
 
 temail:
   gateway:

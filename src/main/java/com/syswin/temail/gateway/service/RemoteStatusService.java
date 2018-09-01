@@ -97,7 +97,7 @@ public class RemoteStatusService {
 
   static enum TemailAcctUptOptType {
     add(HttpMethod.POST),
-    del(HttpMethod.DELETE);
+    del(HttpMethod.PUT);
 
     private HttpMethod method;
 

@@ -1,10 +1,10 @@
 package com.syswin.temail.gateway.status;
 
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.junit.Assert.fail;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -18,7 +18,6 @@ import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.TemailAccoutLocation;
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
 import com.syswin.temail.gateway.service.RemoteStatusService;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -53,17 +52,17 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
         .willRespondWith()
         .status(201)
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-        .body(gson.toJson(Response.ok(CREATED, "Success")))
+        .body(gson.toJson(Response.ok(CREATED)))
         .given("Remove connection")
         .uponReceiving("remove existing connection")
-        .method("DELETE")
+        .method("PUT")
         .body(gson.toJson(location()))
         .headers(headers)
         .path(path)
         .willRespondWith()
         .status(200)
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-        .body(gson.toJson(Response.ok(OK, "Success")))
+        .body(gson.toJson(Response.ok()))
         .toPact();
   }
 
@@ -105,6 +104,6 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
         processId,
         mqTopic,
         mqTag);
-    return new TemailAccoutLocations(new ArrayList<TemailAccoutLocation>(){{add(status);}});
+    return new TemailAccoutLocations(singletonList(status));
   }
 }
