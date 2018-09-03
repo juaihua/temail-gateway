@@ -40,7 +40,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TemailGatewayApplication.class,
-    properties = {"temail.gateway.updateSocketStatusUrl=http://localhost:9100/locations"})
+    properties = {"temail.gateway.updateSocketStatusUrl=http://192.168.15.228:9100/locations"})
 @ActiveProfiles({"debug", "dev"})
 public class RemoteStatusServiceTest {
 

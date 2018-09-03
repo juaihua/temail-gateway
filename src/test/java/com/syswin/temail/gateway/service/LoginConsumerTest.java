@@ -1,5 +1,18 @@
 package com.syswin.temail.gateway.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.gson.Gson;
+import com.syswin.temail.gateway.entity.Response;
+import au.com.dius.pact.consumer.ConsumerPactTestMk2;
+import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.model.RequestResponsePact;
+import org.junit.Before;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -9,18 +22,6 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
-import au.com.dius.pact.consumer.ConsumerPactTestMk2;
-import au.com.dius.pact.consumer.MockServer;
-import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.RequestResponsePact;
-import com.google.gson.Gson;
-import com.syswin.temail.gateway.entity.Response;
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.Before;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 public class LoginConsumerTest extends ConsumerPactTestMk2 {
 
@@ -56,7 +57,7 @@ public class LoginConsumerTest extends ConsumerPactTestMk2 {
           .status(200)
           .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
           .body(gson.toJson(Response.ok(OK, "Success")))
-        .given("User jack is not registered")
+          .given("User jack is not registered")
           .uponReceiving("Jack requested to log in")
           .method("POST")
           .body("{\n"
@@ -94,26 +95,26 @@ public class LoginConsumerTest extends ConsumerPactTestMk2 {
     LoginService loginService = new LoginService(restTemplate, url);
 
     // login success scenario
-    ResponseEntity<Response> responseEntity = loginService.login(sean, signature, unsignedText);
+    ResponseEntity<Response> responseEntity = loginService.validSignature(sean, signature, unsignedText);
 
     assertThat(responseEntity.getStatusCode()).isEqualTo(OK);
     assertThat(responseEntity.getBody().getCode()).isEqualTo(OK.value());
     assertThat(responseEntity.getBody().getData()).isEqualTo("Success");
 
     // login rejected scenario
-    responseEntity = loginService.login("jack@t.email", signature, unsignedText);
+    responseEntity = loginService.validSignature("jack@t.email", signature, unsignedText);
 
     assertThat(responseEntity.getStatusCode()).isEqualTo(FORBIDDEN);
     assertThat(responseEntity.getBody().getCode()).isEqualTo(FORBIDDEN.value());
 
     // server out of work scenario
-    responseEntity = loginService.login("mike@t.email", signature, unsignedText);
+    responseEntity = loginService.validSignature("mike@t.email", signature, unsignedText);
 
     assertThat(responseEntity.getStatusCode()).isEqualTo(INTERNAL_SERVER_ERROR);
     assertThat(responseEntity.getBody().getCode()).isEqualTo(INTERNAL_SERVER_ERROR.value());
 
     LoginService unreachableService = new LoginService(restTemplate, "http://localhost:99");
-    responseEntity = unreachableService.login(sean, signature, unsignedText);
+    responseEntity = unreachableService.validSignature(sean, signature, unsignedText);
 
     assertThat(responseEntity.getStatusCode()).isEqualTo(SERVICE_UNAVAILABLE);
     assertThat(responseEntity.getBody().getCode()).isEqualTo(SERVICE_UNAVAILABLE.value());
