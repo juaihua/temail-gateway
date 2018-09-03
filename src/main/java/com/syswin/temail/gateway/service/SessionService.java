@@ -1,6 +1,9 @@
 package com.syswin.temail.gateway.service;
 
 
+import java.util.Collection;
+import java.util.function.Consumer;
+
 import javax.annotation.Resource;
 
 import com.google.protobuf.InvalidProtocolBufferException;

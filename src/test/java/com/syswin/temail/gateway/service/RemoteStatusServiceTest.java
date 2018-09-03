@@ -1,5 +1,23 @@
 package com.syswin.temail.gateway.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.google.gson.Gson;
+import com.syswin.temail.gateway.TemailGatewayProperties;
+import com.syswin.temail.gateway.entity.Response;
+import com.syswin.temail.gateway.entity.Session;
+import com.syswin.temail.gateway.entity.TemailAccoutLocation;
+import com.syswin.temail.gateway.entity.TemailAccoutLocations;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.springframework.web.reactive.function.client.WebClient;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -16,35 +34,18 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.waitAtMost;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.google.gson.Gson;
-import com.syswin.temail.gateway.TemailGatewayProperties;
-import com.syswin.temail.gateway.entity.Response;
-import com.syswin.temail.gateway.entity.Session;
-import com.syswin.temail.gateway.entity.TemailAccoutLocation;
-import com.syswin.temail.gateway.entity.TemailAccoutLocations;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.springframework.web.reactive.function.client.WebClient;
-
 @Slf4j
 public class RemoteStatusServiceTest {
 
   private static final Gson GSON = new Gson();
 
-  @Autowired
-  private RemoteStatusService remoteStatusService;
+  private final TemailGatewayProperties properties = new TemailGatewayProperties();
+  private final RemoteStatusService remoteStatusService = new RemoteStatusService(properties, WebClient.create());
 
-  private List<Object> results = new ArrayList();
+  private final List<Response<Void>> results = new ArrayList<>();
 
   @ClassRule
-  public static final WireMockRule WIRE_MOCK_RULE = new WireMockRule(9100);
+  public static final WireMockRule WIRE_MOCK_RULE = new WireMockRule(wireMockConfig().dynamicPort());
 
   @BeforeClass
   public static void initMockServer() {

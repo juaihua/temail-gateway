@@ -21,7 +21,7 @@ public class AESCoder {
   /**
    * 提取秘钥数据
    *
-   * @param key
+   * @param keyBytes
    * @return
    */
   public SecretKey extractKey(byte[] keyBytes) {
@@ -32,7 +32,7 @@ public class AESCoder {
   /**
    * encrypt data by aes
    *
-   * @param key
+   * @param keyBytes
    * @param data
    * @return
    */
@@ -49,7 +49,7 @@ public class AESCoder {
   /**
    * decrypt data by aes
    *
-   * @param key
+   * @param keyBytes
    * @param encryData
    * @return
    */
