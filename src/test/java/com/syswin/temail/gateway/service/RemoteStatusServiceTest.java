@@ -1,112 +1,108 @@
 package com.syswin.temail.gateway.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.google.gson.Gson;
-import com.syswin.temail.gateway.TemailGatewayApplication;
-import com.syswin.temail.gateway.entity.*;
-import lombok.extern.slf4j.Slf4j;
-import org.awaitility.Awaitility;
-import org.junit.*;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.put;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static java.util.Arrays.asList;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.awaitility.Awaitility.waitAtMost;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.google.gson.Gson;
+import com.syswin.temail.gateway.TemailGatewayProperties;
+import com.syswin.temail.gateway.entity.Response;
+import com.syswin.temail.gateway.entity.Session;
+import com.syswin.temail.gateway.entity.TemailAccoutLocation;
+import com.syswin.temail.gateway.entity.TemailAccoutLocations;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.springframework.web.reactive.function.client.WebClient;
+
 @Slf4j
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = TemailGatewayApplication.class,
-    properties = {"temail.gateway.updateSocketStatusUrl=http://localhost:9100/locations"})
-@ActiveProfiles({"debug", "dev"})
 public class RemoteStatusServiceTest {
 
   private static final Gson GSON = new Gson();
 
-  @Autowired
-  private RemoteStatusService remoteStatusService;
+  private final TemailGatewayProperties properties = new TemailGatewayProperties();
+  private final RemoteStatusService remoteStatusService = new RemoteStatusService(properties, WebClient.create());
 
-  private List<Object> results = new ArrayList();
+  private final List<Response<Void>> results = new ArrayList<>();
 
   @ClassRule
-  public static final WireMockRule WIRE_MOCK_RULE = new WireMockRule(9100);
+  public static final WireMockRule WIRE_MOCK_RULE = new WireMockRule(wireMockConfig().dynamicPort());
 
   @BeforeClass
   public static void initMockServer() {
     stubFor(post(urlEqualTo("/locations"))
-        .willReturn(aResponse().withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+        .willReturn(aResponse()
+            .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
             .withStatus(SC_CREATED)
-            .withBody(GSON.toJson(Response.ok(new ComnRespData(true))))));
+            .withBody(GSON.toJson(Response.ok()))));
 
-    stubFor(delete(urlEqualTo("/locations")).willReturn(
-        aResponse().withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE).withStatus(SC_OK)
-            .withBody(GSON.toJson(Response.ok(new ComnRespData(true))))));
+    stubFor(put(urlEqualTo("/locations"))
+        .willReturn(
+            aResponse()
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withStatus(SC_OK)
+                .withBody(GSON.toJson(Response.ok()))));
 
-    List<TemailAcctSts> stses = new ArrayList<TemailAcctSts>() {{
-      add(new TemailAcctSts("sean@temail.com", "123456", "192.168.197.23", "232", "topic", "mqTopic"));
-      add(new TemailAcctSts("jean@temail.com", "654321", "192.168.197.24", "235", "topid", "mqTopid"));
-    }};
-    stubFor(get(urlMatching("/locations/(.*)")).willReturn(
-        aResponse().withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE).withStatus(SC_OK)
-            .withBody(GSON.toJson(Response.ok(new TemailAcctStses() {{
-              setStatuses(stses);
-            }})))));
+    List<TemailAccoutLocation> stses = asList(
+        new TemailAccoutLocation("sean@temail.com", "123456", "192.168.197.23", "232", "topic", "mqTopic"),
+        new TemailAccoutLocation("jean@temail.com", "654321", "192.168.197.24", "235", "topid", "mqTopid"));
+
+    TemailAccoutLocations data = new TemailAccoutLocations(stses);
+    stubFor(get(urlMatching("/locations/.*"))
+        .willReturn(
+            aResponse()
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withStatus(SC_OK)
+                .withBody(GSON.toJson(Response.ok(data)))));
   }
 
   @Before
   public void init() {
+    properties.setUpdateSocketStatusUrl("http://localhost:" + WIRE_MOCK_RULE.port() + "/locations");
     results.clear();
   }
 
 
   @Test
   public void testAddSession() {
-    remoteStatusService.addSession("sean_1@temail.com", "12345678", p -> results.add(p));
-    Awaitility.waitAtMost(1000, TimeUnit.SECONDS).until(() -> !results.isEmpty());
+    remoteStatusService.addSession("sean_1@temail.com", "12345678", results::add);
+    waitAtMost(1, TimeUnit.SECONDS).until(() -> !results.isEmpty());
     assertThat(results.get(0)).isInstanceOf(Response.class);
   }
-
-  //@Test
-  //public void testLocateTemailAcctSts() {
-  //  Object response = remoteStatusService.locateTemailAcctSts("sean_1@temail.com");
-  //  Awaitility.waitAtMost(1000, TimeUnit.SECONDS).until(()-> !results.isEmpty());
-  //  assertThat(response).isNotNull().isInstanceOf(Response.class);
-  //}
 
   @Test
   public void testRemoveSession() {
-    remoteStatusService.removeSession("sean_1@temail.com", "12345678", p -> results.add(p));
-    Awaitility.waitAtMost(1000, TimeUnit.SECONDS).until(() -> !results.isEmpty());
+    remoteStatusService.removeSession("sean_1@temail.com", "12345678", results::add);
+    waitAtMost(1, TimeUnit.SECONDS).until(() -> !results.isEmpty());
     assertThat(results.get(0)).isInstanceOf(Response.class);
   }
 
   @Test
-  public void testRemoveSessions(){
-    List<Session> sessions = new ArrayList<Session>(){{
-      add(new Session("sean@temail.com","123"));
-      add(new Session("jean@temail.com","123"));
-    }};
-    remoteStatusService.removeSessions(sessions, p->results.add(p));
-    Awaitility.waitAtMost(1000, TimeUnit.SECONDS).until(()->!results.isEmpty());
-    assertThat(results.get(0)).isInstanceOf(Response.class);
-  }
+  public void testRemoveSessions() {
+    List<Session> sessions = asList(
+      new Session("sean@temail.com", "123"),
+      new Session("jean@temail.com", "123"));
 
-  @After
-  public void last4Awhile() {
-    try {
-      Thread.sleep(10000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+    remoteStatusService.removeSessions(sessions, results::add);
+    waitAtMost(1, TimeUnit.SECONDS).until(() -> !results.isEmpty());
+    assertThat(results.get(0)).isInstanceOf(Response.class);
   }
 }

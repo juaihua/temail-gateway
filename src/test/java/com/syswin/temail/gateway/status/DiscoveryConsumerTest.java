@@ -1,7 +1,10 @@
 package com.syswin.temail.gateway.status;
 
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.fail;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.waitAtMost;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -15,14 +18,16 @@ import au.com.dius.pact.model.RequestResponsePact;
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.Response;
-import com.syswin.temail.gateway.entity.TemailAcctSts;
-import com.syswin.temail.gateway.entity.TemailAcctStses;
+import com.syswin.temail.gateway.entity.TemailAccoutLocation;
+import com.syswin.temail.gateway.entity.TemailAccoutLocations;
 import com.syswin.temail.gateway.service.RemoteStatusService;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.reactive.function.client.WebClient;
+
 
 public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
 
@@ -36,6 +41,7 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
   private final String processId = "12345";
 
   private final TemailGatewayProperties properties = new TemailGatewayProperties();
+  private final Queue<Response<Void>> responses = new LinkedList<>();
 
   @Override
   public RequestResponsePact createPact(PactDslWithProvider pactDslWithProvider) {
@@ -44,33 +50,25 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
 
     return pactDslWithProvider
         .given("New connection")
-        .uponReceiving("new connection established")
-        .method("POST")
-        .body(gson.toJson(location()))
-        .headers(headers)
-        .path(path)
-        .willRespondWith()
-        .status(201)
-        .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-        .body(gson.toJson(Response.ok(CREATED, "Success")))
+          .uponReceiving("new connection established")
+          .method("POST")
+          .body(gson.toJson(location()))
+          .headers(headers)
+          .path(path)
+          .willRespondWith()
+          .status(201)
+          .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+          .body(gson.toJson(Response.ok(CREATED)))
         .given("Remove connection")
-        .uponReceiving("remove existing connection")
-        .method("DELETE")
-        .body(gson.toJson(location()))
-        .headers(headers)
-        .path(path)
-        .willRespondWith()
-        .status(200)
-        .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-        .body(gson.toJson(Response.ok(OK, "Success")))
-        .given("Locate connection")
-        .uponReceiving("locate connection by account")
-        .method("GET")
-        .path(path + "/")
-        .willRespondWith()
-        .status(200)
-        .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-        .body(gson.toJson(Response.ok(OK, location())))
+          .uponReceiving("remove existing connection")
+          .method("PUT")
+          .body(gson.toJson(location()))
+          .headers(headers)
+          .path(path)
+          .willRespondWith()
+          .status(200)
+          .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+          .body(gson.toJson(Response.ok()))
         .toPact();
   }
 
@@ -84,14 +82,13 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
     properties.getInstance().setMqTag(mqTag);
 
     RemoteStatusService statusService = new RemoteStatusService(properties, WebClient.create());
-    statusService.addSession(temail, deviceId, null);
-    statusService.removeSession(temail, deviceId, null);
-    statusService.locateTemailAcctSts(temail);
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException e) {
-      fail(e.getMessage());
-    }
+    statusService.addSession(temail, deviceId, responses::add);
+    waitAtMost(1, SECONDS).until(() -> !responses.isEmpty());
+    assertThat(responses.poll().getCode()).isEqualTo(CREATED.value());
+
+    statusService.removeSession(temail, deviceId, responses::add);
+    waitAtMost(1, SECONDS).until(() -> !responses.isEmpty());
+    assertThat(responses.poll().getCode()).isEqualTo(OK.value());
   }
 
   @Override
@@ -105,16 +102,14 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
   }
 
   @NotNull
-  private TemailAcctStses location() {
-    TemailAcctSts status = new TemailAcctSts(
+  private TemailAccoutLocations location() {
+    TemailAccoutLocation status = new TemailAccoutLocation(
         temail,
         deviceId,
         gatewayHost,
         processId,
         mqTopic,
         mqTag);
-    return new TemailAcctStses(new ArrayList<TemailAcctSts>() {{
-      add(status);
-    }});
+    return new TemailAccoutLocations(singletonList(status));
   }
 }

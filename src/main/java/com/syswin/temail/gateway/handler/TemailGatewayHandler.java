@@ -17,17 +17,14 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * Created by weis on 18/8/2.
- */
 @Slf4j
 @Component
 @Sharable
 public class TemailGatewayHandler extends SimpleChannelInboundHandler<CDTPPacket> {
 
-  private SessionService sessionService;
-  private RequestService requestService;
-  private HeartBeatService heartBeatService;
+  private final SessionService sessionService;
+  private final RequestService requestService;
+  private final HeartBeatService heartBeatService;
 
   public TemailGatewayHandler(SessionService sessionService,
       RequestService requestService, HeartBeatService heartBeatService) {
@@ -46,9 +43,10 @@ public class TemailGatewayHandler extends SimpleChannelInboundHandler<CDTPPacket
         } else if (packet.getCommand() == LOGIN.getCode()) {
           sessionService.login(channel, packet);
         } else if (packet.getCommand() == LOGOUT.getCode()) {
+          // TODO: 2018/8/31 only allowed after login
           sessionService.logout(channel, packet);
         } else {
-          // 其他连接请求
+          log.warn("Received unknown command {} {}", Integer.toHexString(packet.getCommandSpace()), Integer.toHexString(packet.getCommand()));
         }
       } else {
         requestService.handleRequest(channel, packet);

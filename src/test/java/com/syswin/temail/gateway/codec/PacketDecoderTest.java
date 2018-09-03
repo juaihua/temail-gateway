@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 
+//@Ignore
 public class PacketDecoderTest {
 
   private final ChannelHandlerContext context = null;

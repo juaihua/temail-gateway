@@ -17,16 +17,16 @@ public class Response<T> {
   private String message;
   private T data;
 
-  Response(HttpStatus status) {
+  private Response(HttpStatus status) {
     this.code = status.value();
   }
 
-  Response(HttpStatus status, String message) {
+  private Response(HttpStatus status, String message) {
     this.code = status.value();
     this.message = message;
   }
 
-  Response(HttpStatus status, String message, T data) {
+  private Response(HttpStatus status, String message, T data) {
     this.code = status.value();
     this.message = message;
     this.data = data;
@@ -34,6 +34,10 @@ public class Response<T> {
 
   public static <T> Response<T> ok() {
     return new Response<>(OK);
+  }
+
+  public static <T> Response<T> ok(HttpStatus status) {
+    return ok(status, null);
   }
 
   public static <T> Response<T> ok(T body) {

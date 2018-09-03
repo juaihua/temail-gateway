@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TemailAcctStses {
+public class TemailAccoutLocations {
 
-  private List<TemailAcctSts> statuses;
+  private List<TemailAccoutLocation> statuses;
 
 }

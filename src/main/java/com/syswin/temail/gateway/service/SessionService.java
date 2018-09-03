@@ -1,6 +1,8 @@
 package com.syswin.temail.gateway.service;
 
 
+import java.util.Collection;
+import java.util.function.Consumer;
 import javax.annotation.Resource;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -24,6 +26,8 @@ import org.springframework.web.client.RestTemplate;
 public class SessionService {
 
   private final LoginService loginService;
+  private final Consumer<Response<Void>> responseConsumer = ignored -> {
+  };
   @Resource
   private ChannelHolder channelHolder;
   @Resource
@@ -62,7 +66,7 @@ public class SessionService {
     String temail = packet.getHeader().getSender();
     String deviceId = packet.getHeader().getDeviceId();
     channelHolder.addSession(temail, deviceId, channel);
-    remoteStatusService.addSession(temail, deviceId, null);
+    remoteStatusService.addSession(temail, deviceId, responseConsumer);
     // 返回成功的消息
     CDTPLoginResp.Builder builder = CDTPLoginResp.newBuilder();
     builder.setCode(response == null ? HttpStatus.OK.value() : response.getCode());
@@ -106,7 +110,7 @@ public class SessionService {
     // TODO(姚华成) 对packet进行合法性校验
     String temail = packet.getHeader().getSender();
     String deviceId = packet.getHeader().getDeviceId();
-    remoteStatusService.removeSession(temail, deviceId,null);
+    remoteStatusService.removeSession(temail, deviceId, responseConsumer);
     CDTPLogoutResp.Builder builder = CDTPLogoutResp.newBuilder();
     builder.setCode(HttpStatus.OK.value());
     packet.setData(builder.build().toByteArray());
@@ -121,8 +125,8 @@ public class SessionService {
    * @param channel 用户连接通道
    */
   public void terminateChannel(Channel channel) {
-    Iterable<Session> sessions = channelHolder.removeChannel(channel);
-    remoteStatusService.removeSessions(sessions,null);
+    Collection<Session> sessions = channelHolder.removeChannel(channel);
+    remoteStatusService.removeSessions(sessions, responseConsumer);
   }
 
 }
