@@ -1,7 +1,7 @@
 package com.syswin.temail.gateway.client;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.delete;
+import static com.github.tomakehurst.wiremock.client.WireMock.any;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
@@ -13,7 +13,6 @@ import static com.syswin.temail.gateway.client.SingleCommandType.SEND_MESSAGE;
 import static com.syswin.temail.gateway.entity.CommandSpaceType.SINGLE_MESSAGE;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
@@ -27,9 +26,9 @@ import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.containers.RocketMqBrokerContainer;
 import com.syswin.temail.gateway.containers.RocketMqNameServerContainer;
 import com.syswin.temail.gateway.entity.CDTPPacket;
+import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.gateway.entity.Response;
-import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
@@ -94,7 +93,7 @@ public class YHCIntegrationTest {
   private TemailGatewayProperties properties;
 
   @BeforeClass
-  public static void beforeClass() throws MQClientException {
+  public static void beforeClass() throws MQClientException, InterruptedException {
     stubFor(post(urlEqualTo("/verify"))
         .willReturn(
             aResponse()
@@ -103,21 +102,14 @@ public class YHCIntegrationTest {
                 .withBody(gson.toJson(Response.ok())))
     );
 
-    stubFor(post(urlEqualTo("/dispatch"))
+    stubFor(any(urlEqualTo("/dispatch"))
         .willReturn(
             aResponse()
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withStatus(OK.value())
                 .withBody(gson.toJson(Response.ok(ackPayload())))));
 
-    stubFor(post(urlEqualTo("/updateStatus"))
-        .willReturn(
-            aResponse()
-                .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
-                .withStatus(SC_OK)
-                .withBody(gson.toJson(Response.ok("Success")))));
-
-    stubFor(delete(urlEqualTo("/updateStatus"))
+    stubFor(any(urlEqualTo("/updateStatus"))
         .willReturn(
             aResponse()
                 .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
@@ -127,12 +119,16 @@ public class YHCIntegrationTest {
     createMqTopic();
   }
 
-  private static void createMqTopic() throws MQClientException {
+  private static void createMqTopic() throws MQClientException, InterruptedException {
+    Thread.sleep(3000);
     mqProducer.setNamesrvAddr(rocketMqNameSrv.getContainerIpAddress() + ":" + MQ_SERVER_PORT);
     mqProducer.start();
-    await().atMost(5, TimeUnit.SECONDS);
     // ensure topic exists before consumer connects, or no message will be received
-    mqProducer.createTopic(mqProducer.getCreateTopicKey(), "temail-gateway", 1);
+    try {
+      mqProducer.createTopic(mqProducer.getCreateTopicKey(), "temail-gateway", 1);
+    } catch (MQClientException e) {
+      // 直接忽略吧
+    }
   }
 
   @Before
@@ -178,7 +174,7 @@ public class YHCIntegrationTest {
     // TODO(姚华成): 群聊
 
     // 接收消息
-    CDTPPacket packet = mqMsgPayload(sender, message);
+    CDTPPacketTrans packet = mqMsgPayload(sender, message);
     mqProducer.send(new Message(properties.getRocketmq().getMqTopic(), properties.getInstance().getMqTag(),
         gson.toJson(packet).getBytes()), 3000);
     CDTPPacket newResult = client.getNewResult();

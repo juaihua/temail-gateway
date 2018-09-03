@@ -19,6 +19,7 @@ message CDTPHeader {
   string at = 11;
   string topic = 12;
   string extraData = 13;
+//  string targetAddress = 14;
 }
 
 

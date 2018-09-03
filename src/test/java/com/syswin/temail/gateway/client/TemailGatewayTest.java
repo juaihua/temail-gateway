@@ -6,11 +6,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
+import static com.syswin.temail.gateway.Constants.NOTIFY_COMMAND;
 import static com.syswin.temail.gateway.client.PacketMaker.loginPacket;
+import static com.syswin.temail.gateway.client.PacketMaker.mqMsgPayload;
 import static com.syswin.temail.gateway.client.PacketMaker.singleChatPacket;
 import static com.syswin.temail.gateway.client.SingleCommandType.SEND_MESSAGE;
 import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
 import static com.syswin.temail.gateway.entity.CommandSpaceType.SINGLE_MESSAGE;
+import static com.syswin.temail.gateway.entity.CommandSpaceType.SYNC_STATUS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.HttpStatus.SC_OK;
@@ -24,14 +27,11 @@ import com.google.gson.Gson;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.containers.RocketMqBrokerContainer;
 import com.syswin.temail.gateway.containers.RocketMqNameServerContainer;
-import com.syswin.temail.gateway.entity.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.gateway.entity.CommandType;
 import com.syswin.temail.gateway.entity.Response;
 import io.netty.channel.Channel;
-import java.util.Base64;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -58,7 +58,7 @@ import org.testcontainers.containers.Network;
         "temail.gateway.dispatchUrl=http://localhost:8090/dispatch",
         "temail.gateway.updateSocketStatusUrl=http://localhost:8090/locations",
         "temail.gateway.rocketmq.mq-topic=temail-gateway",
-        "temail.gateway.netty.read-idle-time-seconds=3"
+        "temail.gateway.netty.read-idle-time-seconds=3000"
     })
 @RunWith(SpringRunner.class)
 @ActiveProfiles({"debug", "dev"})
@@ -147,6 +147,10 @@ public class TemailGatewayTest {
   }
 
   private static void createMqTopic() throws MQClientException {
+    try {
+      Thread.sleep(3000);
+    } catch (InterruptedException e) {
+    }
     mqProducer.setNamesrvAddr(rocketMqNameSrv.getContainerIpAddress() + ":" + MQ_SERVER_PORT);
     mqProducer.start();
     // ensure topic exists before consumer connects, or no message will be received
@@ -175,7 +179,7 @@ public class TemailGatewayTest {
   @Test
   public void shouldRunFullCycle() throws Exception {
     // login
-    await().atMost(3, SECONDS).until(() -> !responseHandler.receivedMessages().isEmpty());
+    await().atMost(30, SECONDS).until(() -> !responseHandler.receivedMessages().isEmpty());
     CDTPPacket packet = responseHandler.receivedMessages().poll();
     assertThat(packet.getCommandSpace()).isEqualTo((CHANNEL.getCode()));
     assertThat(packet.getCommand()).isEqualTo(CommandType.LOGIN.getCode());
@@ -185,7 +189,7 @@ public class TemailGatewayTest {
 
     // ack for sent message
     channel.writeAndFlush(singleChatPacket(sender, receiver, message, deviceId));
-    await().atMost(3, SECONDS).until(() -> !responseHandler.receivedMessages().isEmpty());
+    await().atMost(30, SECONDS).until(() -> !responseHandler.receivedMessages().isEmpty());
     packet = responseHandler.receivedMessages().poll();
     assertThat(packet.getCommandSpace()).isEqualTo(SINGLE_MESSAGE.getCode());
     assertThat(packet.getCommand()).isEqualTo(SEND_MESSAGE.getCode());
@@ -198,26 +202,14 @@ public class TemailGatewayTest {
     // receive message from MQ
     mqProducer.send(new Message(properties.getRocketmq().getMqTopic(), properties.getInstance().getMqTag(),
         GSON.toJson(mqMsgPayload(sender, message)).getBytes()), 3000);
-    await().atMost(5, SECONDS).until(() -> !responseHandler.receivedMessages().isEmpty());
+    await().atMost(50, SECONDS).until(() -> !responseHandler.receivedMessages().isEmpty());
     packet = responseHandler.receivedMessages().poll();
-    assertThat(packet.getCommandSpace()).isEqualTo(SINGLE_MESSAGE.getCode());
-    assertThat(packet.getCommand()).isEqualTo(SEND_MESSAGE.getCode());
+    assertThat(packet.getCommandSpace()).isEqualTo(SYNC_STATUS.getCode());
+    assertThat(packet.getCommand()).isEqualTo(NOTIFY_COMMAND);
 
     response = GSON.fromJson(new String(packet.getData()), Response.class);
     assertThat(response.getCode()).isEqualTo(200);
     assertThat(response.getData()).isEqualTo(message);
-  }
-
-  private CDTPPacketTrans mqMsgPayload(String recipient, String message) {
-    Response<String> body = Response.ok(message);
-    CDTPPacketTrans payload = new CDTPPacketTrans();
-    payload.setCommandSpace(SINGLE_MESSAGE.getCode());
-    payload.setCommand(SEND_MESSAGE.getCode());
-    CDTPHeader header = new CDTPHeader();
-    header.setReceiver(recipient);
-    payload.setHeader(header);
-    payload.setData(Base64.getEncoder().encodeToString(GSON.toJson(body).getBytes()));
-    return payload;
   }
 
 }

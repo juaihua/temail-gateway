@@ -35,9 +35,8 @@ public class MessageHandlerConsumerTest {
 
   private final String recipient = "sean@t.email";
   private final Gson gson = new Gson();
-
+  private final CDTPPacketTrans payload = mqMsgPayload(recipient, "bonjour");
   private byte[] currentMessage;
-  private final CDTPPacketTrans payload = new CDTPPacketTrans(mqMsgPayload(recipient, "bonjour"));
 
   @Pact(provider = "temail-dispatcher-mq", consumer = "temail-gateway-mq")
   public MessagePact createPact(MessagePactBuilder builder) {

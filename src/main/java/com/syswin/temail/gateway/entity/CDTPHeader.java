@@ -25,6 +25,7 @@ public final class CDTPHeader {
   private String at;
   private String topic;
   private String extraData;
+//  private String targetAddress;
 
   public CDTPHeader() {
   }

@@ -40,13 +40,25 @@ Configuration:
         level: info
         additivity: false
         AppenderRef:
-          ref: ASYNC_LOGFILE
+          ref: CONSOLE
       -
         name: com.syswin
         level: info
         additivity: false
         AppenderRef:
-          ref: ASYNC_LOGFILE
+          ref: CONSOLE
+      -
+        name: com.syswin.temail.gateway.connection.TemailGatewayServer
+        level: info
+        additivity: false
+        AppenderRef:
+          ref: CONSOLE
+      -
+        name: com.syswin.temail.gateway.TemailGatewayApplication
+        level: info
+        additivity: false
+        AppenderRef:
+          ref: CONSOLE
     root:
       level: info
       AppenderRef:
