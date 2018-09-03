@@ -12,12 +12,15 @@ class CommandAwareBodyExtractor implements BodyExtractor {
   }
 
   @Override
-  public byte[] fromBuffer(short commandSpace, short command, ByteBuf byteBuf) {
+  public byte[] fromBuffer(short commandSpace, short command, ByteBuf byteBuf, int remainingBytes) {
+    int remaining = remainingBytes;
     if (isSendSingleMsg(commandSpace, command)) {
       // 单聊的消息比较特殊，把CDTP协议的整个数据打包编码后，放到Packet的Data里。
+      int readableBytes = byteBuf.readableBytes();
       byteBuf.resetReaderIndex();
+      remaining += byteBuf.readableBytes() - readableBytes;
     }
-    return bodyExtractor.fromBuffer(commandSpace, command, byteBuf);
+    return bodyExtractor.fromBuffer(commandSpace, command, byteBuf, remaining);
   }
 
   private boolean isSendSingleMsg(short commandSpace, short command) {
