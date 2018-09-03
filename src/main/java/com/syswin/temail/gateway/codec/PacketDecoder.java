@@ -34,9 +34,9 @@ public class PacketDecoder extends ByteToMessageDecoder {
     if (packetLength <= 0) {
       throw new PacketException("包长度不合法：" + packetLength);
     }
-    if (byteBuf.readableBytes() != packetLength) {
-      throw new PacketException("无法读取到包长度指定的全部包数据：packetLength=" + packetLength
-          + "，剩余可读取的数据长度" + byteBuf.readableBytes());
+    if (byteBuf.readableBytes() < packetLength) {
+      byteBuf.resetReaderIndex();
+      return;
     }
     byteBuf.markReaderIndex();
     short commandSpace = byteBuf.readShort();
@@ -70,7 +70,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
       packet.setHeader(new CDTPHeader(cdtpHeader));
     }
 
-    byte[] data = bodyExtractor.fromBuffer(commandSpace, command, byteBuf);
+    byte[] data = bodyExtractor.fromBuffer(commandSpace, command, byteBuf, packetLength - headerLength - 8);
 
     packet.setData(data);
     list.add(packet);
