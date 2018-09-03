@@ -31,13 +31,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
 
-  private static final String ackMessage = uniquify("Sent");
+  //private static final String ackMessage = uniquify("Sent");
+  private static final String ackMessage = "Sent ackMessage";
   private final String path = "/dispatch";
   private final Gson gson = new Gson();
   private final String sender = "jack@t.email";
   private final String receiver = "sean@t.email";
   private final String message = "hello world";
-  private final String deviceId = uniquify("deviceId");
+  private final String deviceId = "deviceId_5514";
   private final CDTPPacketTrans packet = new CDTPPacketTrans(singleChatPacket(sender, receiver, message, deviceId));
   private volatile Response resultResponse = null;
 

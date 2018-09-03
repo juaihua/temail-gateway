@@ -1,8 +1,8 @@
 package com.syswin.temail.gateway.client;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
@@ -26,10 +26,12 @@ import com.syswin.temail.gateway.containers.RocketMqBrokerContainer;
 import com.syswin.temail.gateway.containers.RocketMqNameServerContainer;
 import com.syswin.temail.gateway.entity.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPPacket;
+import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.gateway.entity.CommandType;
 import com.syswin.temail.gateway.entity.Response;
 import io.netty.channel.Channel;
+import java.util.Base64;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -112,14 +114,14 @@ public class TemailGatewayTest {
                 .withStatus(SC_OK)
                 .withBody(GSON.toJson(Response.ok(ackPayload())))));
 
-    stubFor(post(urlEqualTo("/updateStatus"))
+    stubFor(post(urlEqualTo("/locations"))
         .willReturn(
             aResponse()
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
                 .withStatus(SC_OK)
                 .withBody(GSON.toJson(Response.ok("Success")))));
 
-    stubFor(delete(urlEqualTo("/updateStatus"))
+    stubFor(put(urlEqualTo("/locations"))
         .willReturn(
             aResponse()
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
@@ -206,16 +208,15 @@ public class TemailGatewayTest {
     assertThat(response.getData()).isEqualTo(message);
   }
 
-  @NotNull
-  private CDTPPacket mqMsgPayload(String recipient, String message) {
+  private CDTPPacketTrans mqMsgPayload(String recipient, String message) {
     Response<String> body = Response.ok(message);
-    CDTPPacket payload = new CDTPPacket();
+    CDTPPacketTrans payload = new CDTPPacketTrans();
     payload.setCommandSpace(SINGLE_MESSAGE.getCode());
     payload.setCommand(SEND_MESSAGE.getCode());
     CDTPHeader header = new CDTPHeader();
     header.setReceiver(recipient);
     payload.setHeader(header);
-    payload.setData(GSON.toJson(body).getBytes());
+    payload.setData(Base64.getEncoder().encodeToString(GSON.toJson(body).getBytes()));
     return payload;
   }
 
