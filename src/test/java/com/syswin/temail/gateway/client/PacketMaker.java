@@ -65,7 +65,7 @@ public class PacketMaker {
     header.setSignatureAlgorithm(1);
     header.setTimestamp(System.currentTimeMillis());
     header.setDataEncryptionMethod(0);
-    header.setPacketId("PacketId1234");
+    header.setPacketId("PacketId12345");
     header.setSender(sender);
     header.setSenderPK("SenderPK");
 //    header.setReceiver("sean@t.email");
