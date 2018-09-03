@@ -33,7 +33,7 @@ public class PacketMaker {
     header.setSignatureAlgorithm(1);
     header.setSignature("sign");
     header.setDataEncryptionMethod(0);
-    header.setTimestamp(System.currentTimeMillis());
+    header.setTimestamp(1535713173935L);
     header.setPacketId("pkgId");
     header.setDeviceId(deviceId);
     header.setSender(sender);
