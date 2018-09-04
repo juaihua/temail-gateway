@@ -19,7 +19,7 @@ public class YHCClientResponseHandler extends SimpleChannelInboundHandler<CDTPPa
   private CountDownLatch latch;
   private CDTPPacket result;
   @Getter
-  private boolean newResult;
+  private volatile boolean newResult;
 
   public CDTPPacket getResult() {
     newResult = false;

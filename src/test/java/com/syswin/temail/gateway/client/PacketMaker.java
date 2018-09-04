@@ -9,6 +9,7 @@ import static com.syswin.temail.gateway.entity.CommandSpaceType.SYNC_STATUS;
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPPacket;
+import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogin.Builder;
 import com.syswin.temail.gateway.entity.CommandSpaceType;
@@ -33,7 +34,7 @@ public class PacketMaker {
     header.setSignatureAlgorithm(1);
     header.setSignature("sign");
     header.setDataEncryptionMethod(0);
-    header.setTimestamp(System.currentTimeMillis());
+    header.setTimestamp(1535713173935L);
     header.setPacketId("pkgId");
     header.setDeviceId(deviceId);
     header.setSender(sender);
@@ -65,7 +66,7 @@ public class PacketMaker {
     header.setSignatureAlgorithm(1);
     header.setTimestamp(System.currentTimeMillis());
     header.setDataEncryptionMethod(0);
-    header.setPacketId("PacketId1234");
+    header.setPacketId("PacketId12345");
     header.setSender(sender);
     header.setSenderPK("SenderPK");
 //    header.setReceiver("sean@t.email");
@@ -100,7 +101,7 @@ public class PacketMaker {
     return payload;
   }
 
-  public static CDTPPacket mqMsgPayload(String recipient, String message) {
+  public static CDTPPacketTrans mqMsgPayload(String recipient, String message) {
     Response<String> body = Response.ok(message);
     CDTPPacket payload = new CDTPPacket();
     payload.setCommandSpace(SYNC_STATUS.getCode());
@@ -110,7 +111,7 @@ public class PacketMaker {
     header.setReceiver(recipient);
     payload.setHeader(header);
     payload.setData(gson.toJson(body).getBytes());
-    return payload;
+    return new CDTPPacketTrans(payload);
   }
 
 }

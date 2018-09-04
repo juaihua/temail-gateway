@@ -30,8 +30,6 @@ public class PacketEncoder extends MessageToByteEncoder<CDTPPacket> {
   @Override
   protected void encode(ChannelHandlerContext channelHandlerContext,
       CDTPPacket packet, ByteBuf byteBuf) {
-    log.info("写入通道的信息是：CommandSpace={},Command={},CDTPHeader={},"
-        + "Data={}", packet.getCommandSpace(), packet.getCommand(), packet.getHeader(), new String(packet.getData()));
     byteBuf.writeShort(packet.getCommandSpace());
     byteBuf.writeShort(packet.getCommand());
     byteBuf.writeShort(packet.getVersion());
@@ -44,5 +42,8 @@ public class PacketEncoder extends MessageToByteEncoder<CDTPPacket> {
       byteBuf.writeShort(0);
     }
     byteBuf.writeBytes(packet.getData());
+
+    log.info("写入通道的信息是：CommandSpace={},Command={},CDTPHeader={},"
+        + "Data={}", packet.getCommandSpace(), packet.getCommand(), packet.getHeader(), new String(packet.getData()));
   }
 }

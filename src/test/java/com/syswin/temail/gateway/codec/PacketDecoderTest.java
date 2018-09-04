@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 
-//@Ignore
 public class PacketDecoderTest {
 
   private final ChannelHandlerContext context = null;
@@ -26,10 +25,13 @@ public class PacketDecoderTest {
   public void shouldDecodeNormalPacketBytes() throws Exception {
     CDTPPacket packet = PacketMaker.loginPacket(sender, deviceId);
     ByteBuf buffer = Unpooled.buffer();
-    // TODO(此处固定写长度，需要优化：结合LengthFieldPrepender等类进行处理)
-    buffer.writeInt(169);
+    ByteBuf bufferIncludeLength = Unpooled.buffer();
+
     encoder.encode(context, packet, buffer);
-    decoder.decode(context, buffer, packets);
+    bufferIncludeLength.writeInt(buffer.readableBytes());
+    bufferIncludeLength.writeBytes(buffer.retain());
+
+    decoder.decode(context, bufferIncludeLength, packets);
 
     assertThat(packets).isNotEmpty();
     assertThat(packets.get(0)).isEqualTo(packet);
@@ -40,11 +42,13 @@ public class PacketDecoderTest {
     String message = "hello world";
     CDTPPacket packet = PacketMaker.singleChatPacket(sender, "recipient", message, deviceId);
     ByteBuf buffer = Unpooled.buffer();
+    ByteBuf bufferIncludeLength = Unpooled.buffer();
 
-    // TODO(此处固定写长度，需要优化：结合LengthFieldPrepender等类进行处理)
-    buffer.writeInt(198);
     encoder.encode(context, packet, buffer);
-    decoder.decode(context, buffer, packets);
+    bufferIncludeLength.writeInt(buffer.readableBytes());
+    bufferIncludeLength.writeBytes(buffer.retain());
+
+    decoder.decode(context, bufferIncludeLength, packets);
 
     assertThat(packets).isNotEmpty();
     CDTPPacket actual = ((CDTPPacket) packets.get(0));
@@ -57,9 +61,8 @@ public class PacketDecoderTest {
 
     packets.clear();
     buffer.clear();
-    buffer.writeInt(198);
 
-    // data field of decoded packet contains all packet bytes except length field
+    // 经过修改以后，单聊的Data中的CDTP数据已经包含了长度
     buffer.writeBytes(actual.getData());
 
     decoder.decode(context, buffer, packets);

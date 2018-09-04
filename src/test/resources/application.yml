@@ -6,9 +6,6 @@ spring:
   - com.systoon.integration.spring.boot.disconf.context.config.ConfigurationPropertiesRebinderAutoConfiguration
   - com.systoon.integration.spring.boot.disconf.context.config.RefreshAutoConfiguration
 
-logging:
-  config: classpath:log4j2.xml
-
 temail:
   gateway:
     verifyUrl: http://temail-dispatch:8081/verify

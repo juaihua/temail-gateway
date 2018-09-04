@@ -64,11 +64,15 @@ public class YHCNettyClient {
   }
 
   public CDTPPacket syncExecute(CDTPPacket reqPacket) {
+    return syncExecute(reqPacket, 30,TimeUnit.SECONDS);
+  }
+
+  public CDTPPacket syncExecute(CDTPPacket reqPacket, long timeout, TimeUnit timeUnit) {
     try {
       CountDownLatch latch = new CountDownLatch(1);
       responseHandler.resetLatch(latch);
       channel.writeAndFlush(reqPacket);
-      latch.await();
+      latch.await(timeout, timeUnit);
       return responseHandler.getResult();
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
@@ -76,7 +80,11 @@ public class YHCNettyClient {
   }
 
   public CDTPPacket getNewResult() {
-    Awaitility.await().atMost(300, TimeUnit.SECONDS).until(() -> responseHandler.isNewResult());
+    return getNewResult(30,TimeUnit.SECONDS);
+  }
+
+  public CDTPPacket getNewResult(long timeout, TimeUnit timeUnit) {
+    Awaitility.await().atMost(timeout, timeUnit).until(() -> responseHandler.isNewResult());
     return responseHandler.getResult();
   }
 

@@ -8,6 +8,6 @@ public class Constants {
 
   public static final short CDTP_VERSION = 1;
   public static final int LENGTH_FIELD_LENGTH = 4;
-  public static final short NOTIFY_COMMAND = 2;
+  public static final short NOTIFY_COMMAND = 3;
 
 }
