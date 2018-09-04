@@ -16,8 +16,7 @@ public class SHA256CoderTest {
 
   @Test
   public void testSHA256() throws Exception {
-    for(int i = 0; i < 100; i++){
-      String testData = "Thank you!"+i;
+      String testData = "Thank you!";
       log.info("测试数据：{}", testData);
 
       String encryptedData = sha256Coder
@@ -26,6 +25,5 @@ public class SHA256CoderTest {
 
       assertThat(base64Coder.decrypt(encryptedData))
           .isEqualTo(sha256Coder.encrypt(testData.getBytes(charSet)));
-    }
   }
 }

@@ -32,11 +32,12 @@ class LoginService {
   }
 
 
-  public ResponseEntity<Response> validSignature(String temail, String signature, String unsignedText) {
+  public ResponseEntity<Response> validSignature(String temail, String signature, String unsignedText, String signatureAlgorithm) {
     Map<String, String> map = new HashMap<>();
     map.put("temail", temail);
     map.put("unsignedBytes", unsignedText);
     map.put("signature", signature);
+    map.put("signatureAlgorithm",signatureAlgorithm);
     String authDataJson = gson.toJson(map);
     HttpEntity<String> requestEntity = new HttpEntity<>(authDataJson, httpHeaders);
     try {

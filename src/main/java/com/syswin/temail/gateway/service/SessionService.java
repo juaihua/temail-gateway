@@ -64,7 +64,8 @@ public class SessionService {
     // TODO(姚华成): 这个cdtpLogin对象暂时没用，后续根据业务需要再完善？
     // TODO 当前认证请求做简化处理，未来需要完善
     ResponseEntity<Response> responseEntity = loginService.validSignature(temail,
-        packet.getHeader().getSignature(), extractUnsignedData(packet));
+        packet.getHeader().getSignature(), extractUnsignedData(packet),
+        packet.getHeader().getSignatureAlgorithm() + "");
     Response response = responseEntity.getBody();
     if (responseEntity.getStatusCode().is2xxSuccessful()) {
       loginSuccess(channel, packet, response);
