@@ -83,11 +83,11 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
 
     RemoteStatusService statusService = new RemoteStatusService(properties, WebClient.create());
     statusService.addSession(temail, deviceId, responses::add);
-    waitAtMost(1, SECONDS).until(() -> !responses.isEmpty());
+    waitAtMost(5, SECONDS).until(() -> !responses.isEmpty());
     assertThat(responses.poll().getCode()).isEqualTo(CREATED.value());
 
     statusService.removeSession(temail, deviceId, responses::add);
-    waitAtMost(1, SECONDS).until(() -> !responses.isEmpty());
+    waitAtMost(5, SECONDS).until(() -> !responses.isEmpty());
     assertThat(responses.poll().getCode()).isEqualTo(OK.value());
   }
 

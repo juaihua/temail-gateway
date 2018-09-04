@@ -62,8 +62,7 @@ public class PacketDecoderTest {
     packets.clear();
     buffer.clear();
 
-    // data field of decoded packet contains all packet bytes except length field
-    buffer.writeInt(actual.getData().length);
+    // 经过修改以后，单聊的Data中的CDTP数据已经包含了长度
     buffer.writeBytes(actual.getData());
 
     decoder.decode(context, buffer, packets);
