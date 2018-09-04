@@ -77,20 +77,26 @@ public class MessageHandlerConsumerTest {
   private PactDslJsonBody packetJson(CDTPPacketTrans cdtpPacketTrans, PactDslJsonBody body) {
     PactDslJsonBody header = new PactDslJsonBody("header", "", body);
 
-    header.stringValue("deviceId", cdtpPacketTrans.getHeader().getDeviceId());
+    setStringIfNotNull(header, "deviceId", cdtpPacketTrans.getHeader().getDeviceId());
     header.numberValue("signatureAlgorithm", cdtpPacketTrans.getHeader().getSignatureAlgorithm());
-    header.stringValue("signature", cdtpPacketTrans.getHeader().getSignature());
+    setStringIfNotNull(header, "signature", cdtpPacketTrans.getHeader().getSignature());
     header.numberValue("dataEncryptionMethod", cdtpPacketTrans.getHeader().getDataEncryptionMethod());
     header.numberValue("timestamp", cdtpPacketTrans.getHeader().getTimestamp());
-    header.stringValue("packetId", cdtpPacketTrans.getHeader().getPacketId());
-    header.stringValue("sender", cdtpPacketTrans.getHeader().getSender());
-    header.stringValue("senderPK", cdtpPacketTrans.getHeader().getSenderPK());
-    header.stringValue("receiver", cdtpPacketTrans.getHeader().getReceiver());
-    header.stringValue("receiverPK", cdtpPacketTrans.getHeader().getReceiverPK());
-    header.stringValue("at", cdtpPacketTrans.getHeader().getAt());
-    header.stringValue("topic", cdtpPacketTrans.getHeader().getTopic());
-    header.stringValue("extraData", cdtpPacketTrans.getHeader().getExtraData());
+    setStringIfNotNull(header, "packetId", cdtpPacketTrans.getHeader().getPacketId());
+    setStringIfNotNull(header, "sender", cdtpPacketTrans.getHeader().getSender());
+    setStringIfNotNull(header, "senderPK", cdtpPacketTrans.getHeader().getSenderPK());
+    setStringIfNotNull(header, "receiver", cdtpPacketTrans.getHeader().getReceiver());
+    setStringIfNotNull(header, "receiverPK", cdtpPacketTrans.getHeader().getReceiverPK());
+    setStringIfNotNull(header, "at", cdtpPacketTrans.getHeader().getAt());
+    setStringIfNotNull(header, "topic", cdtpPacketTrans.getHeader().getTopic());
+    setStringIfNotNull(header, "extraData", cdtpPacketTrans.getHeader().getExtraData());
     return header;
+  }
+
+  private void setStringIfNotNull(PactDslJsonBody header, String key, String value) {
+    if (value != null) {
+      header.stringValue(key, value);
+    }
   }
 
   private PactDslJsonBody bodyJson(CDTPPacketTrans cdtpPacketTrans) {
