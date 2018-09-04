@@ -30,6 +30,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
       List<Object> list) throws Exception {
     CDTPPacket packet = new CDTPPacket();
 
+    byteBuf.markReaderIndex();
     int packetLength = byteBuf.readInt();
     if (packetLength <= 0) {
       throw new PacketException("包长度不合法：" + packetLength);
@@ -38,7 +39,6 @@ public class PacketDecoder extends ByteToMessageDecoder {
       byteBuf.resetReaderIndex();
       return;
     }
-    byteBuf.markReaderIndex();
     short commandSpace = byteBuf.readShort();
     if (commandSpace < 0) {
       throw new PacketException("命令空间不合法，commandSpace=" + commandSpace);

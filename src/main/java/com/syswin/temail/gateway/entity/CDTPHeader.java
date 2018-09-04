@@ -25,7 +25,7 @@ public final class CDTPHeader {
   private String at;
   private String topic;
   private String extraData;
-//  private String targetAddress;
+  private String targetAddress;
 
   public CDTPHeader() {
   }
@@ -46,6 +46,7 @@ public final class CDTPHeader {
     this.setAt(nullable(cdtpHeader.getAt()));
     this.setTopic(nullable(cdtpHeader.getTopic()));
     this.setExtraData(nullable(cdtpHeader.getExtraData()));
+    this.setTargetAddress(nullable(cdtpHeader.getTargetAddress()));
   }
 
   private static String nullable(String value) {
@@ -95,6 +96,9 @@ public final class CDTPHeader {
     }
     if (extraData != null) {
       builder.setExtraData(getExtraData());
+    }
+    if (targetAddress != null) {
+      builder.setTargetAddress(getTargetAddress());
     }
     return builder.build();
   }
