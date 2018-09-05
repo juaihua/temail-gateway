@@ -1,6 +1,7 @@
 package com.syswin.temail.gateway;
 
 import com.syswin.temail.gateway.utils.LocalMachineUtil;
+import java.util.UUID;
 import lombok.Data;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -61,7 +62,8 @@ public class TemailGatewayProperties {
 
     private Instance() {
       hostOf = LocalMachineUtil.getLocalIp();
-      processId = LocalMachineUtil.getLocalProccesId();
+      //processId = LocalMachineUtil.getLocalProccesId();
+      processId = UUID.randomUUID().toString().replace("-", "").toLowerCase();
       mqTag = "temail-server-" + hostOf + "-" + processId;
     }
 
