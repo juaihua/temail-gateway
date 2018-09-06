@@ -27,6 +27,7 @@ class MessageHandler {
       String receiver = packet.getHeader().getReceiver();
       Iterable<Channel> channels = channelHolder.getChannels(receiver);
       for (Channel channel : channels) {
+        log.info("当前推送的通道信息：{}", channel);
         channel.writeAndFlush(packet);
       }
     } catch (JsonSyntaxException e) {

@@ -50,6 +50,8 @@ public class RequestService {
                 respPacket =
                     errorPacket(packet, INTERNAL_ERROR.getCode(), "dispatcher请求没有从服务器端返回结果对象：");
               }
+              // 请求的数据可能加密，而返回的数据没有加密，需要设置加密标识
+              respPacket.getHeader().setDataEncryptionMethod(0);
               channel.writeAndFlush(respPacket);
             }), t -> channel.writeAndFlush(
             errorPacket(packet, INTERNAL_ERROR.getCode(), t.getMessage())));
