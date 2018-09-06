@@ -1,10 +1,11 @@
 package com.syswin.temail.gateway.service;
 
+import com.google.gson.Gson;
+import com.syswin.temail.gateway.encrypt.util.SHA256Coder;
+import com.syswin.temail.gateway.entity.CDTPPacket;
+import com.syswin.temail.gateway.entity.Response;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.google.gson.Gson;
-import com.syswin.temail.gateway.entity.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,9 +20,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 class LoginService {
 
   private final RestTemplate restTemplate;
+
   private final String authUrl;
+
   private final Gson gson;
+
   private final HttpHeaders httpHeaders = new HttpHeaders();
+
+  private SHA256Coder sha256Coder = new SHA256Coder();
 
 
   public LoginService(RestTemplate restTemplate, String authUrl) {
@@ -32,20 +38,38 @@ class LoginService {
   }
 
 
-  public ResponseEntity<Response> validSignature(String temail, String signature, String unsignedText) {
+  public ResponseEntity<Response> validSignature(CDTPPacket cdtpPacket) {
+    return this.validSignature(cdtpPacket.getHeader().getSender(),
+        cdtpPacket.getHeader().getSignature(),
+        extractUnsignedData(cdtpPacket),
+        cdtpPacket.getHeader().getSignatureAlgorithm() + "");
+  }
+
+  public ResponseEntity<Response> validSignature(String temail, String signature,
+      String unsignedText, String signatureAlgorithm) {
     Map<String, String> map = new HashMap<>();
     map.put("temail", temail);
     map.put("unsignedBytes", unsignedText);
     map.put("signature", signature);
+    map.put("signatureAlgorithm", signatureAlgorithm);
     String authDataJson = gson.toJson(map);
     HttpEntity<String> requestEntity = new HttpEntity<>(authDataJson, httpHeaders);
     try {
-      return restTemplate
-          .postForEntity(authUrl, requestEntity, Response.class);
+      return restTemplate.postForEntity(authUrl, requestEntity, Response.class);
     } catch (RestClientException e) {
       log.error("Failed to reach remote auth service at {}", authUrl, e);
-      return new ResponseEntity<>(Response.failed(SERVICE_UNAVAILABLE, e.getMessage()), SERVICE_UNAVAILABLE);
+      return new ResponseEntity<>(Response.failed(SERVICE_UNAVAILABLE,
+          e.getMessage()), SERVICE_UNAVAILABLE);
     }
+  }
+
+  public String extractUnsignedData(CDTPPacket cdtpPacket) {
+    StringBuilder unSignedData = new StringBuilder();
+    unSignedData.append((cdtpPacket.getCommandSpace() + cdtpPacket.getCommand()))
+        .append(cdtpPacket.getHeader().getReceiver())
+        .append(cdtpPacket.getHeader().getTimestamp())
+        .append(sha256Coder.encryptAndSwitch2Base64(cdtpPacket.getData()));
+    return unSignedData.toString();
   }
 
 }

@@ -31,6 +31,7 @@ public class LoginConsumerTest extends ConsumerPactTestMk2 {
   private final String sean = "sean@t.email";
   private final String signature = "signed-abc";
   private final String unsignedText = "abc";
+  private final String signatureAlgorithm = "1";
 
   @Before
   public void setUp() {
@@ -49,7 +50,8 @@ public class LoginConsumerTest extends ConsumerPactTestMk2 {
           .body("{\n"
               + "  \"temail\": \"" + sean + "\",\n"
               + "  \"signature\": \"" + signature + "\",\n"
-              + "  \"unsignedBytes\": \"" + unsignedText + "\"\n"
+              + "  \"unsignedBytes\": \"" + unsignedText + "\",\n"
+              + "  \"signatureAlgorithm\": \"" + signatureAlgorithm + "\"\n"
               + "}")
           .headers(headers)
           .path(path)
@@ -57,13 +59,14 @@ public class LoginConsumerTest extends ConsumerPactTestMk2 {
           .status(200)
           .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
           .body(gson.toJson(Response.ok(OK, "Success")))
-          .given("User jack is not registered")
+        .given("User jack is not registered")
           .uponReceiving("Jack requested to log in")
           .method("POST")
           .body("{\n"
               + "  \"temail\": \"jack@t.email\",\n"
               + "  \"signature\": \"" + signature + "\",\n"
-              + "  \"unsignedBytes\": \"" + unsignedText + "\"\n"
+              + "  \"unsignedBytes\": \"" + unsignedText + "\",\n"
+              + "  \"signatureAlgorithm\": \"" + signatureAlgorithm + "\"\n"
               + "}")
           .headers(headers)
           .path(path)
@@ -77,7 +80,8 @@ public class LoginConsumerTest extends ConsumerPactTestMk2 {
           .body("{\n"
               + "  \"temail\": \"mike@t.email\",\n"
               + "  \"signature\": \"" + signature + "\",\n"
-              + "  \"unsignedBytes\": \"" + unsignedText + "\"\n"
+              + "  \"unsignedBytes\": \"" + unsignedText + "\",\n"
+              + "  \"signatureAlgorithm\": \"" + signatureAlgorithm + "\"\n"
               + "}")
           .headers(headers)
           .path(path)
@@ -95,26 +99,26 @@ public class LoginConsumerTest extends ConsumerPactTestMk2 {
     LoginService loginService = new LoginService(restTemplate, url);
 
     // login success scenario
-    ResponseEntity<Response> responseEntity = loginService.validSignature(sean, signature, unsignedText);
+    ResponseEntity<Response> responseEntity = loginService.validSignature(sean, signature, unsignedText,signatureAlgorithm);
 
     assertThat(responseEntity.getStatusCode()).isEqualTo(OK);
     assertThat(responseEntity.getBody().getCode()).isEqualTo(OK.value());
     assertThat(responseEntity.getBody().getData()).isEqualTo("Success");
 
     // login rejected scenario
-    responseEntity = loginService.validSignature("jack@t.email", signature, unsignedText);
+    responseEntity = loginService.validSignature("jack@t.email", signature, unsignedText, signatureAlgorithm);
 
     assertThat(responseEntity.getStatusCode()).isEqualTo(FORBIDDEN);
     assertThat(responseEntity.getBody().getCode()).isEqualTo(FORBIDDEN.value());
 
     // server out of work scenario
-    responseEntity = loginService.validSignature("mike@t.email", signature, unsignedText);
+    responseEntity = loginService.validSignature("mike@t.email", signature, unsignedText, signatureAlgorithm);
 
     assertThat(responseEntity.getStatusCode()).isEqualTo(INTERNAL_SERVER_ERROR);
     assertThat(responseEntity.getBody().getCode()).isEqualTo(INTERNAL_SERVER_ERROR.value());
 
     LoginService unreachableService = new LoginService(restTemplate, "http://localhost:99");
-    responseEntity = unreachableService.validSignature(sean, signature, unsignedText);
+    responseEntity = unreachableService.validSignature(sean, signature, unsignedText, signatureAlgorithm);
 
     assertThat(responseEntity.getStatusCode()).isEqualTo(SERVICE_UNAVAILABLE);
     assertThat(responseEntity.getBody().getCode()).isEqualTo(SERVICE_UNAVAILABLE.value());
