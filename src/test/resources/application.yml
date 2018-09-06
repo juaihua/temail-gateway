@@ -2,6 +2,7 @@ spring:
   main:
     web-application-type: none
   autoconfigure.exclude:
+  - com.syswin.temail.channel.client.TemailChannelClientAutoConfiguration
   - com.systoon.integration.spring.boot.disconf.DisconfAutoConfiguration
   - com.systoon.integration.spring.boot.disconf.context.config.ConfigurationPropertiesRebinderAutoConfiguration
   - com.systoon.integration.spring.boot.disconf.context.config.RefreshAutoConfiguration
