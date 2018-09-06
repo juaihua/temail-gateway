@@ -15,8 +15,9 @@ public enum CommandType {
   LOGIN(101),
   LOGOUT(102),
 
-  INTERNAL_ERROR(600);
+  INTERNAL_ERROR(600),
 
+  SIGNATURE_VALID_FAIL(700);
 
   private short code;
 
