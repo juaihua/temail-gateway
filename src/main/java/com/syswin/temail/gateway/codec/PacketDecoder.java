@@ -26,7 +26,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
   }
 
   @Override
-  protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf,
+  protected void decode(ChannelHandlerContext ctx, ByteBuf byteBuf,
       List<Object> list) throws Exception {
     CDTPPacket packet = new CDTPPacket();
 
@@ -74,8 +74,9 @@ public class PacketDecoder extends ByteToMessageDecoder {
 
     packet.setData(data);
     list.add(packet);
-    log.info("从通道读取的信息是：CommandSpace={},Command={},CDTPHeader={},"
-        + "Data={}", packet.getCommandSpace(), packet.getCommand(), packet.getHeader(), new String(packet.getData()));
+    log.info("从通道{}读取的信息是：CommandSpace={},Command={},CDTPHeader={},"
+            + "Data={}", ctx.channel(), packet.getCommandSpace(), packet.getCommand(), packet.getHeader(),
+        new String(packet.getData()));
   }
 
 }

@@ -25,7 +25,7 @@ public class ChannelExceptionHandler extends ChannelInboundHandlerAdapter {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    log.error("数据处理异常", cause);
+    log.error("数据处理异常，通道信息" + ctx.channel(), cause);
     if (ctx.channel().isActive()) {
       CDTPPacket packet;
       if (cause instanceof PacketException && ((PacketException) cause).getPacket() != null) {

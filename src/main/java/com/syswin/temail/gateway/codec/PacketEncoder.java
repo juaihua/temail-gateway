@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 public class PacketEncoder extends MessageToByteEncoder<CDTPPacket> {
 
   @Override
-  protected void encode(ChannelHandlerContext channelHandlerContext,
+  protected void encode(ChannelHandlerContext ctx,
       CDTPPacket packet, ByteBuf byteBuf) {
     byteBuf.writeShort(packet.getCommandSpace());
     byteBuf.writeShort(packet.getCommand());
@@ -43,7 +43,8 @@ public class PacketEncoder extends MessageToByteEncoder<CDTPPacket> {
     }
     byteBuf.writeBytes(packet.getData());
 
-    log.info("写入通道的信息是：CommandSpace={},Command={},CDTPHeader={},"
-        + "Data={}", packet.getCommandSpace(), packet.getCommand(), packet.getHeader(), new String(packet.getData()));
+    log.info("写入通道{}的信息是：CommandSpace={},Command={},CDTPHeader={},"
+            + "Data={}", ctx.channel(), packet.getCommandSpace(), packet.getCommand(), packet.getHeader(),
+        new String(packet.getData()));
   }
 }

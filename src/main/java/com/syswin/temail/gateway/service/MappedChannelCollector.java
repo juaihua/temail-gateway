@@ -7,7 +7,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 class MappedChannelCollector implements ChannelCollector {
 
   private final Map<Channel, Collection<Session>> channelSessionMap = new ConcurrentHashMap<>();
@@ -30,6 +32,7 @@ class MappedChannelCollector implements ChannelCollector {
     sessions.removeIf(session -> temail.equals(session.getTemail()) && deviceId.equals(session.getDeviceId()));
     if (sessions.isEmpty()) {
       channelSessionMap.remove(channel);
+      log.info("连接关闭前的请求堆栈信息",new RuntimeException(channel.toString()));
       channel.close();
     }
   }

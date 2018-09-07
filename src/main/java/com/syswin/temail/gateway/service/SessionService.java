@@ -28,7 +28,8 @@ public class SessionService {
 
   private final LoginService loginService;
 
-  private final Consumer<Response<Void>> responseConsumer = ignored -> {};
+  private final Consumer<Response<Void>> responseConsumer = ignored -> {
+  };
 
   @Resource
   private ChannelHolder channelHolder;
@@ -98,6 +99,7 @@ public class SessionService {
     channel.writeAndFlush(packet);
 
     if (channelHolder.hasNoSession(channel)) {
+      log.info("连接关闭前的请求堆栈信息", new RuntimeException(channel.toString()));
       channel.close();
     }
   }
@@ -136,6 +138,5 @@ public class SessionService {
     Collection<Session> sessions = channelHolder.removeChannel(channel);
     remoteStatusService.removeSessions(sessions, responseConsumer);
   }
-
 
 }
