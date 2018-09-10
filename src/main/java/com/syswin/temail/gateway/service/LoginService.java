@@ -51,7 +51,7 @@ class LoginService {
     map.put("temail", temail);
     map.put("unsignedBytes", unsignedText);
     map.put("signature", signature);
-    map.put("signatureAlgorithm", signatureAlgorithm);
+    map.put("algorithm", signatureAlgorithm);
     String authDataJson = gson.toJson(map);
     HttpEntity<String> requestEntity = new HttpEntity<>(authDataJson, httpHeaders);
     try {

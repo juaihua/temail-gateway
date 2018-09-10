@@ -1,6 +1,12 @@
 spring:
     main:
         web-application-type: none
+channel:
+  client:
+    serverHost: 127.0.0.1
+    serverPort: 8765
+    writeIdle: 10
+    max-retry-internal: 60
 
 temail:
     gateway:
