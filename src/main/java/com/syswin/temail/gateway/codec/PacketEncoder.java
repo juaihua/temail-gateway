@@ -2,6 +2,8 @@ package com.syswin.temail.gateway.codec;
 
 import com.syswin.temail.gateway.entity.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPPacket;
+import com.syswin.temail.gateway.entity.CommandSpaceType;
+import com.syswin.temail.gateway.entity.CommandType;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -42,9 +44,15 @@ public class PacketEncoder extends MessageToByteEncoder<CDTPPacket> {
       byteBuf.writeShort(0);
     }
     byteBuf.writeBytes(packet.getData());
+    if (!isPond(packet)) {
+      log.info("{}通道写入的信息是：CommandSpace={},Command={},CDTPHeader={},"
+              + "Data={}", ctx.channel(), packet.getCommandSpace(), packet.getCommand(), packet.getHeader(),
+          new String(packet.getData()));
+    }
+  }
 
-    log.info("写入通道{}的信息是：CommandSpace={},Command={},CDTPHeader={},"
-            + "Data={}", ctx.channel(), packet.getCommandSpace(), packet.getCommand(), packet.getHeader(),
-        new String(packet.getData()));
+  private boolean isPond(CDTPPacket packet) {
+    return packet.getCommandSpace() == CommandSpaceType.CHANNEL.getCode()
+        && packet.getCommand() == CommandType.PONG.getCode();
   }
 }

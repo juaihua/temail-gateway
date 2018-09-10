@@ -99,7 +99,7 @@ public class SessionService {
     channel.writeAndFlush(packet);
 
     if (channelHolder.hasNoSession(channel)) {
-      log.info("连接关闭前的请求堆栈信息", new RuntimeException(channel.toString()));
+      log.debug("连接关闭前的请求堆栈信息", new RuntimeException(channel.toString()));
       channel.close();
     }
   }

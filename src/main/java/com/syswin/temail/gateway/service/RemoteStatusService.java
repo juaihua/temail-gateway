@@ -83,7 +83,7 @@ public class RemoteStatusService {
         .exchange()
         .subscribe(clientResponse -> {
           if (!clientResponse.statusCode().is2xxSuccessful()) {
-            log.info("upd temailAccoutLocations fail {} , will try agagin later! ", clientResponse.statusCode());
+            log.debug("upd temailAccoutLocations fail {} , will try agagin later! ", clientResponse.statusCode());
             pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
           } else {
             clientResponse.bodyToMono(typeReference)

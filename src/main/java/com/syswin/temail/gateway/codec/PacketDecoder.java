@@ -3,6 +3,8 @@ package com.syswin.temail.gateway.codec;
 import com.syswin.temail.gateway.entity.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf;
+import com.syswin.temail.gateway.entity.CommandSpaceType;
+import com.syswin.temail.gateway.entity.CommandType;
 import com.syswin.temail.gateway.exception.PacketException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -74,9 +76,16 @@ public class PacketDecoder extends ByteToMessageDecoder {
 
     packet.setData(data);
     list.add(packet);
-    log.info("从通道{}读取的信息是：CommandSpace={},Command={},CDTPHeader={},"
-            + "Data={}", ctx.channel(), packet.getCommandSpace(), packet.getCommand(), packet.getHeader(),
-        new String(packet.getData()));
+    if (!isPind(packet)) {
+      log.info("{}通道读取的信息是：CommandSpace={},Command={},CDTPHeader={},"
+              + "Data={}", ctx.channel(), packet.getCommandSpace(), packet.getCommand(), packet.getHeader(),
+          new String(packet.getData()));
+    }
+  }
+
+  private boolean isPind(CDTPPacket packet) {
+    return packet.getCommandSpace() == CommandSpaceType.CHANNEL.getCode()
+        && packet.getCommand() == CommandType.PING.getCode();
   }
 
 }
