@@ -4,18 +4,15 @@ import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPServerError;
-import com.syswin.temail.gateway.entity.Response;
 import io.netty.channel.Channel;
 import javax.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
 import static com.syswin.temail.gateway.entity.CommandType.INTERNAL_ERROR;
-import static com.syswin.temail.gateway.entity.CommandType.SIGNATURE_VALID_FAIL;
 
 @Service
 public class RequestService {
@@ -44,15 +41,6 @@ public class RequestService {
       channel.writeAndFlush(packet);
       return;
     }
-
-    //signature valid fail
-    ResponseEntity<Response> responseEntity = loginService.validSignature(packet);
-    if(!responseEntity.getStatusCode().is2xxSuccessful()){
-      errorPacket(packet, SIGNATURE_VALID_FAIL.getCode(), "用户" + temail + "在设备" + deviceId + "数据包验签未通过！");
-      channel.writeAndFlush(packet);
-      return;
-    }
-
     dispatchService.dispatch(properties.getDispatchUrl(), new CDTPPacketTrans(packet),
         clientResponse -> clientResponse
             .bodyToMono(String.class)
