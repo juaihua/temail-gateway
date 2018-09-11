@@ -42,7 +42,7 @@ class LoginService {
     return this.validSignature(cdtpPacket.getHeader().getSender(),
         cdtpPacket.getHeader().getSignature(),
         extractUnsignedData(cdtpPacket),
-        cdtpPacket.getHeader().getSignatureAlgorithm() + "");
+        String.valueOf(cdtpPacket.getHeader().getSignatureAlgorithm()));
   }
 
   public ResponseEntity<Response> validSignature(String temail, String signature,
@@ -55,9 +55,13 @@ class LoginService {
     String authDataJson = gson.toJson(map);
     HttpEntity<String> requestEntity = new HttpEntity<>(authDataJson, httpHeaders);
     try {
-      return restTemplate.postForEntity(authUrl, requestEntity, Response.class);
+      ResponseEntity<Response> responseResponseEntity = restTemplate
+          .postForEntity(authUrl, requestEntity, Response.class);
+      log.info("signature valid result : {},  data : {}, url : {} ",
+          responseResponseEntity.getStatusCode(), authDataJson, authUrl);
+      return responseResponseEntity;
     } catch (RestClientException e) {
-      log.error("Failed to reach remote auth service at {}", authUrl, e);
+      log.error("signature valid error data : {}, url : {} ", authDataJson, authUrl, e.toString());
       return new ResponseEntity<>(Response.failed(SERVICE_UNAVAILABLE,
           e.getMessage()), SERVICE_UNAVAILABLE);
     }
