@@ -66,7 +66,7 @@ class LoginService {
   public String extractUnsignedData(CDTPPacket cdtpPacket) {
     StringBuilder unSignedData = new StringBuilder();
     unSignedData.append((cdtpPacket.getCommandSpace() + cdtpPacket.getCommand()))
-        .append(cdtpPacket.getHeader().getReceiver())
+        .append(cdtpPacket.getHeader().getTargetAddress())
         .append(cdtpPacket.getHeader().getTimestamp())
         .append(sha256Coder.encryptAndSwitch2Base64(cdtpPacket.getData()));
     return unSignedData.toString();
