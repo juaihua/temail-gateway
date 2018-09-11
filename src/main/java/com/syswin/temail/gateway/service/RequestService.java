@@ -1,5 +1,8 @@
 package com.syswin.temail.gateway.service;
 
+import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
+import static com.syswin.temail.gateway.entity.CommandType.INTERNAL_ERROR;
+
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacketTrans;
@@ -8,18 +11,13 @@ import io.netty.channel.Channel;
 import javax.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import static com.syswin.temail.gateway.entity.CommandSpaceType.CHANNEL;
-import static com.syswin.temail.gateway.entity.CommandType.INTERNAL_ERROR;
 
 @Service
 public class RequestService {
 
   private final DispatchService dispatchService;
-
-  private LoginService loginService;
 
   @Resource
   private ChannelHolder channelHolder;
@@ -28,9 +26,8 @@ public class RequestService {
   private TemailGatewayProperties properties;
 
   @Autowired
-  public RequestService(WebClient dispatcherWebClient, TemailGatewayProperties properties, RestTemplate restTemplate) {
+  public RequestService(WebClient dispatcherWebClient) {
     dispatchService = new DispatchService(dispatcherWebClient);
-    loginService = new LoginService(restTemplate, properties.getVerifyUrl());
   }
 
   public void handleRequest(Channel channel, CDTPPacket packet) {
@@ -73,6 +70,8 @@ public class RequestService {
   }
 
   private boolean authSession(Channel channel, String temail, String deviceId) {
-    return channel == channelHolder.getChannel(temail, deviceId);
+    return StringUtils.hasText(temail)
+        && StringUtils.hasText(deviceId)
+        && channel == channelHolder.getChannel(temail, deviceId);
   }
 }
