@@ -18,7 +18,13 @@ class RocketMqConsumer {
   RocketMqConsumer(TemailGatewayProperties properties, MessageListener messageListener) {
     this.properties = properties;
     this.messageListener = messageListener;
-    this.consumer = new DefaultMQPushConsumer(properties.getRocketmq().getConsumerGroup());
+    // RocketMq的ConsumerGroup以配置的consumerGroup作为前缀，加上IP以及UUID进行标识
+    // 确保各gateway都能收到消息
+    // BroadCast方案已经讨论过，此场景功能上能够实现相同的效果，业务上不如ConsumerGroup清晰
+    String consumerGroup = properties.getRocketmq().getConsumerGroup() + "-"
+        + properties.getInstance().getHostOf() + "-"
+        + properties.getInstance().getProcessId();
+    this.consumer = new DefaultMQPushConsumer(consumerGroup);
   }
 
   void start() throws MQClientException {
