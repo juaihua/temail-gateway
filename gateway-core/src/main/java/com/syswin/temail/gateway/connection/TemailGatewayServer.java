@@ -1,0 +1,102 @@
+package com.syswin.temail.gateway.connection;
+
+import com.syswin.temail.gateway.Constants;
+import com.syswin.temail.gateway.codec.BodyExtractor;
+import com.syswin.temail.gateway.codec.PacketDecoder;
+import com.syswin.temail.gateway.codec.PacketEncoder;
+import com.syswin.temail.gateway.codec.SimpleBodyExtractor;
+import com.syswin.temail.gateway.handler.ChannelExceptionHandler;
+import com.syswin.temail.gateway.handler.IdleHandler;
+import com.syswin.temail.gateway.handler.TemailGatewayHandler;
+import com.syswin.temail.gateway.service.HeartBeatService;
+import com.syswin.temail.gateway.service.RequestHandler;
+import com.syswin.temail.gateway.service.SessionHandler;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.timeout.IdleStateHandler;
+import java.net.InetSocketAddress;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class TemailGatewayServer {
+
+  private final IdleHandler idleHandler;
+  private final TemailGatewayHandler temailGatewayHandler;
+  private final ChannelExceptionHandler channelExceptionHandler;
+  private final BodyExtractor bodyExtractor;
+
+  public TemailGatewayServer(SessionHandler sessionHandler, RequestHandler requestHandler) {
+    this(new TemailGatewayHandler(sessionHandler, requestHandler, new HeartBeatService()),
+        new ChannelExceptionHandler(),
+        new SimpleBodyExtractor(),
+        sessionHandler
+    );
+  }
+
+  public TemailGatewayServer(
+      SessionHandler sessionHandler,
+      RequestHandler requestHandler,
+      BodyExtractor bodyExtractor) {
+
+    this(new TemailGatewayHandler(sessionHandler, requestHandler, new HeartBeatService()),
+        new ChannelExceptionHandler(),
+        bodyExtractor,
+        sessionHandler
+    );
+  }
+
+  private TemailGatewayServer(
+      TemailGatewayHandler temailGatewayHandler,
+      ChannelExceptionHandler channelExceptionHandler,
+      BodyExtractor bodyExtractor,
+      SessionHandler sessionHandler) {
+    this.idleHandler = new IdleHandler(sessionHandler);
+    this.temailGatewayHandler = temailGatewayHandler;
+    this.channelExceptionHandler = channelExceptionHandler;
+    this.bodyExtractor = bodyExtractor;
+  }
+
+  public void run(int port, final int readIdleTimeSeconds) {
+    EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+    EventLoopGroup workerGroup = new NioEventLoopGroup();// 默认 cup
+
+    ServerBootstrap bootstrap = new ServerBootstrap();
+
+    bootstrap.group(bossGroup, workerGroup)
+        // 使用指定端口设置套接字地址
+        .channel(NioServerSocketChannel.class)
+        // 指定使用NIO传输Channel
+        .localAddress(new InetSocketAddress(port))
+        // 通过NoDelay禁用Nagle,使消息立即发送出去
+        .childOption(ChannelOption.TCP_NODELAY, true)
+        // 保持长连接状态
+        .childOption(ChannelOption.SO_KEEPALIVE, true)
+        .childHandler(new ChannelInitializer<SocketChannel>() {
+          @Override
+          protected void initChannel(SocketChannel channel) {
+            channel.pipeline()
+                .addLast("idleStateHandler", new IdleStateHandler(readIdleTimeSeconds, 0, 0))
+                .addLast("idleHandler", idleHandler)
+                .addLast("lengthFieldBasedFrameDecoder",
+                    new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, Constants.LENGTH_FIELD_LENGTH, 0, 0))
+                .addLast("lengthFieldPrepender",
+                    new LengthFieldPrepender(Constants.LENGTH_FIELD_LENGTH, 0, false))
+                .addLast("packetDecoder", new PacketDecoder(bodyExtractor))
+                .addLast("packetEncoder", new PacketEncoder())
+                .addLast("temailGatewayHandler", temailGatewayHandler)
+                .addLast("channelExceptionHandler", channelExceptionHandler);
+          }
+        });
+
+    // 异步地绑定服务器;调用sync方法阻塞等待直到绑定完成
+    bootstrap.bind().syncUninterruptibly();
+    log.info("Temail 服务器已启动,端口号：{}", port);
+  }
+}
