@@ -44,23 +44,17 @@ public class TemailGatewayApplication {
   }
 
   @Bean
-  ChannelHolder channelHolder() {
-    return new ChannelHolder();
-  }
-
-  @Bean
-  TemailGatewayServer gatewayServer(
+  ChannelHolder channelCollector(
       TemailGatewayProperties properties,
       RestTemplate restTemplate,
-      WebClient webClient,
-      ChannelHolder channelHolder) {
+      WebClient webClient) {
 
     final TemailGatewayServer gatewayServer = new TemailGatewayServer(
-        new SessionService(restTemplate, properties, channelHolder, new RemoteStatusService(properties, webClient)),
-        new RequestService(webClient, channelHolder, properties),
+        new SessionService(restTemplate, properties, new RemoteStatusService(properties, webClient)),
+        new RequestService(webClient, properties),
         new CommandAwareBodyExtractor(new SimpleBodyExtractor()));
 
     gatewayServer.run(properties.getNetty().getPort(), properties.getNetty().getReadIdleTimeSeconds());
-    return gatewayServer;
+    return gatewayServer.channelHolder();
   }
 }

@@ -1,13 +1,16 @@
 package com.syswin.temail.gateway.service;
 
 import com.syswin.temail.gateway.entity.CDTPPacket;
-import io.netty.channel.Channel;
+import com.syswin.temail.gateway.entity.Session;
+import com.syswin.temail.gateway.handler.LoginHandler;
+import com.syswin.temail.gateway.handler.LogoutHandler;
+import java.util.Collection;
 
 public interface SessionHandler {
 
-  void login(Channel channel, CDTPPacket packet);
+  void login(CDTPPacket packet, LoginHandler loginHandler);
 
-  void logout(Channel channel, CDTPPacket packet);
+  void logout(CDTPPacket packet, LogoutHandler logoutHandler);
 
-  void terminateChannel(Channel channel);
+  void disconnect(Collection<Session> sessions);
 }

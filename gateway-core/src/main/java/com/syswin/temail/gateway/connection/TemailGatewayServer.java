@@ -8,6 +8,7 @@ import com.syswin.temail.gateway.codec.SimpleBodyExtractor;
 import com.syswin.temail.gateway.handler.ChannelExceptionHandler;
 import com.syswin.temail.gateway.handler.IdleHandler;
 import com.syswin.temail.gateway.handler.TemailGatewayHandler;
+import com.syswin.temail.gateway.service.ChannelHolder;
 import com.syswin.temail.gateway.service.HeartBeatService;
 import com.syswin.temail.gateway.service.RequestHandler;
 import com.syswin.temail.gateway.service.SessionHandler;
@@ -31,33 +32,45 @@ public class TemailGatewayServer {
   private final TemailGatewayHandler temailGatewayHandler;
   private final ChannelExceptionHandler channelExceptionHandler;
   private final BodyExtractor bodyExtractor;
+  private final ChannelHolder channelHolder;
 
   public TemailGatewayServer(SessionHandler sessionHandler, RequestHandler requestHandler) {
-    this(new TemailGatewayHandler(sessionHandler, requestHandler, new HeartBeatService()),
-        new ChannelExceptionHandler(),
-        new SimpleBodyExtractor(),
-        sessionHandler
-    );
+    this(sessionHandler, requestHandler, new ChannelHolder());
   }
 
-  public TemailGatewayServer(
+  public TemailGatewayServer(SessionHandler sessionHandler, RequestHandler requestHandler, BodyExtractor bodyExtractor) {
+    this(sessionHandler, requestHandler, bodyExtractor, new ChannelHolder());
+  }
+
+  private TemailGatewayServer(SessionHandler sessionHandler, RequestHandler requestHandler, ChannelHolder channelHolder) {
+    this(new TemailGatewayHandler(sessionHandler, requestHandler, new HeartBeatService(), channelHolder),
+        new ChannelExceptionHandler(),
+        new SimpleBodyExtractor(),
+        sessionHandler,
+        channelHolder);
+  }
+
+  private TemailGatewayServer(
       SessionHandler sessionHandler,
       RequestHandler requestHandler,
-      BodyExtractor bodyExtractor) {
+      BodyExtractor bodyExtractor,
+      ChannelHolder channelHolder) {
 
-    this(new TemailGatewayHandler(sessionHandler, requestHandler, new HeartBeatService()),
+    this(new TemailGatewayHandler(sessionHandler, requestHandler, new HeartBeatService(), channelHolder),
         new ChannelExceptionHandler(),
         bodyExtractor,
-        sessionHandler
-    );
+        sessionHandler,
+        channelHolder);
   }
 
   private TemailGatewayServer(
       TemailGatewayHandler temailGatewayHandler,
       ChannelExceptionHandler channelExceptionHandler,
       BodyExtractor bodyExtractor,
-      SessionHandler sessionHandler) {
-    this.idleHandler = new IdleHandler(sessionHandler);
+      SessionHandler sessionHandler,
+      ChannelHolder channelHolder) {
+    this.channelHolder = channelHolder;
+    this.idleHandler = new IdleHandler(sessionHandler, channelHolder);
     this.temailGatewayHandler = temailGatewayHandler;
     this.channelExceptionHandler = channelExceptionHandler;
     this.bodyExtractor = bodyExtractor;
@@ -98,5 +111,9 @@ public class TemailGatewayServer {
     // 异步地绑定服务器;调用sync方法阻塞等待直到绑定完成
     bootstrap.bind().syncUninterruptibly();
     log.info("Temail 服务器已启动,端口号：{}", port);
+  }
+
+  public ChannelHolder channelHolder() {
+    return channelHolder;
   }
 }

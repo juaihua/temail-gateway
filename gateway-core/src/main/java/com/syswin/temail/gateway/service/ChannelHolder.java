@@ -12,7 +12,7 @@ public class ChannelHolder implements ChannelCollector {
   private final Map<String, Map<String, Channel>> sessionChannelMap = new ConcurrentHashMap<>();
   private final ChannelCollector channelCollector = new MappedChannelCollector();
 
-  Channel getChannel(String temail, String deviceId) {
+  public Channel getChannel(String temail, String deviceId) {
     return sessionChannelMap.getOrDefault(temail, Collections.emptyMap()).get(deviceId);
   }
 

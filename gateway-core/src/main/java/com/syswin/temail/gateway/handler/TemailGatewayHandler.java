@@ -5,8 +5,10 @@ import static com.syswin.temail.gateway.entity.CommandType.LOGIN;
 import static com.syswin.temail.gateway.entity.CommandType.LOGOUT;
 import static com.syswin.temail.gateway.entity.CommandType.PING;
 
+import com.syswin.temail.gateway.entity.CDTPHeader;
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.exception.PacketException;
+import com.syswin.temail.gateway.service.ChannelHolder;
 import com.syswin.temail.gateway.service.HeartBeatService;
 import com.syswin.temail.gateway.service.RequestHandler;
 import com.syswin.temail.gateway.service.SessionHandler;
@@ -23,14 +25,19 @@ public class TemailGatewayHandler extends SimpleChannelInboundHandler<CDTPPacket
   private final SessionHandler sessionService;
   private final RequestHandler requestService;
   private final HeartBeatService heartBeatService;
+  private final ChannelHolder channelHolder;
+  private final RequestInterceptor requestInterceptor;
 
   public TemailGatewayHandler(
       SessionHandler sessionService,
       RequestHandler requestService,
-      HeartBeatService heartBeatService) {
+      HeartBeatService heartBeatService,
+      ChannelHolder channelHolder) {
     this.sessionService = sessionService;
     this.requestService = requestService;
     this.heartBeatService = heartBeatService;
+    this.channelHolder = channelHolder;
+    this.requestInterceptor = new RequestInterceptor(channelHolder);
   }
 
   @Override
@@ -41,18 +48,41 @@ public class TemailGatewayHandler extends SimpleChannelInboundHandler<CDTPPacket
         if (packet.getCommand() == PING.getCode()) {
           heartBeatService.pong(channel, packet);
         } else if (packet.getCommand() == LOGIN.getCode()) {
-          sessionService.login(channel, packet);
+          sessionService.login(packet, loginHandler(channel));
         } else if (packet.getCommand() == LOGOUT.getCode()) {
           // TODO: 2018/8/31 only allowed after login
-          sessionService.logout(channel, packet);
+          sessionService.logout(packet, new LogoutHandlerImpl(channelHolder, channel));
         } else {
           log.warn("Received unknown command {} {}", Integer.toHexString(packet.getCommandSpace()), Integer.toHexString(packet.getCommand()));
         }
       } else {
-        requestService.handleRequest(channel, packet);
+        if (requestInterceptor.isLoggedIn(channel, packet)) {
+          requestService.handleRequest(channel, packet);
+        }
       }
     } catch (Exception e) {
       throw new PacketException(e, packet);
     }
+  }
+
+  private LoginHandler loginHandler(Channel channel) {
+    return new LoginHandler() {
+      @Override
+      public void onSucceed(CDTPPacket request, CDTPPacket response) {
+        CDTPHeader header = request.getHeader();
+        channelHolder.addSession(header.getSender(), header.getDeviceId(), channel);
+        channel.writeAndFlush(response);
+      }
+
+      @Override
+      public void onFailed(CDTPPacket response) {
+        channel.writeAndFlush(response);
+
+        if (channelHolder.hasNoSession(channel)) {
+          log.debug("连接关闭前的请求堆栈信息", new RuntimeException(channel.toString()));
+          channel.close();
+        }
+      }
+    };
   }
 }

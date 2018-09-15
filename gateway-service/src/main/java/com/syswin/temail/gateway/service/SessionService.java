@@ -10,7 +10,8 @@ import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLogoutResp;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.Session;
 import com.syswin.temail.gateway.exception.PacketException;
-import io.netty.channel.Channel;
+import com.syswin.temail.gateway.handler.LoginHandler;
+import com.syswin.temail.gateway.handler.LogoutHandler;
 import java.util.Collection;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
@@ -27,23 +28,19 @@ public class SessionService implements SessionHandler {
   private final Consumer<Response<Void>> responseConsumer = ignored -> {
   };
 
-  private final ChannelHolder channelHolder;
-
   private final RemoteStatusService remoteStatusService;
 
   public SessionService(RestTemplate restTemplate,
       TemailGatewayProperties properties,
-      ChannelHolder channelHolder,
       RemoteStatusService remoteStatusService) {
 
-    this.channelHolder = channelHolder;
     this.remoteStatusService = remoteStatusService;
     loginService = new LoginService(restTemplate, properties.getVerifyUrl());
   }
 
 
   @Override
-  public void login(Channel channel, CDTPPacket packet) {
+  public void login(CDTPPacket packet, LoginHandler loginHandler) {
     String temail = packet.getHeader().getSender();
     String deviceId = packet.getHeader().getDeviceId();
     if (!StringUtils.hasText(temail) || !StringUtils.hasText(deviceId)) {
@@ -57,17 +54,16 @@ public class SessionService implements SessionHandler {
     ResponseEntity<Response> responseEntity = loginService.validSignature(packet);
     Response response = responseEntity.getBody();
     if (responseEntity.getStatusCode().is2xxSuccessful()) {
-      loginSuccess(channel, packet, response);
+      loginSuccess(packet, response, loginHandler);
     } else {
-      loginFailure(channel, packet, response);
+      loginFailure(packet, response, loginHandler);
     }
   }
 
 
-  private void loginSuccess(Channel channel, CDTPPacket packet, Response response) {
+  private void loginSuccess(CDTPPacket packet, Response response, LoginHandler loginHandler) {
     String temail = packet.getHeader().getSender();
     String deviceId = packet.getHeader().getDeviceId();
-    channelHolder.addSession(temail, deviceId, channel);
     remoteStatusService.addSession(temail, deviceId, responseConsumer);
     // 返回成功的消息
     CDTPLoginResp.Builder builder = CDTPLoginResp.newBuilder();
@@ -76,11 +72,11 @@ public class SessionService implements SessionHandler {
       builder.setDesc(response.getMessage());
     }
     packet.setData(builder.build().toByteArray());
-    channel.writeAndFlush(packet);
+    loginHandler.onSucceed(packet, packet);
   }
 
 
-  private void loginFailure(Channel channel, CDTPPacket packet, Response response) {
+  private void loginFailure(CDTPPacket packet, Response response, LoginHandler loginHandler) {
     // 登录失败返回错误消息，然后检查当前通道是否有登录用户，没有则关闭
     CDTPLoginResp.Builder builder = CDTPLoginResp.newBuilder();
     if (response != null) {
@@ -96,23 +92,19 @@ public class SessionService implements SessionHandler {
       builder.setCode(HttpStatus.FORBIDDEN.value());
     }
     packet.setData(builder.build().toByteArray());
-    channel.writeAndFlush(packet);
 
-    if (channelHolder.hasNoSession(channel)) {
-      log.debug("连接关闭前的请求堆栈信息", new RuntimeException(channel.toString()));
-      channel.close();
-    }
+    loginHandler.onFailed(packet);
   }
 
 
   /**
    * 用户主动登出
    *
-   * @param channel 用户连接通道
    * @param packet 用户请求数据包
+   * @param logoutHandler
    */
   @Override
-  public void logout(Channel channel, CDTPPacket packet) {
+  public void logout(CDTPPacket packet, LogoutHandler logoutHandler) {
     ResponseEntity<Response> responseEntity = loginService.validSignature(packet);
     if (responseEntity.getStatusCode().is2xxSuccessful()) {
       String temail = packet.getHeader().getSender();
@@ -121,8 +113,7 @@ public class SessionService implements SessionHandler {
       CDTPLogoutResp.Builder builder = CDTPLogoutResp.newBuilder();
       builder.setCode(HttpStatus.OK.value());
       packet.setData(builder.build().toByteArray());
-      channel.writeAndFlush(packet);
-      channelHolder.removeSession(temail, deviceId, channel);
+      logoutHandler.onSucceeded(packet, packet);
     } else {
       //TODO - juaihua 如果登出操作验签不通过什么也不做？
 
@@ -133,11 +124,10 @@ public class SessionService implements SessionHandler {
   /**
    * 空闲或者异常退出
    *
-   * @param channel 用户连接通道
+   * @param sessions 用户连接通道
    */
   @Override
-  public void terminateChannel(Channel channel) {
-    Collection<Session> sessions = channelHolder.removeChannel(channel);
+  public void disconnect(Collection<Session> sessions) {
     remoteStatusService.removeSessions(sessions, responseConsumer);
   }
 

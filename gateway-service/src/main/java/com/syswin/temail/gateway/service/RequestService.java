@@ -8,34 +8,21 @@ import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPServerError;
 import io.netty.channel.Channel;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 public class RequestService implements RequestHandler {
 
   private final DispatchService dispatchService;
-  private final ChannelHolder channelHolder;
   private final TemailGatewayProperties properties;
 
-  @Autowired
   public RequestService(WebClient dispatcherWebClient,
-      ChannelHolder channelHolder,
       TemailGatewayProperties properties) {
     dispatchService = new DispatchService(dispatcherWebClient);
-    this.channelHolder = channelHolder;
     this.properties = properties;
   }
 
   @Override
   public void handleRequest(Channel channel, CDTPPacket packet) {
-    String temail = packet.getHeader().getSender();
-    String deviceId = packet.getHeader().getDeviceId();
-    if (!authSession(channel, temail, deviceId)) {
-      errorPacket(packet, INTERNAL_ERROR.getCode(), "用户" + temail + "在设备" + deviceId + "上没有登录，无法进行操作！");
-      channel.writeAndFlush(packet);
-      return;
-    }
     dispatchService.dispatch(properties.getDispatchUrl(), new CDTPPacketTrans(packet),
         clientResponse -> clientResponse
             .bodyToMono(String.class)
@@ -65,11 +52,5 @@ public class RequestService implements RequestHandler {
     builder.setDesc(message);
     packet.setData(builder.build().toByteArray());
     return packet;
-  }
-
-  private boolean authSession(Channel channel, String temail, String deviceId) {
-    return StringUtils.hasText(temail)
-        && StringUtils.hasText(deviceId)
-        && channel == channelHolder.getChannel(temail, deviceId);
   }
 }
