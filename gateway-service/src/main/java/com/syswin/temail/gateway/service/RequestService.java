@@ -7,7 +7,7 @@ import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPServerError;
-import io.netty.channel.Channel;
+import java.util.function.Consumer;
 import org.springframework.web.reactive.function.client.WebClient;
 
 public class RequestService implements RequestHandler {
@@ -22,7 +22,7 @@ public class RequestService implements RequestHandler {
   }
 
   @Override
-  public void handleRequest(Channel channel, CDTPPacket packet) {
+  public void handleRequest(CDTPPacket packet, Consumer<CDTPPacket> responseHandler) {
     dispatchService.dispatch(properties.getDispatchUrl(), new CDTPPacketTrans(packet),
         clientResponse -> clientResponse
             .bodyToMono(String.class)
@@ -38,8 +38,8 @@ public class RequestService implements RequestHandler {
               }
               // 请求的数据可能加密，而返回的数据没有加密，需要设置加密标识
               respPacket.getHeader().setDataEncryptionMethod(0);
-              channel.writeAndFlush(respPacket);
-            }), t -> channel.writeAndFlush(
+              responseHandler.accept(respPacket);
+            }), t -> responseHandler.accept(
             errorPacket(packet, INTERNAL_ERROR.getCode(), t.getMessage())));
   }
 

@@ -57,7 +57,7 @@ public class TemailGatewayHandler extends SimpleChannelInboundHandler<CDTPPacket
         }
       } else {
         if (requestInterceptor.isLoggedIn(channel, packet)) {
-          requestService.handleRequest(channel, packet);
+          requestService.handleRequest(packet, channel::writeAndFlush);
         }
       }
     } catch (Exception e) {

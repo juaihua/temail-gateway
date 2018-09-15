@@ -1,9 +1,9 @@
 package com.syswin.temail.gateway.service;
 
 import com.syswin.temail.gateway.entity.CDTPPacket;
-import io.netty.channel.Channel;
+import java.util.function.Consumer;
 
 public interface RequestHandler {
 
-  void handleRequest(Channel channel, CDTPPacket packet);
+  void handleRequest(CDTPPacket packet, Consumer<CDTPPacket> responseHandler);
 }
