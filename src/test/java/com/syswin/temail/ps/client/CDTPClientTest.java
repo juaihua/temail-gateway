@@ -8,12 +8,12 @@ import org.junit.Test;
  * @author 姚华成
  * @date 2018-9-14
  */
-public class PsCDTPClientTest {
+public class CDTPClientTest {
 
   @Test
   public void test() {
-    PsClientBuilder builder = new PsClientBuilder();
-    PsCDTPClient client = builder.port(9999).build();
+    CDTPClientBuilder builder = new CDTPClientBuilder();
+    CDTPClient client = builder.port(9999).build();
     client.connect();
 
     CDTPPacket packet = new CDTPPacket();

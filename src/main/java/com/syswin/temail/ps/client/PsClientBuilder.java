@@ -6,20 +6,26 @@ package com.syswin.temail.ps.client;
  */
 public class PsClientBuilder {
 
-  private String host = "127.0.0.1";
-  private int port = 8099;
+  private String deviceId;
+  private String defaultHost;
+  private int defaultPort;
 
-  public PsClientBuilder host(String host) {
-    this.host = host;
+  public PsClient build() {
+    return new PsClientImpl(deviceId, defaultHost, defaultPort);
+  }
+
+  public PsClientBuilder deviceId(String deviceId) {
+    this.deviceId = deviceId;
     return this;
   }
 
-  public PsClientBuilder port(int port) {
-    this.port = port;
+  public PsClientBuilder defaultHost(String defaultHost) {
+    this.defaultHost = defaultHost;
     return this;
   }
 
-  public PsCDTPClient build() {
-    return new PsCDTPClient(host, port);
+  public PsClientBuilder defaultPort(int defaultPort) {
+    this.defaultPort = defaultPort;
+    return this;
   }
 }

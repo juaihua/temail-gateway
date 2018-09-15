@@ -15,6 +15,10 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timeout;
+import io.netty.util.Timer;
+import io.netty.util.TimerTask;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -24,18 +28,26 @@ import org.awaitility.Awaitility;
  * @author 姚华成
  * @date 2018-8-29
  */
-public class PsCDTPClient {
+public class CDTPClient implements TimerTask {
+  // TODO
+  // 心跳
+  // 断网重连
+  //
+
 
   private static final int DEFAULT_TIMEOUT = 30;
   private String host;
   private int port;
+
+  private Timer timer = new HashedWheelTimer();
+
   private Channel channel;
   private PsClientResponseHandler responseHandler;
 
-   PsCDTPClient(String host, int port) {
+  CDTPClient(String host, int port) {
     this.host = host;
     this.port = port;
-     responseHandler = new PsClientResponseHandler();
+    responseHandler = new PsClientResponseHandler();
   }
 
   public void connect() {
@@ -88,4 +100,9 @@ public class PsCDTPClient {
     return responseHandler.getResult();
   }
 
+
+  @Override
+  public void run(Timeout timeout) throws Exception {
+
+  }
 }
