@@ -1,5 +1,6 @@
 package com.syswin.temail.ps.client;
 
+
 import static com.syswin.temail.ps.common.Constants.LENGTH_FIELD_LENGTH;
 
 import com.syswin.temail.ps.common.codec.PacketDecoder;
@@ -8,101 +9,221 @@ import com.syswin.temail.ps.common.entity.CDTPPacket;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
-import java.net.InetSocketAddress;
-import java.util.concurrent.CountDownLatch;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.awaitility.Awaitility;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author 姚华成
  * @date 2018-8-29
  */
-public class CDTPClient implements TimerTask {
-  // TODO
-  // 心跳
-  // 断网重连
-  //
+@Slf4j
+class CDTPClient {
 
+  static final int DEFAULT_EXECUTE_TIMEOUT = 3;
 
-  private static final int DEFAULT_TIMEOUT = 30;
-  private String host;
-  private int port;
+  private final String host;
+  private final int port;
+  private final List<RequestWrapper> requests = new LinkedList<>();
+  private final int writeIdleTimeSeconds;
+  private final int maxRetryInternal;
 
-  private Timer timer = new HashedWheelTimer();
+  private CDTPClientHandler CDTPClientHandler;
+  @Getter
+  private BlockingStub blockingStub;
+  @Getter
+  private AsyncStub asyncStub;
 
-  private Channel channel;
-  private PsClientResponseHandler responseHandler;
-
-  CDTPClient(String host, int port) {
+  CDTPClient(String host, int port, int writeIdleTimeSeconds, int maxRetryInternal) {
     this.host = host;
     this.port = port;
-    responseHandler = new PsClientResponseHandler();
+    this.writeIdleTimeSeconds = writeIdleTimeSeconds;
+    this.maxRetryInternal = maxRetryInternal;
+    CDTPClientHandler = new CDTPClientHandler();
+
+    blockingStub = new BlockingStub(requests);
+    asyncStub = new AsyncStub(requests);
+
+    ExecutorService executorService = Executors.newFixedThreadPool(2);
+    executorService.submit(this::handleResponse);
+    executorService.submit(this::handleTimeout);
   }
 
   public void connect() {
-
     EventLoopGroup group = new NioEventLoopGroup();
     Bootstrap bootstrap = new Bootstrap();
     bootstrap.group(group)
         .channel(NioSocketChannel.class)
-        .remoteAddress(new InetSocketAddress(host, port))
-        .handler(new ChannelInitializer<SocketChannel>() {
-          @Override
-          protected void initChannel(SocketChannel socketChannel) {
-            socketChannel.pipeline()
-                .addLast("lengthFieldBasedFrameDecoder",
-                    new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH, 0, 0))
-                .addLast("lengthFieldPrepender",
-                    new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false))
-                .addLast(new PacketDecoder())
-                .addLast(new PacketEncoder())
-                .addLast(responseHandler);
-          }
-        });
-    ChannelFuture future = bootstrap.connect().syncUninterruptibly();
-    channel = future.channel();
+        .handler(new LoggingHandler(LogLevel.INFO));
+
+    final ConnectionWatchdog watchdog = new ConnectionWatchdog(bootstrap) {
+
+      public ChannelHandler[] handlers() {
+        return new ChannelHandler[]{
+            this,
+            new IdleStateHandler(0, writeIdleTimeSeconds, 0),
+            new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH),
+            new LengthFieldPrepender(LENGTH_FIELD_LENGTH),
+            new PacketDecoder(),
+            new PacketEncoder(),
+            CDTPClientHandler,
+        };
+      }
+    };
+    realConnect(bootstrap, watchdog.handlers());
+
     Runtime.getRuntime().addShutdownHook(new Thread(group::shutdownGracefully));
   }
 
-  public CDTPPacket syncExecute(CDTPPacket reqPacket) {
-    return syncExecute(reqPacket, 30, TimeUnit.SECONDS);
-  }
-
-  public CDTPPacket syncExecute(CDTPPacket reqPacket, long timeout, TimeUnit timeUnit) {
+  private ChannelFuture realConnect(Bootstrap bootstrap, ChannelHandler[] handlers) {
+    //进行连接
+    ChannelFuture future;
+    bootstrap.handler(new ChannelInitializer<Channel>() {
+      //初始化channel
+      @Override
+      protected void initChannel(Channel ch) {
+        ch.pipeline().addLast(handlers);
+      }
+    });
     try {
-      CountDownLatch latch = new CountDownLatch(1);
-      responseHandler.resetLatch(latch);
-      channel.writeAndFlush(reqPacket);
-      latch.await(timeout, timeUnit);
-      return responseHandler.getResult();
+      future = bootstrap.connect(host, port).sync();
+      setChannel(future.channel());
+      return future;
     } catch (InterruptedException e) {
-      throw new RuntimeException(e);
+      throw new PsClientException("连接服务器出错！", e);
     }
   }
 
-  public CDTPPacket getNewResult() {
-    return getNewResult(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
+
+  private void handleResponse() {
+    do {
+      try {
+        CDTPPacket respPacket = CDTPClientHandler.getReceivedMessages().take();
+        try {
+          synchronized (requests) {
+            Iterator<RequestWrapper> iter = requests.iterator();
+            while (iter.hasNext()) {
+              RequestWrapper request = iter.next();
+              if (request.matchResponse(respPacket)) {
+                Consumer<CDTPPacket> responseConsumer = request.getResponseConsumer();
+                if (responseConsumer != null) {
+                  responseConsumer.accept(respPacket);
+                }
+                iter.remove();
+              }
+            }
+          }
+        } catch (Exception e) {
+          // 其他异常无须处理
+          log.error("处理请求响应时出错，响应对象：" + respPacket, e);
+        }
+      } catch (InterruptedException e) {
+        log.error("响应处理进程被中止，无法处理服务器返回的消息！", e);
+        break;
+      }
+    } while (true);
   }
 
-  public CDTPPacket getNewResult(long timeout, TimeUnit timeUnit) {
-    Awaitility.await().atMost(timeout, timeUnit).until(() -> responseHandler.isNewResult());
-    return responseHandler.getResult();
+  private void handleTimeout() {
+    synchronized (requests) {
+      Iterator<RequestWrapper> iter = requests.iterator();
+      while (iter.hasNext()) {
+        RequestWrapper request = iter.next();
+        if (request.hasTimeout()) {
+          Consumer<Throwable> errorConsumer = request.getErrorConsumer();
+          if (errorConsumer != null) {
+            errorConsumer.accept(new TimeoutException());
+          }
+          iter.remove();
+        }
+      }
+    }
   }
 
+  private void setChannel(Channel channel) {
+    this.blockingStub.setChannel(channel);
+    this.asyncStub.setChannel(channel);
+  }
 
-  @Override
-  public void run(Timeout timeout) throws Exception {
+  @Sharable
+  public abstract class ConnectionWatchdog
+      extends ChannelInboundHandlerAdapter
+      implements TimerTask {
 
+    private final Timer timer = new HashedWheelTimer();
+    private Bootstrap bootstrap;
+    private int attempts;
+
+    protected ConnectionWatchdog(Bootstrap bootstrap) {
+      this.bootstrap = bootstrap;
+    }
+
+    /**
+     * channel链路每次active的时候，将其连接的次数重新☞ 0
+     */
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) {
+      log.debug("当前链路已经激活了，重连尝试次数重新置为0");
+      attempts = 0;
+      ctx.fireChannelActive();
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) {
+      log.debug("链接关闭，将进行重连");
+
+      int timeout = 1 << attempts;
+      if (timeout > maxRetryInternal) {
+        timeout = maxRetryInternal;
+      } else {
+        attempts++;
+      }
+
+      //重连的间隔时间会越来越长
+      timer.newTimeout(this, timeout, TimeUnit.SECONDS);
+      ctx.fireChannelInactive();
+    }
+
+    @Override
+    public void run(Timeout timeout) {
+      ChannelFuture future = realConnect(bootstrap, handlers());
+      //future对象
+      future.addListener((ChannelFutureListener) f -> {
+        //如果重连失败，则调用ChannelInactive方法，再次出发重连事件，一直尝试12次，如果失败则不再重连
+        if (!f.isSuccess()) {
+          log.debug("重连失败");
+          f.channel().pipeline().fireChannelInactive();
+        } else {
+          log.debug("重连成功");
+        }
+      });
+    }
+
+    abstract ChannelHandler[] handlers();
   }
 }

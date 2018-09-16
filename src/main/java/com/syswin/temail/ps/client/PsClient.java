@@ -10,5 +10,5 @@ public interface PsClient {
 
   Message sendMessage(Message message);
 
-  void sendMessage(Message message, Consumer<Message> responseConsumer, Consumer<Message> errorConsumer);
+  void sendMessage(Message message, Consumer<Message> responseConsumer, Consumer<Throwable> errorConsumer);
 }
