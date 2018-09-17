@@ -6,12 +6,16 @@ import static com.syswin.temail.ps.common.entity.CommandType.LOGIN;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLoginResp;
+import com.syswin.temail.kms.vault.CipherAlgorithm;
+import com.syswin.temail.kms.vault.KeyAwareAsymmetricCipher;
+import com.syswin.temail.kms.vault.VaultKeeper;
 import com.syswin.temail.ps.client.utils.StringUtil;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
@@ -25,13 +29,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class PsClientImpl implements PsClient {
 
-  private static final int DEFAULT_PORT = 8099;
   private Map<HostAndPort, CDTPClientEntity> cdtpClientMap = new ConcurrentHashMap<>();
   private String deviceId;
   private String defaultHost;
   private int port;
   private int writeIdleTimeSeconds;
   private int maxRetryInternal;
+  private KeyAwareAsymmetricCipher cipher = new VaultKeeper().asymmetricCipher(CipherAlgorithm.SM2);
 
   PsClientImpl(String deviceId, String defaultHost, int port, int writeIdleTimeSeconds, int maxRetryInternal) {
     this.deviceId = deviceId;
@@ -72,11 +76,7 @@ class PsClientImpl implements PsClient {
       hostAndPort.setHost(defaultHost);
     }
     if (hostAndPort.getPort() == 0) {
-      if (port > 0) {
-        hostAndPort.setPort(port);
-      } else {
-        hostAndPort.setPort(DEFAULT_PORT);
-      }
+      hostAndPort.setPort(port);
     }
     CDTPClientEntity cdtpClientEntity = cdtpClientMap.computeIfAbsent(hostAndPort,
         key -> {
@@ -106,11 +106,13 @@ class PsClientImpl implements PsClient {
     packet.setCommand(LOGIN.getCode());
     packet.setVersion(CDTP_VERSION);
     CDTPHeader header = new CDTPHeader();
+    header.setDeviceId(deviceId);
     header.setSender(temail);
-    header.setSenderPK("SenderPK");
-    // TODO(姚华成) 本地的公钥和私钥怎么管理？
+    cipher.publicKey(temail).ifPresent(key -> header.setSenderPK(key.toString()));
+    header.setPacketId(UUID.randomUUID().toString());
 
     packet.setHeader(header);
+    packet.setData(new byte[0]);
     return packet;
   }
 
@@ -127,7 +129,7 @@ class PsClientImpl implements PsClient {
       CDTPLoginResp loginResp = CDTPLoginResp.parseFrom(respPacket.getData());
       if (!loginSuccess(loginResp)) {
         // 登录失败的处理，暂时简单抛出异常
-        throw new PsClientException("登录失败" + loginResp.getCode() + loginResp.getDesc());
+        throw new PsClientException(temail + "登录失败，状态码：" + loginResp.getCode() + "，错误描述：" + loginResp.getDesc());
       }
       cdtpClientEntity.getLoggedTemails().add(temail);
     } catch (InvalidProtocolBufferException e) {
@@ -140,6 +142,10 @@ class PsClientImpl implements PsClient {
   }
 
   private void genSignature(CDTPPacket packet) {
+//    String temail = packet.getHeader().getSender();
+//    byte[] unsigned = new byte[100];
+//    String sign = Base64.getEncoder().encodeToString(cipher.sign(temail, null));
+
     // TODO(姚华成) 签名待实现
   }
 

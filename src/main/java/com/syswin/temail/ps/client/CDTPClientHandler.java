@@ -2,12 +2,8 @@ package com.syswin.temail.ps.client;
 
 import static com.syswin.temail.ps.common.Constants.CDTP_VERSION;
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL;
-import static com.syswin.temail.ps.common.entity.CommandType.INTERNAL_ERROR;
 import static com.syswin.temail.ps.common.entity.CommandType.PING;
-import static com.syswin.temail.ps.common.entity.CommandType.PONG;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPServerError;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -42,22 +38,10 @@ class CDTPClientHandler extends SimpleChannelInboundHandler<CDTPPacket> {
 
   @Override
   protected void channelRead0(ChannelHandlerContext channelHandlerContext, CDTPPacket packet) {
-    if (packet.getCommandSpace() == CHANNEL.getCode()) {
-      if (packet.getCommand() == PONG.getCode()) {
-        // 心跳响应数据不处理
-        log.debug("接收到心跳数据响应");
-        return;
-      } else if (packet.getCommand() == INTERNAL_ERROR.getCode()) {
-        // 服务器端异常，直接记录错误日志
-        Object errorData;
-        try {
-          errorData = CDTPServerError.parseFrom(packet.getData());
-        } catch (InvalidProtocolBufferException e) {
-          errorData = packet;
-        }
-        log.error("服务器返回错误的信息，异常数据为：{}", errorData);
-        return;
-      }
+    if (packet.isHearbeat()) {
+      // 心跳响应数据不处理
+      log.debug("接收到心跳数据响应");
+      return;
     }
     log.info("从服务器端收到的信息：{}", packet);
     receivedMessages.offer(packet);

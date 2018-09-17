@@ -7,11 +7,16 @@ package com.syswin.temail.ps.client;
 public class PsClientBuilder {
 
   private static final int DEFAULT_WRITE_IDLE_TIME_SECONDS = 30;
+  private static final int DEFAULT_PORT = 8099;
   private String deviceId;
-  private String defaultHost;
-  private int defaultPort;
+  private String defaultHost = "127.0.0.1";
+  private int defaultPort = DEFAULT_PORT;
   private int writeIdleTimeSeconds = DEFAULT_WRITE_IDLE_TIME_SECONDS;
-  private int maxRetryInternal;
+  private int maxRetryInternal = 1;
+
+  public PsClientBuilder(String deviceId) {
+    this.deviceId = deviceId;
+  }
 
   public PsClient build() {
     return new PsClientImpl(deviceId, defaultHost, defaultPort, writeIdleTimeSeconds, maxRetryInternal);

@@ -3,8 +3,10 @@ package com.syswin.temail.ps.client;
 
 import static com.syswin.temail.ps.common.Constants.LENGTH_FIELD_LENGTH;
 
+import com.syswin.temail.ps.client.utils.StringUtil;
 import com.syswin.temail.ps.common.codec.PacketDecoder;
 import com.syswin.temail.ps.common.codec.PacketEncoder;
+import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -28,8 +30,8 @@ import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -45,11 +47,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class CDTPClient {
 
-  static final int DEFAULT_EXECUTE_TIMEOUT = 3;
+  static final int DEFAULT_EXECUTE_TIMEOUT = 300;
 
   private final String host;
   private final int port;
-  private final List<RequestWrapper> requests = new LinkedList<>();
+  private final ConcurrentHashMap<String, RequestWrapper> requestMap = new ConcurrentHashMap<>();
   private final int writeIdleTimeSeconds;
   private final int maxRetryInternal;
 
@@ -66,8 +68,8 @@ class CDTPClient {
     this.maxRetryInternal = maxRetryInternal;
     CDTPClientHandler = new CDTPClientHandler();
 
-    blockingStub = new BlockingStub(requests);
-    asyncStub = new AsyncStub(requests);
+    blockingStub = new BlockingStub(requestMap);
+    asyncStub = new AsyncStub(requestMap);
 
     ExecutorService executorService = Executors.newFixedThreadPool(2);
     executorService.submit(this::handleResponse);
@@ -125,42 +127,52 @@ class CDTPClient {
       try {
         CDTPPacket respPacket = CDTPClientHandler.getReceivedMessages().take();
         try {
-          synchronized (requests) {
-            Iterator<RequestWrapper> iter = requests.iterator();
-            while (iter.hasNext()) {
-              RequestWrapper request = iter.next();
-              if (request.matchResponse(respPacket)) {
-                Consumer<CDTPPacket> responseConsumer = request.getResponseConsumer();
-                if (responseConsumer != null) {
-                  responseConsumer.accept(respPacket);
-                }
-                iter.remove();
-              }
+          CDTPHeader header = respPacket.getHeader();
+          String packetId = header.getPacketId();
+          RequestWrapper requestWrapper = null;
+          if (StringUtil.hasText(packetId)) {
+            requestWrapper = requestMap.remove(packetId);
+          } else {
+            // 无主的服务器端错误
+            if (requestMap.size() == 1) {
+              requestWrapper = requestMap.values().iterator().next();
+            } else {
+              log.error("服务器返回无主错误，而客户端有多个请求，无法处理, 返回值：{}", respPacket);
             }
           }
-        } catch (Exception e) {
+          if (requestWrapper != null) {
+            Consumer<CDTPPacket> responseConsumer = requestWrapper.getResponseConsumer();
+            responseConsumer.accept(respPacket);
+          }
+        } catch (RuntimeException e) {
           // 其他异常无须处理
           log.error("处理请求响应时出错，响应对象：" + respPacket, e);
         }
       } catch (InterruptedException e) {
         log.error("响应处理进程被中止，无法处理服务器返回的消息！", e);
-        break;
+        Thread.currentThread().interrupt();
       }
-    } while (true);
+    } while (!Thread.interrupted());
   }
 
   private void handleTimeout() {
-    synchronized (requests) {
-      Iterator<RequestWrapper> iter = requests.iterator();
-      while (iter.hasNext()) {
-        RequestWrapper request = iter.next();
-        if (request.hasTimeout()) {
-          Consumer<Throwable> errorConsumer = request.getErrorConsumer();
-          if (errorConsumer != null) {
-            errorConsumer.accept(new TimeoutException());
+    // TODO(姚华成) 先这么实现吧，总感觉有点土
+    while (!Thread.interrupted()) {
+      try {
+        Iterator<Map.Entry<String, RequestWrapper>> iter = requestMap.entrySet().iterator();
+        while (iter.hasNext()) {
+          RequestWrapper request = iter.next().getValue();
+          if (request.hasTimeout()) {
+            Consumer<Throwable> errorConsumer = request.getErrorConsumer();
+            if (errorConsumer != null) {
+              errorConsumer.accept(new TimeoutException());
+            }
+            iter.remove();
           }
-          iter.remove();
         }
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
       }
     }
   }

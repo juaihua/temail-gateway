@@ -4,7 +4,7 @@ import static com.syswin.temail.ps.client.CDTPClient.DEFAULT_EXECUTE_TIMEOUT;
 
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import io.netty.channel.Channel;
-import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import lombok.Setter;
@@ -15,12 +15,12 @@ import lombok.Setter;
  */
 class BlockingStub {
 
-  private final List<RequestWrapper> requests;
+  private final ConcurrentHashMap<String, RequestWrapper> requestMap;
   @Setter
   private Channel channel;
 
-   BlockingStub(List<RequestWrapper> requests) {
-    this.requests = requests;
+  BlockingStub(ConcurrentHashMap<String, RequestWrapper> requestMap) {
+    this.requestMap = requestMap;
   }
 
   public CDTPPacket execute(CDTPPacket reqPacket) {
@@ -29,20 +29,18 @@ class BlockingStub {
 
   public CDTPPacket execute(CDTPPacket reqPacket, long timeout, TimeUnit timeUnit) {
     try {
+      String packetId = reqPacket.getHeader()
+          .getPacketId();
       CountDownLatch latch = new CountDownLatch(1);
       ResponseWrapper responseWrapper = new ResponseWrapper();
       RequestWrapper requestWrapper = new RequestWrapper(reqPacket, packet -> {
         responseWrapper.response = packet;
+        requestMap.remove(packetId);
         latch.countDown();
       });
-      synchronized (requests) {
-        requests.add(requestWrapper);
-      }
+      requestMap.put(packetId, requestWrapper);
       channel.writeAndFlush(reqPacket);
       latch.await(timeout, timeUnit);
-      synchronized (requests) {
-        requests.remove(requestWrapper);
-      }
       return responseWrapper.response;
     } catch (InterruptedException e) {
       throw new PsClientException("执行CDTP请求出错", e);
