@@ -8,8 +8,10 @@ import com.syswin.temail.gateway.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPServerError;
 import java.util.function.Consumer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClient;
 
+@Slf4j
 public class RequestService implements RequestHandler {
 
   private final DispatchService dispatchService;
@@ -39,8 +41,10 @@ public class RequestService implements RequestHandler {
               // 请求的数据可能加密，而返回的数据没有加密，需要设置加密标识
               respPacket.getHeader().setDataEncryptionMethod(0);
               responseHandler.accept(respPacket);
-            }), t -> responseHandler.accept(
-            errorPacket(packet, INTERNAL_ERROR.getCode(), t.getMessage())));
+            }), t -> {
+          log.error("调用dispatcher请求出错", t);
+          responseHandler.accept(errorPacket(packet, INTERNAL_ERROR.getCode(), t.getMessage()));
+        });
   }
 
   private CDTPPacket errorPacket(CDTPPacket packet, int code, String message) {

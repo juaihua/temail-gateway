@@ -8,7 +8,7 @@ import java.util.Base64.Encoder;
 public class SHA256Coder {
 
   private final MessageDigest messageDigest;
-  private final Encoder encoder = Base64.getEncoder();
+  private final Encoder encoder = Base64.getUrlEncoder();
 
   public SHA256Coder(){
     try {
