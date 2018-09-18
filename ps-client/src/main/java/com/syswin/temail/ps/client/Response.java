@@ -6,7 +6,7 @@ import com.syswin.temail.ps.common.entity.CDTPPacket;
  * @author 姚华成
  * @date 2018-9-16
  */
-class ResponseWrapper {
+class Response {
 
-  CDTPPacket response;
+  CDTPPacket respPacket;
 }

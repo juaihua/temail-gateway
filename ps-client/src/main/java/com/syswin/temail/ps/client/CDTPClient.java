@@ -29,15 +29,12 @@ import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
-import java.util.Iterator;
-import java.util.Map;
+import io.netty.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -51,15 +48,13 @@ class CDTPClient {
 
   private final String host;
   private final int port;
-  private final ConcurrentHashMap<String, RequestWrapper> requestMap = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, Request> requestMap = new ConcurrentHashMap<>();
   private final int writeIdleTimeSeconds;
   private final int maxRetryInternal;
+  private final EventLoopGroup bossGroup = new NioEventLoopGroup();
 
   private CDTPClientHandler CDTPClientHandler;
-  @Getter
-  private BlockingStub blockingStub;
-  @Getter
-  private AsyncStub asyncStub;
+  private Channel channel;
 
   CDTPClient(String host, int port, int writeIdleTimeSeconds, int maxRetryInternal) {
     this.host = host;
@@ -67,19 +62,11 @@ class CDTPClient {
     this.writeIdleTimeSeconds = writeIdleTimeSeconds;
     this.maxRetryInternal = maxRetryInternal;
     CDTPClientHandler = new CDTPClientHandler();
-
-    blockingStub = new BlockingStub(requestMap);
-    asyncStub = new AsyncStub(requestMap);
-
-    ExecutorService executorService = Executors.newFixedThreadPool(2);
-    executorService.submit(this::handleResponse);
-    executorService.submit(this::handleTimeout);
   }
 
   public void connect() {
-    EventLoopGroup group = new NioEventLoopGroup();
     Bootstrap bootstrap = new Bootstrap();
-    bootstrap.group(group)
+    bootstrap.group(bossGroup)
         .channel(NioSocketChannel.class)
         .handler(new LoggingHandler(LogLevel.INFO));
 
@@ -98,8 +85,48 @@ class CDTPClient {
       }
     };
     realConnect(bootstrap, watchdog.handlers());
+    bossGroup.submit(this::handleResponse);
 
-    Runtime.getRuntime().addShutdownHook(new Thread(group::shutdownGracefully));
+    Runtime.getRuntime().addShutdownHook(new Thread(bossGroup::shutdownGracefully));
+  }
+
+  public CDTPPacket syncExecute(CDTPPacket reqPacket) {
+    return syncExecute(reqPacket, DEFAULT_EXECUTE_TIMEOUT, TimeUnit.SECONDS);
+  }
+
+  public CDTPPacket syncExecute(CDTPPacket reqPacket, long timeout, TimeUnit timeUnit) {
+    try {
+      String packetId = reqPacket.getHeader()
+          .getPacketId();
+      CountDownLatch latch = new CountDownLatch(1);
+      Response response = new Response();
+      Request request = new Request(reqPacket, packet -> {
+        response.respPacket = packet;
+        latch.countDown();
+      });
+      requestMap.put(packetId, request);
+      channel.writeAndFlush(reqPacket);
+      latch.await(timeout, timeUnit);
+      return response.respPacket;
+    } catch (InterruptedException e) {
+      throw new PsClientException("执行CDTP请求出错", e);
+    }
+  }
+
+  public void asyncExecute(CDTPPacket reqPacket, Consumer<CDTPPacket> responseConsumer,
+      Consumer<Throwable> errorConsumer) {
+    asyncExecute(reqPacket, responseConsumer, errorConsumer, DEFAULT_EXECUTE_TIMEOUT, TimeUnit.SECONDS);
+  }
+
+  public void asyncExecute(CDTPPacket reqPacket, Consumer<CDTPPacket> responseConsumer,
+      Consumer<Throwable> errorConsumer, long timeout, TimeUnit timeUnit) {
+    String packetId = reqPacket.getHeader()
+        .getPacketId();
+    Request request = new Request(reqPacket, responseConsumer, errorConsumer, timeout, timeUnit);
+    ScheduledFuture<?> timeoutFuture = bossGroup.schedule(new TimeoutTask(request), timeout, timeUnit);
+    request.setTimeoutFuture(timeoutFuture);
+    requestMap.put(packetId, request);
+    channel.writeAndFlush(reqPacket);
   }
 
   private ChannelFuture realConnect(Bootstrap bootstrap, ChannelHandler[] handlers) {
@@ -114,7 +141,7 @@ class CDTPClient {
     });
     try {
       future = bootstrap.connect(host, port).sync();
-      setChannel(future.channel());
+      channel = future.channel();
       return future;
     } catch (InterruptedException e) {
       throw new PsClientException("连接服务器出错！", e);
@@ -129,19 +156,23 @@ class CDTPClient {
         try {
           CDTPHeader header = respPacket.getHeader();
           String packetId = header.getPacketId();
-          RequestWrapper requestWrapper = null;
+          Request request = null;
           if (StringUtil.hasText(packetId)) {
-            requestWrapper = requestMap.remove(packetId);
+            request = requestMap.remove(packetId);
           } else {
-            // 无主的服务器端错误
+            // 无主的服务器端错误，而客户端只有一个请求，那就是它了
             if (requestMap.size() == 1) {
-              requestWrapper = requestMap.values().iterator().next();
+              request = requestMap.values().iterator().next();
             } else {
               log.error("服务器返回无主错误，而客户端有多个请求，无法处理, 返回值：{}", respPacket);
             }
           }
-          if (requestWrapper != null) {
-            Consumer<CDTPPacket> responseConsumer = requestWrapper.getResponseConsumer();
+          if (request != null) {
+            ScheduledFuture<?> timeoutFuture = request.getTimeoutFuture();
+            if (timeoutFuture != null) {
+              timeoutFuture.cancel(false);
+            }
+            Consumer<CDTPPacket> responseConsumer = request.getResponseConsumer();
             responseConsumer.accept(respPacket);
           }
         } catch (RuntimeException e) {
@@ -155,31 +186,22 @@ class CDTPClient {
     } while (!Thread.interrupted());
   }
 
-  private void handleTimeout() {
-    // TODO(姚华成) 先这么实现吧，总感觉有点土
-    while (!Thread.interrupted()) {
-      try {
-        Iterator<Map.Entry<String, RequestWrapper>> iter = requestMap.entrySet().iterator();
-        while (iter.hasNext()) {
-          RequestWrapper request = iter.next().getValue();
-          if (request.hasTimeout()) {
-            Consumer<Throwable> errorConsumer = request.getErrorConsumer();
-            if (errorConsumer != null) {
-              errorConsumer.accept(new TimeoutException());
-            }
-            iter.remove();
-          }
-        }
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      }
-    }
-  }
+  private final class TimeoutTask implements Runnable {
 
-  private void setChannel(Channel channel) {
-    this.blockingStub.setChannel(channel);
-    this.asyncStub.setChannel(channel);
+    private Request request;
+
+    private TimeoutTask(Request request) {
+      this.request = request;
+    }
+
+    @Override
+    public void run() {
+      Consumer<Throwable> errorConsumer = request.getErrorConsumer();
+      if (errorConsumer != null) {
+        errorConsumer.accept(new TimeoutException());
+      }
+      requestMap.remove(request.getReqPacket().getHeader().getPacketId());
+    }
   }
 
   @Sharable
@@ -238,4 +260,5 @@ class CDTPClient {
 
     abstract ChannelHandler[] handlers();
   }
+
 }

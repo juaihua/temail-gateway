@@ -12,6 +12,7 @@ import com.syswin.temail.ps.client.utils.StringUtil;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +52,7 @@ class PsClientImpl implements PsClient {
 
     CDTPPacket packet = getCdtpPacket(message);
 
-    CDTPPacket respPacket = cdtpClient.getBlockingStub().execute(packet);
+    CDTPPacket respPacket = cdtpClient.syncExecute(packet);
     return MessageConverter.fromCDTPPacket(respPacket);
   }
 
@@ -61,7 +62,7 @@ class PsClientImpl implements PsClient {
 
     CDTPPacket reqPacket = getCdtpPacket(message);
 
-    cdtpClient.getAsyncStub().execute(reqPacket,
+    cdtpClient.asyncExecute(reqPacket,
         packet -> responseConsumer.accept(MessageConverter.fromCDTPPacket(packet)),
         errorConsumer);
   }
@@ -108,7 +109,8 @@ class PsClientImpl implements PsClient {
     CDTPHeader header = new CDTPHeader();
     header.setDeviceId(deviceId);
     header.setSender(temail);
-    cipher.publicKey(temail).ifPresent(key -> header.setSenderPK(key.toString()));
+    cipher.publicKey(temail).ifPresent(key -> header.setSenderPK(
+        Base64.getUrlEncoder().encodeToString(key)));
     header.setPacketId(UUID.randomUUID().toString());
 
     packet.setHeader(header);
@@ -125,7 +127,7 @@ class PsClientImpl implements PsClient {
       CDTPClient cdtpClient = cdtpClientEntity.getCdtpClient();
       CDTPPacket packet = genLoginPacket(temail);
       genSignature(packet);
-      CDTPPacket respPacket = cdtpClient.getBlockingStub().execute(packet);
+      CDTPPacket respPacket = cdtpClient.syncExecute(packet);
       CDTPLoginResp loginResp = CDTPLoginResp.parseFrom(respPacket.getData());
       if (!loginSuccess(loginResp)) {
         // 登录失败的处理，暂时简单抛出异常

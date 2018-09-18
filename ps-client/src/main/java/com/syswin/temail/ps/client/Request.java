@@ -1,10 +1,12 @@
 package com.syswin.temail.ps.client;
 
 import com.syswin.temail.ps.common.entity.CDTPPacket;
+import io.netty.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 /**
  * @author 姚华成
@@ -12,25 +14,20 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-class RequestWrapper {
+class Request {
 
   private final CDTPPacket reqPacket;
   private final Consumer<CDTPPacket> responseConsumer;
   private Consumer<Throwable> errorConsumer;
-  private long timeoutInMillis;
-  private long startTime;
+  @Setter
+  @Getter
+  private ScheduledFuture<?> timeoutFuture;
 
-  RequestWrapper(CDTPPacket reqPacket,
+  Request(CDTPPacket reqPacket,
       Consumer<CDTPPacket> responseConsumer, Consumer<Throwable> errorConsumer, long timeout,
       TimeUnit timeUnit) {
     this.reqPacket = reqPacket;
     this.responseConsumer = responseConsumer;
     this.errorConsumer = errorConsumer;
-    this.timeoutInMillis = timeUnit.toMillis(timeout);
-    this.startTime = System.currentTimeMillis();
-  }
-
-  boolean hasTimeout() {
-    return timeoutInMillis > 0 && (System.currentTimeMillis() - startTime) >= timeoutInMillis;
   }
 }
