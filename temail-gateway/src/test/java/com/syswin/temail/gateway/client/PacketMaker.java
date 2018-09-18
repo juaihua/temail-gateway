@@ -1,8 +1,8 @@
 package com.syswin.temail.gateway.client;
 
 import static com.syswin.temail.ps.common.Constants.CDTP_VERSION;
-import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL;
-import static com.syswin.temail.ps.common.entity.CommandSpaceType.SYNC_STATUS;
+import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
+import static com.syswin.temail.ps.common.entity.CommandSpaceType.SYNC_STATUS_CODE;
 import static com.syswin.temail.ps.server.Constants.NOTIFY_COMMAND;
 
 import com.google.gson.Gson;
@@ -26,7 +26,7 @@ public class PacketMaker {
   public static CDTPPacket singleChatPacket(String sender, String recipient, String message, String deviceId) {
 
     CDTPPacket packet = new CDTPPacket();
-    packet.setCommandSpace(CommandSpaceType.SINGLE_MESSAGE.getCode());
+    packet.setCommandSpace(CommandSpaceType.SINGLE_MESSAGE_CODE);
     packet.setCommand(SingleCommandType.SEND_MESSAGE.getCode());
     packet.setVersion(CDTP_VERSION);
 
@@ -72,7 +72,7 @@ public class PacketMaker {
 //    header.setReceiver("sean@t.email");
 //    header.setReceiverPK("ReceiverPK");
 
-    packet.setCommandSpace(CHANNEL.getCode());
+    packet.setCommandSpace(CHANNEL_CODE);
     packet.setCommand(CommandType.LOGIN.getCode());
     packet.setVersion(CDTP_VERSION);
     packet.setHeader(header);
@@ -105,7 +105,7 @@ public class PacketMaker {
   public static CDTPPacketTrans mqMsgPayload(String recipient, String message) {
     Response<String> body = Response.ok(message);
     CDTPPacket payload = new CDTPPacket();
-    payload.setCommandSpace(SYNC_STATUS.getCode());
+    payload.setCommandSpace(SYNC_STATUS_CODE);
     payload.setCommand(NOTIFY_COMMAND);
     payload.setVersion(CDTP_VERSION);
     CDTPHeader header = new CDTPHeader();

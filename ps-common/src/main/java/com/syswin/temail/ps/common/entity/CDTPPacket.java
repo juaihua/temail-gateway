@@ -1,6 +1,6 @@
 package com.syswin.temail.ps.common.entity;
 
-import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL;
+import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.PING;
 import static com.syswin.temail.ps.common.entity.CommandType.PONG;
 
@@ -24,7 +24,7 @@ public final class CDTPPacket {
   private byte[] data;
 
   public boolean isHearbeat() {
-    return commandSpace == CHANNEL.getCode() &&
+    return commandSpace == CHANNEL_CODE &&
         (command == PING.getCode() || command == PONG.getCode());
   }
 }

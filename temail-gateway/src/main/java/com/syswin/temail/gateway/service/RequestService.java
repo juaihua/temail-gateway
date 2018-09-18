@@ -1,6 +1,6 @@
 package com.syswin.temail.gateway.service;
 
-import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL;
+import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.INTERNAL_ERROR;
 
 import com.syswin.temail.gateway.TemailGatewayProperties;
@@ -49,7 +49,7 @@ public class RequestService implements RequestHandler {
   }
 
   private CDTPPacket errorPacket(CDTPPacket packet, int code, String message) {
-    packet.setCommandSpace(CHANNEL.getCode());
+    packet.setCommandSpace(CHANNEL_CODE);
     packet.setCommand(INTERNAL_ERROR.getCode());
 
     CDTPServerError.Builder builder = CDTPServerError.newBuilder();

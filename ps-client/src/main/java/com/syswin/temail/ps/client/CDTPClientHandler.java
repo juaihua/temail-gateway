@@ -1,7 +1,7 @@
 package com.syswin.temail.ps.client;
 
 import static com.syswin.temail.ps.common.Constants.CDTP_VERSION;
-import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL;
+import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.PING;
 
 import com.syswin.temail.ps.common.entity.CDTPPacket;
@@ -30,7 +30,7 @@ class CDTPClientHandler extends SimpleChannelInboundHandler<CDTPPacket> {
 
   private static CDTPPacket createHeartbeatPacket() {
     CDTPPacket packet = new CDTPPacket();
-    packet.setCommandSpace(CHANNEL.getCode());
+    packet.setCommandSpace(CHANNEL_CODE);
     packet.setCommand(PING.getCode());
     packet.setVersion(CDTP_VERSION);
     return packet;

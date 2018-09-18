@@ -1,7 +1,7 @@
 package com.syswin.temail.ps.client;
 
 import static com.syswin.temail.ps.common.Constants.CDTP_VERSION;
-import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL;
+import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.LOGIN;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -102,7 +102,7 @@ class PsClientImpl implements PsClient {
 
   private CDTPPacket genLoginPacket(String temail) {
     CDTPPacket packet = new CDTPPacket();
-    packet.setCommandSpace(CHANNEL.getCode());
+    packet.setCommandSpace(CHANNEL_CODE);
     packet.setCommand(LOGIN.getCode());
     packet.setVersion(CDTP_VERSION);
     CDTPHeader header = new CDTPHeader();

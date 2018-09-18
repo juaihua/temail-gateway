@@ -16,8 +16,7 @@ public enum CommandType {
   LOGOUT(102),
 
   INTERNAL_ERROR(600),
-
-  SIGNATURE_VALID_FAIL(700);
+  ;
 
   public static final short PING_CODE = PING.code;
   public static final short PONG_CODE = PONG.code;

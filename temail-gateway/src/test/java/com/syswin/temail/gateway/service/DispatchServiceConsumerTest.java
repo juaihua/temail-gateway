@@ -2,7 +2,7 @@ package com.syswin.temail.gateway.service;
 
 import static com.syswin.temail.gateway.client.PacketMaker.singleChatPacket;
 import static com.syswin.temail.gateway.client.SingleCommandType.SEND_MESSAGE;
-import static com.syswin.temail.ps.common.entity.CommandSpaceType.SINGLE_MESSAGE;
+import static com.syswin.temail.ps.common.entity.CommandSpaceType.SINGLE_MESSAGE_CODE;
 import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -95,7 +95,7 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
   @NotNull
   private CDTPPacket ackPayload() {
     CDTPPacket payload = new CDTPPacket();
-    payload.setCommandSpace(SINGLE_MESSAGE.getCode());
+    payload.setCommandSpace(SINGLE_MESSAGE_CODE);
     payload.setCommand(SEND_MESSAGE.getCode());
     payload.setData(gson.toJson(Response.ok(ackMessage)).getBytes());
     return payload;

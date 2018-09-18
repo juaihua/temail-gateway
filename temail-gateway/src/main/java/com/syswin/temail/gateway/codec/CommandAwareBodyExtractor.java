@@ -25,6 +25,6 @@ public class CommandAwareBodyExtractor implements BodyExtractor {
   }
 
   private boolean isSendSingleMsg(short commandSpace, short command) {
-    return commandSpace == CommandSpaceType.SINGLE_MESSAGE.getCode() && command == 1;
+    return commandSpace == CommandSpaceType.SINGLE_MESSAGE_CODE && command == 1;
   }
 }

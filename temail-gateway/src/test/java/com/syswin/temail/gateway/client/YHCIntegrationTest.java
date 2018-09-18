@@ -11,7 +11,7 @@ import static com.syswin.temail.gateway.client.PacketMaker.loginPacket;
 import static com.syswin.temail.gateway.client.PacketMaker.mqMsgPayload;
 import static com.syswin.temail.gateway.client.PacketMaker.singleChatPacket;
 import static com.syswin.temail.gateway.client.SingleCommandType.SEND_MESSAGE;
-import static com.syswin.temail.ps.common.entity.CommandSpaceType.SINGLE_MESSAGE;
+import static com.syswin.temail.ps.common.entity.CommandSpaceType.SINGLE_MESSAGE_CODE;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -169,7 +169,7 @@ public class YHCIntegrationTest {
     // 单聊
     CDTPPacket singleChatReqPacket = singleChatPacket(sender, receive, message, deviceId);
     CDTPPacket singleChatRespPacket = client.syncExecute(singleChatReqPacket);
-    assertThat(singleChatRespPacket.getCommandSpace()).isEqualTo(SINGLE_MESSAGE.getCode());
+    assertThat(singleChatRespPacket.getCommandSpace()).isEqualTo(SINGLE_MESSAGE_CODE);
     assertThat(singleChatRespPacket.getCommandSpace()).isEqualTo(SEND_MESSAGE.getCode());
     Response response = gson.fromJson(new String(singleChatRespPacket.getData()), Response.class);
     assertIs2xxSuccessful(response.getCode());

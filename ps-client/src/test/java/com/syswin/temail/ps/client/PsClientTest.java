@@ -22,7 +22,7 @@ public class PsClientTest {
   public static Message singleChatPacket(String sender, String recipient, String content) {
     Header header = new Header();
 
-    header.setCommandSpace(CommandSpaceType.SINGLE_MESSAGE.getCode());
+    header.setCommandSpace(CommandSpaceType.SINGLE_MESSAGE_CODE);
     header.setCommand(SingleCommandType.SEND_MESSAGE.getCode());
 
     header.setDataEncryptionMethod(0);

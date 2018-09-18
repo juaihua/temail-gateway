@@ -13,8 +13,14 @@ public enum CommandSpaceType {
   SINGLE_MESSAGE(1),
   GROUP_MESSAGE(2),
   SYNC_STATUS(3),
-  STRATEGY(4);
+  STRATEGY(4),
+  ;
 
+  public static final short CHANNEL_CODE = CHANNEL.code;
+  public static final short SINGLE_MESSAGE_CODE = SINGLE_MESSAGE.code;
+  public static final short GROUP_MESSAGE_CODE = GROUP_MESSAGE.code;
+  public static final short SYNC_STATUS_CODE = SYNC_STATUS.code;
+  public static final short STRATEGY_CODE = STRATEGY.code;
   private short code;
 
   CommandSpaceType(int code) {

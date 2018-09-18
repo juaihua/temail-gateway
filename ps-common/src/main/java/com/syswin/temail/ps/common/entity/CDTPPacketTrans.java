@@ -48,7 +48,7 @@ public class CDTPPacketTrans {
   }
 
   private static boolean isSendSingleMsg(short commandSpace, short command) {
-    return commandSpace == CommandSpaceType.SINGLE_MESSAGE.getCode() && command == 1;
+    return commandSpace == CommandSpaceType.SINGLE_MESSAGE_CODE && command == 1;
   }
 
   public CDTPPacket toCDTPPacket() {
