@@ -5,13 +5,13 @@ import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL;
 import static com.syswin.temail.ps.common.entity.CommandType.LOGIN;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.syswin.temail.gateway.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.kms.vault.CipherAlgorithm;
 import com.syswin.temail.kms.vault.KeyAwareAsymmetricCipher;
 import com.syswin.temail.kms.vault.VaultKeeper;
 import com.syswin.temail.ps.client.utils.StringUtil;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
+import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
