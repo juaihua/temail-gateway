@@ -1,4 +1,4 @@
-package com.syswin.temail.ps.server.service;
+package com.syswin.temail.gateway.service;
 
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -12,6 +12,7 @@ import com.syswin.temail.ps.common.exception.PacketException;
 import com.syswin.temail.ps.server.entity.Session;
 import com.syswin.temail.ps.server.handler.LoginHandler;
 import com.syswin.temail.ps.server.handler.LogoutHandler;
+import com.syswin.temail.ps.server.service.SessionHandler;
 import java.util.Collection;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;

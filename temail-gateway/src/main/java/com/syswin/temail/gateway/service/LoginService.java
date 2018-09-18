@@ -1,4 +1,4 @@
-package com.syswin.temail.ps.server.service;
+package com.syswin.temail.gateway.service;
 
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;

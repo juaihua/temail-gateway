@@ -1,4 +1,4 @@
-package com.syswin.temail.ps.server.service;
+package com.syswin.temail.gateway.service;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;

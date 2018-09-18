@@ -1,4 +1,9 @@
-package com.syswin.temail.ps.server.service;
+package com.syswin.temail.gateway.service;
+
+import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.waitAtMost;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,13 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-
 import org.junit.Test;
-
-import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.waitAtMost;
 
 public class PendingTaskQueueTest {
 

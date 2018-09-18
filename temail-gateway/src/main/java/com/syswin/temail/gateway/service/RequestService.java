@@ -1,4 +1,4 @@
-package com.syswin.temail.ps.server.service;
+package com.syswin.temail.gateway.service;
 
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL;
 import static com.syswin.temail.ps.common.entity.CommandType.INTERNAL_ERROR;
@@ -7,6 +7,7 @@ import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPServerError;
+import com.syswin.temail.ps.server.service.RequestHandler;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClient;

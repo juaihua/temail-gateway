@@ -20,7 +20,7 @@ import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.TemailAccoutLocation;
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
-import com.syswin.temail.ps.server.service.RemoteStatusService;
+import com.syswin.temail.gateway.service.RemoteStatusService;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
