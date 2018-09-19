@@ -18,8 +18,8 @@ import org.junit.Test;
 public class PsClientTest {
 
   private static Gson gson = new Gson();
-  private String sender = "jack@t.email";
-  private String receive = "sean@t.email";
+  private String sender = "jack@throwable.email";
+  private String receive = "sean@throwable.email";
   private String deviceId = "deviceId";
   private String content = "hello world";
 

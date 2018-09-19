@@ -37,7 +37,7 @@ public class SessionServiceImpl extends AbstractSessionService {
   }
 
   @Override
-  protected boolean realLogin(CDTPPacket reqPacket, CDTPPacket respPacket) {
+  protected boolean loginExt(CDTPPacket reqPacket, CDTPPacket respPacket) {
     String temail = reqPacket.getHeader().getSender();
     String deviceId = reqPacket.getHeader().getDeviceId();
     if (!StringUtils.hasText(temail) || !StringUtils.hasText(deviceId)) {
@@ -61,7 +61,7 @@ public class SessionServiceImpl extends AbstractSessionService {
   }
 
   @Override
-  protected boolean realLogout(CDTPPacket reqPacket, CDTPPacket respPacket) {
+  protected boolean logoutExt(CDTPPacket reqPacket, CDTPPacket respPacket) {
     ResponseEntity<Response> responseEntity = loginService.validSignature(reqPacket);
     if (responseEntity.getStatusCode().is2xxSuccessful()) {
       String temail = reqPacket.getHeader().getSender();
@@ -82,7 +82,7 @@ public class SessionServiceImpl extends AbstractSessionService {
    * @param sessions 用户连接通道
    */
   @Override
-  protected void removeSessions(Collection<Session> sessions) {
+  protected void disconnectExt(Collection<Session> sessions) {
     remoteStatusService.removeSessions(sessions, responseConsumer);
   }
 

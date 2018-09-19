@@ -44,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class CDTPClient {
 
-  static final int DEFAULT_EXECUTE_TIMEOUT = 300;
+  static final int DEFAULT_EXECUTE_TIMEOUT = 1;
 
   private final String host;
   private final int port;
@@ -105,12 +105,16 @@ class CDTPClient {
         latch.countDown();
       });
       requestMap.put(packetId, request);
-      channel.writeAndFlush(reqPacket);
+      channel.writeAndFlush(reqPacket).syncUninterruptibly();
       latch.await(timeout, timeUnit);
       return response.respPacket;
     } catch (InterruptedException e) {
       throw new PsClientException("执行CDTP请求出错", e);
     }
+  }
+
+  public void asyncExecute(CDTPPacket reqPacket, Consumer<CDTPPacket> responseConsumer) {
+    asyncExecute(reqPacket, responseConsumer, null);
   }
 
   public void asyncExecute(CDTPPacket reqPacket, Consumer<CDTPPacket> responseConsumer,
@@ -126,7 +130,7 @@ class CDTPClient {
     ScheduledFuture<?> timeoutFuture = bossGroup.schedule(new TimeoutTask(request), timeout, timeUnit);
     request.setTimeoutFuture(timeoutFuture);
     requestMap.put(packetId, request);
-    channel.writeAndFlush(reqPacket);
+    channel.writeAndFlush(reqPacket).syncUninterruptibly();
   }
 
   private ChannelFuture realConnect(Bootstrap bootstrap, ChannelHandler[] handlers) {
@@ -196,6 +200,7 @@ class CDTPClient {
 
     @Override
     public void run() {
+      log.error("请求超时！请求对象：{}", request);
       Consumer<Throwable> errorConsumer = request.getErrorConsumer();
       if (errorConsumer != null) {
         errorConsumer.accept(new TimeoutException());

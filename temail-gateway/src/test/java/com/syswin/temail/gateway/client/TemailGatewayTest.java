@@ -188,7 +188,7 @@ public class TemailGatewayTest {
     assertThat(loginResp.getCode()).isEqualTo(200);
 
     // ack for sent message
-    channel.writeAndFlush(singleChatPacket(sender, receiver, message, deviceId));
+    channel.writeAndFlush(singleChatPacket(sender, receiver, message, deviceId)).syncUninterruptibly();
     await().atMost(30, SECONDS).until(() -> !responseHandler.receivedMessages().isEmpty());
     packet = responseHandler.receivedMessages().poll();
     assertThat(packet.getCommandSpace()).isEqualTo(SINGLE_MESSAGE_CODE);

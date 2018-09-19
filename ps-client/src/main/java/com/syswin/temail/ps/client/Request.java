@@ -7,12 +7,14 @@ import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author 姚华成
  * @date 2018-9-16
  */
 @Getter
+@ToString
 @RequiredArgsConstructor
 class Request {
 
