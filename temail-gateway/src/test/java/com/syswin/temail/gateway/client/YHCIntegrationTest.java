@@ -39,7 +39,6 @@ import org.apache.rocketmq.common.message.Message;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.runner.RunWith;
@@ -61,7 +60,7 @@ import org.testcontainers.containers.Network;
         "temail.gateway.allIdleTimeSeconds=3"
     })
 @RunWith(SpringRunner.class)
-@Ignore
+//@Ignore
 public class YHCIntegrationTest {
 
   private static final int MQ_SERVER_PORT = 9876;

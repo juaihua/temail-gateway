@@ -1,13 +1,13 @@
 package com.syswin.temail.gateway;
 
 import com.syswin.temail.gateway.codec.CommandAwareBodyExtractor;
-import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
-import com.syswin.temail.ps.server.connection.TemailGatewayServer;
-import com.syswin.temail.ps.server.service.ChannelHolder;
 import com.syswin.temail.gateway.service.RemoteStatusService;
-import com.syswin.temail.gateway.service.RequestService;
-import com.syswin.temail.gateway.service.SessionService;
+import com.syswin.temail.gateway.service.RequestServiceImpl;
+import com.syswin.temail.gateway.service.SessionServiceImpl;
 import com.syswin.temail.gateway.service.SilentResponseErrorHandler;
+import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
+import com.syswin.temail.ps.server.connection.PsServer;
+import com.syswin.temail.ps.server.service.ChannelHolder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -44,17 +44,22 @@ public class TemailGatewayApplication {
   }
 
   @Bean
-  ChannelHolder channelCollector(
+  ChannelHolder channelHolder(
       TemailGatewayProperties properties,
       RestTemplate restTemplate,
       WebClient webClient) {
 
-    final TemailGatewayServer gatewayServer = new TemailGatewayServer(
-        new SessionService(restTemplate, properties, new RemoteStatusService(properties, webClient)),
-        new RequestService(webClient, properties),
-        new CommandAwareBodyExtractor(new SimpleBodyExtractor()));
+    SessionServiceImpl sessionService =
+        new SessionServiceImpl(restTemplate, properties,
+            new RemoteStatusService(properties, webClient));
+    PsServer psServer =
+        new PsServer(
+            sessionService,
+            new RequestServiceImpl(webClient, properties),
+            new CommandAwareBodyExtractor(
+                new SimpleBodyExtractor()));
+    psServer.run(properties.getNetty().getPort(), properties.getNetty().getReadIdleTimeSeconds());
 
-    gatewayServer.run(properties.getNetty().getPort(), properties.getNetty().getReadIdleTimeSeconds());
-    return gatewayServer.channelHolder();
+    return sessionService.getChannelHolder();
   }
 }

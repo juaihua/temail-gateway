@@ -48,7 +48,7 @@ Configuration:
         AppenderRef:
           ref: CONSOLE
       -
-        name: com.syswin.temail.gateway.connection.TemailGatewayServer
+        name: com.syswin.temail.gateway.connection.PsServer
         level: info
         additivity: false
         AppenderRef:
