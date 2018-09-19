@@ -109,7 +109,7 @@ public class YHCIntegrationTest {
             aResponse()
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withStatus(OK.value())
-                .withBody(gson.toJson(Response.ok(ackPayload())))));
+                .withBody(gson.toJson(ackPayload()))));
 
     stubFor(any(urlEqualTo("/updateStatus"))
         .willReturn(
@@ -166,11 +166,11 @@ public class YHCIntegrationTest {
     assertIs2xxSuccessful(cdtpLoginResp.getCode());
 
     // 单聊
-    CDTPPacket singleChatReqPacket = singleChatPacket(sender, receive, message, deviceId);
-    CDTPPacket singleChatRespPacket = client.syncExecute(singleChatReqPacket);
-    assertThat(singleChatRespPacket.getCommandSpace()).isEqualTo(SINGLE_MESSAGE_CODE);
-    assertThat(singleChatRespPacket.getCommandSpace()).isEqualTo(SEND_MESSAGE.getCode());
-    Response response = gson.fromJson(new String(singleChatRespPacket.getData()), Response.class);
+    CDTPPacket reqPacket = singleChatPacket(sender, receive, message, deviceId);
+    CDTPPacket respPacket = client.syncExecute(reqPacket);
+    assertThat(respPacket.getCommandSpace()).isEqualTo(SINGLE_MESSAGE_CODE);
+    assertThat(respPacket.getCommandSpace()).isEqualTo(SEND_MESSAGE.getCode());
+    Response response = gson.fromJson(new String(respPacket.getData()), Response.class);
     assertIs2xxSuccessful(response.getCode());
 
     // TODO(姚华成): 群聊

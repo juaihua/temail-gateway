@@ -6,7 +6,6 @@ import static com.syswin.temail.ps.common.entity.CommandSpaceType.SYNC_STATUS_CO
 import static com.syswin.temail.ps.server.Constants.NOTIFY_COMMAND;
 
 import com.google.gson.Gson;
-import com.seanyinx.github.unit.scaffolding.Randomness;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
@@ -94,12 +93,11 @@ public class PacketMaker {
   }
 
 
-  public static CDTPPacket ackPayload() {
-    CDTPPacket payload = new CDTPPacket();
-    payload.setCommand((short) 1000);
-    String ackMessage = Randomness.uniquify("Sent");
-    payload.setData(gson.toJson(Response.ok(ackMessage)).getBytes());
-    return payload;
+  public static Response ackPayload() {
+    Map<String, Object> msgData = new HashMap<>();
+    msgData.put("msgId", "消息ID");
+    msgData.put("seqId", "消息序列号");
+    return Response.ok(msgData);
   }
 
   public static CDTPPacketTrans mqMsgPayload(String recipient, String message) {
