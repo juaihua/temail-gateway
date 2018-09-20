@@ -8,9 +8,9 @@ import java.util.Base64.Encoder;
 public class SHA256Coder {
 
   private final MessageDigest messageDigest;
-  private final Encoder encoder = Base64.getUrlEncoder();
+  private final Encoder encoder = Base64.getEncoder();
 
-  public SHA256Coder(){
+  public SHA256Coder() {
     try {
       messageDigest = MessageDigest.getInstance("SHA-256");
     } catch (NoSuchAlgorithmException e) {
@@ -18,12 +18,12 @@ public class SHA256Coder {
     }
   }
 
-  public byte[] encrypt(byte[] data){
+  public byte[] encrypt(byte[] data) {
     messageDigest.update(data);
     return messageDigest.digest();
   }
 
-  public String encryptAndSwitch2Base64(byte[] data){
+  public String encryptAndSwitch2Base64(byte[] data) {
     return encoder.encodeToString(this.encrypt(data));
   }
 

@@ -12,19 +12,13 @@ public class PsClientBuilder {
   private String defaultHost = "127.0.0.1";
   private int defaultPort = DEFAULT_PORT;
   private int writeIdleTimeSeconds = DEFAULT_WRITE_IDLE_TIME_SECONDS;
-  private int maxRetryInternal = 1;
 
   public PsClientBuilder(String deviceId) {
     this.deviceId = deviceId;
   }
 
   public PsClient build() {
-    return new PsClientImpl(deviceId, defaultHost, defaultPort, writeIdleTimeSeconds, maxRetryInternal);
-  }
-
-  public PsClientBuilder deviceId(String deviceId) {
-    this.deviceId = deviceId;
-    return this;
+    return new PsClientImpl(deviceId, defaultHost, defaultPort, writeIdleTimeSeconds);
   }
 
   public PsClientBuilder defaultHost(String defaultHost) {
@@ -39,11 +33,6 @@ public class PsClientBuilder {
 
   public PsClientBuilder writeIdleTimeSeconds(int writeIdleTimeSeconds) {
     this.writeIdleTimeSeconds = writeIdleTimeSeconds;
-    return this;
-  }
-
-  public PsClientBuilder maxRetryInternal(int maxRetryInternal) {
-    this.maxRetryInternal = maxRetryInternal;
     return this;
   }
 }

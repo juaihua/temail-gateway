@@ -4,6 +4,7 @@ import static com.syswin.temail.ps.common.Constants.CDTP_VERSION;
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.PING;
 
+import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -33,6 +34,8 @@ class CDTPClientHandler extends SimpleChannelInboundHandler<CDTPPacket> {
     packet.setCommandSpace(CHANNEL_CODE);
     packet.setCommand(PING.getCode());
     packet.setVersion(CDTP_VERSION);
+    packet.setHeader(new CDTPHeader());
+    packet.setData(new byte[0]);
     return packet;
   }
 
@@ -44,6 +47,9 @@ class CDTPClientHandler extends SimpleChannelInboundHandler<CDTPPacket> {
       return;
     }
     log.info("从服务器端收到的信息：{}", packet);
+    if (packet.isInternalError()) {
+      log.error(new String(packet.getData()));
+    }
     receivedMessages.offer(packet);
   }
 
@@ -58,5 +64,8 @@ class CDTPClientHandler extends SimpleChannelInboundHandler<CDTPPacket> {
     super.userEventTriggered(ctx, evt);
   }
 
-
+  @Override
+  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    log.error("客户端异常！", cause);
+  }
 }

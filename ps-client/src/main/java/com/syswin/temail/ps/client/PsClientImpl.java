@@ -1,26 +1,21 @@
 package com.syswin.temail.ps.client;
 
-import static com.syswin.temail.ps.client.SignatureAlgorithm.ECC512_CODE;
+import static com.syswin.temail.ps.client.Constants.DEFAULT_EXECUTE_TIMEOUT;
 import static com.syswin.temail.ps.common.Constants.CDTP_VERSION;
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.LOGIN;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.syswin.temail.kms.vault.CipherAlgorithm;
-import com.syswin.temail.kms.vault.KeyAwareAsymmetricCipher;
-import com.syswin.temail.kms.vault.VaultKeeper;
 import com.syswin.temail.ps.client.utils.StringUtil;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -38,36 +33,41 @@ class PsClientImpl implements PsClient {
   private String defaultHost;
   private int port;
   private int writeIdleTimeSeconds;
-  private int maxRetryInternal;
-  private KeyAwareAsymmetricCipher cipher = new VaultKeeper().asymmetricCipher(CipherAlgorithm.SM2);
+//  private KeyAwareAsymmetricCipher cipher = new VaultKeeper().asymmetricCipher(CipherAlgorithm.ECDSA);
 
-  PsClientImpl(String deviceId, String defaultHost, int port, int writeIdleTimeSeconds, int maxRetryInternal) {
+  PsClientImpl(String deviceId, String defaultHost, int port, int writeIdleTimeSeconds) {
     this.deviceId = deviceId;
     this.defaultHost = defaultHost;
     this.port = port;
     this.writeIdleTimeSeconds = writeIdleTimeSeconds;
-    this.maxRetryInternal = maxRetryInternal;
   }
 
   @Override
   public Message sendMessage(Message message) {
+    return sendMessage(message, DEFAULT_EXECUTE_TIMEOUT, TimeUnit.SECONDS);
+  }
+
+  @Override
+  public Message sendMessage(Message message, long timeout, TimeUnit timeUnit) {
     CDTPClient cdtpClient = getCdtpClient(message);
-
     CDTPPacket packet = getCdtpPacket(message);
-
-    CDTPPacket respPacket = cdtpClient.syncExecute(packet);
+    CDTPPacket respPacket = cdtpClient.syncExecute(packet, timeout, timeUnit);
     return MessageConverter.fromCDTPPacket(respPacket);
   }
 
   @Override
   public void sendMessage(Message message, Consumer<Message> responseConsumer, Consumer<Throwable> errorConsumer) {
+    sendMessage(message, responseConsumer, errorConsumer, DEFAULT_EXECUTE_TIMEOUT, TimeUnit.SECONDS);
+  }
+
+  @Override
+  public void sendMessage(Message message, Consumer<Message> responseConsumer, Consumer<Throwable> errorConsumer,
+      long timeout, TimeUnit timeUnit) {
     CDTPClient cdtpClient = getCdtpClient(message);
-
     CDTPPacket reqPacket = getCdtpPacket(message);
-
     cdtpClient.asyncExecute(reqPacket,
         packet -> responseConsumer.accept(MessageConverter.fromCDTPPacket(packet)),
-        errorConsumer);
+        errorConsumer, timeout, timeUnit);
   }
 
   private CDTPClient getCdtpClient(Message message) {
@@ -84,17 +84,21 @@ class PsClientImpl implements PsClient {
     }
     CDTPClientEntity cdtpClientEntity = cdtpClientMap.computeIfAbsent(hostAndPort,
         key -> {
-          CDTPClient cdtpClient = new CDTPClient(key.getHost(), key.getPort(), writeIdleTimeSeconds, maxRetryInternal);
+          CDTPClient cdtpClient = new CDTPClient(key.getHost(), key.getPort(), writeIdleTimeSeconds);
           cdtpClient.connect();
           return new CDTPClientEntity(cdtpClient);
         });
+    CDTPClient cdtpClient = cdtpClientEntity.getCdtpClient();
+    if (!cdtpClient.isActive()) {
+      cdtpClient.realConnect();
+    }
     String sender = message.getHeader().getSender();
     // 检查本地是否存在会话，如果没有本地会话，则登录
     if (!isLogged(sender, cdtpClientEntity)) {
       login(sender, cdtpClientEntity);
     }
 
-    return cdtpClientEntity.getCdtpClient();
+    return cdtpClient;
   }
 
   private CDTPPacket getCdtpPacket(Message message) {
@@ -112,8 +116,8 @@ class PsClientImpl implements PsClient {
     CDTPHeader header = new CDTPHeader();
     header.setDeviceId(deviceId);
     header.setSender(temail);
-    cipher.publicKey(temail).ifPresent(key -> header.setSenderPK(
-        Base64.getUrlEncoder().encodeToString(key)));
+//    cipher.publicKey(temail).ifPresent(key -> header.setSenderPK(
+//        Base64.getUrlEncoder().encodeToString(key)));
     header.setPacketId(UUID.randomUUID().toString());
 
     packet.setHeader(header);
@@ -131,6 +135,9 @@ class PsClientImpl implements PsClient {
       CDTPPacket packet = genLoginPacket(temail);
       genSignature(packet);
       CDTPPacket respPacket = cdtpClient.syncExecute(packet);
+      if (respPacket == null) {
+        throw new TimeoutException(temail + "登录超时");
+      }
       CDTPLoginResp loginResp = CDTPLoginResp.parseFrom(respPacket.getData());
       if (!loginSuccess(loginResp)) {
         // 登录失败的处理，暂时简单抛出异常
@@ -147,19 +154,19 @@ class PsClientImpl implements PsClient {
   }
 
   private void genSignature(CDTPPacket packet) {
-    try {
-      CDTPHeader header = packet.getHeader();
-      byte[] dataSha256 = MessageDigest.getInstance("SHA-256").digest(packet.getData());
-      String unsigned =
-          String.valueOf(packet.getCommandSpace() + packet.getCommand()) + header.getTargetAddress() + String
-              .valueOf(header.getTimestamp()) + Base64.getEncoder().encodeToString(dataSha256);
-      String temail = header.getSender();
-      String sign = Base64.getEncoder().encodeToString(cipher.sign(temail, unsigned));
-      header.setSignatureAlgorithm(ECC512_CODE);
-      header.setSignature(sign);
-    } catch (NoSuchAlgorithmException e) {
-      throw new PsClientException("对数据进行签名时出错！", e);
-    }
+//    try {
+//      CDTPHeader header = packet.getHeader();
+//      byte[] dataSha256 = MessageDigest.getInstance("SHA-256").digest(packet.getData());
+//      String unsigned =
+//          String.valueOf(packet.getCommandSpace() + packet.getCommand()) + header.getTargetAddress() + String
+//              .valueOf(header.getTimestamp()) + Base64.getEncoder().encodeToString(dataSha256);
+//      String temail = header.getSender();
+//      String sign = Base64.getEncoder().encodeToString(cipher.sign(temail, unsigned));
+//      header.setSignatureAlgorithm(ECC512_CODE);
+//      header.setSignature(sign);
+//    } catch (NoSuchAlgorithmException e) {
+//      throw new PsClientException("对数据进行签名时出错！", e);
+//    }
 
   }
 

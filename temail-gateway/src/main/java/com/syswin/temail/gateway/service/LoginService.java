@@ -6,6 +6,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.encrypt.util.SHA256Coder;
 import com.syswin.temail.gateway.entity.Response;
+import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,10 +40,11 @@ class LoginService {
 
 
   public ResponseEntity<Response> validSignature(CDTPPacket cdtpPacket) {
-    return this.validSignature(cdtpPacket.getHeader().getSender(),
-        cdtpPacket.getHeader().getSignature(),
+    CDTPHeader header = cdtpPacket.getHeader();
+    return this.validSignature(header.getSender(),
+        header.getSignature(),
         extractUnsignedData(cdtpPacket),
-        String.valueOf(cdtpPacket.getHeader().getSignatureAlgorithm()));
+        String.valueOf(header.getSignatureAlgorithm()));
   }
 
   public ResponseEntity<Response> validSignature(String temail, String signature,
@@ -68,12 +70,10 @@ class LoginService {
   }
 
   public String extractUnsignedData(CDTPPacket cdtpPacket) {
-    StringBuilder unSignedData = new StringBuilder();
-    unSignedData.append((cdtpPacket.getCommandSpace() + cdtpPacket.getCommand()))
-        .append(cdtpPacket.getHeader().getTargetAddress())
-        .append(cdtpPacket.getHeader().getTimestamp())
-        .append(sha256Coder.encryptAndSwitch2Base64(cdtpPacket.getData()));
-    return unSignedData.toString();
+    return String.valueOf((cdtpPacket.getCommandSpace() + cdtpPacket.getCommand()))
+        + cdtpPacket.getHeader().getTargetAddress()
+        + cdtpPacket.getHeader().getTimestamp()
+        + sha256Coder.encryptAndSwitch2Base64(cdtpPacket.getData());
   }
 
 }

@@ -6,7 +6,7 @@ package com.syswin.temail.ps.client;
  */
 class MessageMaker {
 
-  Message sendSingCharMessage(String sender, String receiver, String content) {
+  static Message sendSingleChatMessage(String sender, String receiver, String content) {
     return MessageConverter.fromCDTPPacket(PacketMaker.sendSingleCharPacket(sender, receiver, content));
   }
 }

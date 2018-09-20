@@ -1,5 +1,6 @@
 package com.syswin.temail.gateway.service;
 
+import static com.syswin.temail.gateway.service.SignatureUtil.resetSignature;
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.INTERNAL_ERROR;
 
@@ -36,13 +37,13 @@ public class RequestServiceImpl implements RequestService {
               } else {
                 errorPacket(reqPacket, INTERNAL_ERROR.getCode(), "dispatcher请求没有从服务器端返回结果对象：");
               }
-              // 请求的数据可能加密，而返回的数据没有加密，需要设置加密标识
-              reqPacket.getHeader().setDataEncryptionMethod(0);
+              resetSignature(reqPacket);
               responseHandler.accept(reqPacket);
             }),
         t -> {
           log.error("调用dispatcher请求出错", t);
           errorPacket(reqPacket, INTERNAL_ERROR.getCode(), t.getMessage());
+          resetSignature(reqPacket);
           responseHandler.accept(reqPacket);
         });
   }

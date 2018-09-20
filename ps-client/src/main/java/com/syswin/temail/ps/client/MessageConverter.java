@@ -7,6 +7,9 @@ import com.syswin.temail.ps.common.entity.CDTPPacket;
 class MessageConverter {
 
   static Message fromCDTPPacket(CDTPPacket packet) {
+    if (packet == null) {
+      return null;
+    }
     CDTPHeader cdtpHeader = packet.getHeader();
     Header header = new Header();
     header.setCommandSpace(packet.getCommandSpace());
@@ -30,6 +33,9 @@ class MessageConverter {
   }
 
   static CDTPPacket toCDTPPacket(Message message) {
+    if (message == null) {
+      return null;
+    }
     Header header = message.getHeader();
     CDTPHeader cdtpHeader = new CDTPHeader();
     cdtpHeader.setDataEncryptionMethod(header.getDataEncryptionMethod());

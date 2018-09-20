@@ -9,6 +9,8 @@ import static com.syswin.temail.ps.common.entity.CommandType.LOGOUT_CODE;
 import com.google.gson.Gson;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -52,9 +54,21 @@ class PacketMaker {
     packet.setCommand(SEND_MESSAGE_CODE);
     CDTPHeader header = new CDTPHeader();
     header.setDeviceId("deviceId");
+    header.setDataEncryptionMethod(0);
+    header.setTimestamp(System.currentTimeMillis());
+    header.setPacketId(UUID.randomUUID().toString());
+
     header.setSender(sender);
     header.setReceiver(receiver);
-    header.setPacketId(UUID.randomUUID().toString());
+    Map<String, Object> extraData = new HashMap<>();
+    extraData.put("from", sender);
+    extraData.put("to", receiver);
+    extraData.put("storeType", "2");
+    extraData.put("type", "0");
+    extraData.put("msgId", "4298F38F87DC4775B264A3753E77B443");
+    header.setExtraData(gson.toJson(extraData));
+//    header.setTargetAddress("192.168.1.194");
+
     packet.setHeader(header);
     packet.setData(content.getBytes());
     return packet;

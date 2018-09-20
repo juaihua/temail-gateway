@@ -1,13 +1,14 @@
 package com.syswin.temail.gateway.service;
 
 
+import static com.syswin.temail.gateway.service.SignatureUtil.resetSignature;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLogin;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
-import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLogoutResp;
 import com.syswin.temail.ps.server.entity.Session;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
 import java.util.Collection;
@@ -40,40 +41,37 @@ public class SessionServiceImpl extends AbstractSessionService {
   protected boolean loginExt(CDTPPacket reqPacket, CDTPPacket respPacket) {
     String temail = reqPacket.getHeader().getSender();
     String deviceId = reqPacket.getHeader().getDeviceId();
-    if (!StringUtils.hasText(temail) || !StringUtils.hasText(deviceId)) {
-      return false;
-    }
     try {
-      CDTPLogin cdtpLogin = CDTPLogin.parseFrom(reqPacket.getData());
-      log.debug("暂没有用的调试信息", cdtpLogin);
-    } catch (InvalidProtocolBufferException e) {
-      return false;
-    }
-    ResponseEntity<Response> responseEntity = loginService.validSignature(reqPacket);
-    Response response = responseEntity.getBody();
-    if (responseEntity.getStatusCode().is2xxSuccessful()) {
-      loginSuccess(reqPacket, respPacket, response);
-      return true;
-    } else {
-      loginFailure(reqPacket, respPacket, response);
-      return false;
+      if (!StringUtils.hasText(temail) || !StringUtils.hasText(deviceId)) {
+        return false;
+      }
+      try {
+        CDTPLogin cdtpLogin = CDTPLogin.parseFrom(reqPacket.getData());
+        log.debug("暂没有用的调试信息", cdtpLogin);
+      } catch (InvalidProtocolBufferException e) {
+        return false;
+      }
+      ResponseEntity<Response> responseEntity = loginService.validSignature(reqPacket);
+      Response response = responseEntity.getBody();
+      if (responseEntity.getStatusCode().is2xxSuccessful()) {
+        loginSuccess(reqPacket, respPacket, response);
+        return true;
+      } else {
+        loginFailure(reqPacket, respPacket, response);
+        return false;
+      }
+    } finally {
+      resetSignature(respPacket);
     }
   }
 
   @Override
-  protected boolean logoutExt(CDTPPacket reqPacket, CDTPPacket respPacket) {
-    ResponseEntity<Response> responseEntity = loginService.validSignature(reqPacket);
-    if (responseEntity.getStatusCode().is2xxSuccessful()) {
-      String temail = reqPacket.getHeader().getSender();
-      String deviceId = reqPacket.getHeader().getDeviceId();
-      remoteStatusService.removeSession(temail, deviceId, responseConsumer);
-      CDTPLogoutResp.Builder builder = CDTPLogoutResp.newBuilder();
-      builder.setCode(HttpStatus.OK.value());
-      respPacket.setData(builder.build().toByteArray());
-      return true;
-    } else {
-      return false;
-    }
+  protected void logoutExt(CDTPPacket reqPacket, CDTPPacket respPacket) {
+    String temail = reqPacket.getHeader().getSender();
+    String deviceId = reqPacket.getHeader().getDeviceId();
+    remoteStatusService.removeSession(temail, deviceId, responseConsumer);
+    super.logoutExt(reqPacket, respPacket);
+    resetSignature(respPacket);
   }
 
   /**

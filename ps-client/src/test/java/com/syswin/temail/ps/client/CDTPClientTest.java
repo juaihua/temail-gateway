@@ -2,18 +2,18 @@ package com.syswin.temail.ps.client;
 
 
 import static com.syswin.temail.ps.client.PacketMaker.sendSingleCharRespPacket;
+import static com.syswin.temail.ps.server.Constants.HTTP_STATUS_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
+import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.ps.server.connection.PsServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
-import com.syswin.temail.ps.server.service.RequestService;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,10 +27,10 @@ public class CDTPClientTest {
 
   private static final int serverPort = 8099;
   private static final int serverReadIdleTimeSeconds = 300;
-  private static RequestHandler requestHandler = Mockito.mock(RequestHandler.class);
-  private CDTPClient client;
-  private String sender = "jack@throwable.email";
-  private String receive = "sean@throwable.email";
+  private static TestRequestHandler testRequestHandler = Mockito.mock(TestRequestHandler.class);
+  private static CDTPClient client;
+  private String sender = "jack@t.email";
+  private String receive = "sean@t.email";
   private String message = "hello world";
 
   @BeforeClass
@@ -39,7 +39,7 @@ public class CDTPClientTest {
         new PsServer(
             new AbstractSessionService() {
             },
-            new TestRequestService(requestHandler));
+            new TestRequestService(testRequestHandler));
     psServer.run(serverPort, serverReadIdleTimeSeconds);
   }
 
@@ -47,23 +47,23 @@ public class CDTPClientTest {
   public void connect() {
     if (client == null) {
       String host = "localhost";
-      client = new CDTPClient(host, serverPort, 30, 1);
+      client = new CDTPClient(host, serverPort, 30);
       client.connect();
     }
   }
 
   @Test
-  public void syncExecute() {
+  public void syncExecute() throws InvalidProtocolBufferException {
     CDTPPacket reqPacket = PacketMaker.loginPacket(sender);
     CDTPPacket respPacket = client.syncExecute(reqPacket);
-    assertThat(respPacket).isEqualToComparingFieldByField(reqPacket);
+    CDTPLoginResp loginResp = CDTPLoginResp.parseFrom(respPacket.getData());
+    assertThat(loginResp.getCode()).isEqualTo(HTTP_STATUS_OK);
 
     reqPacket = PacketMaker.sendSingleCharPacket(sender, receive, message);
     CDTPPacket respPacket1 = sendSingleCharRespPacket(reqPacket);
-    when(requestHandler.dispach(reqPacket)).thenReturn(respPacket1);
+    when(testRequestHandler.dispatch(reqPacket)).thenReturn(respPacket1);
     respPacket = client.syncExecute(reqPacket);
-    assertThat(respPacket).isEqualToComparingFieldByField(respPacket1);
-//    Thread.sleep(3000);
+    assertThat(respPacket).isEqualTo(respPacket1);
   }
 
   @Test
@@ -77,22 +77,47 @@ public class CDTPClientTest {
   public void asyncExecute() throws InterruptedException {
     CDTPPacket loginReqPacket = PacketMaker.loginPacket(sender);
     CountDownLatch latch1 = new CountDownLatch(1);
+    AtomicReference<String> errorMsg = new AtomicReference<>();
     client.asyncExecute(loginReqPacket,
         respPacket -> {
-          assertThat(respPacket).isEqualToComparingFieldByField(loginReqPacket);
+          try {
+            CDTPLoginResp loginResp = CDTPLoginResp.parseFrom(respPacket.getData());
+            if (loginResp.getCode() != HTTP_STATUS_OK) {
+              errorMsg.set("返回值不对，\n期望值：200，\n实际值：" + loginResp.getCode());
+            }
+          } catch (InvalidProtocolBufferException e) {
+            errorMsg.set("返回值的data格式不对，" + new String(respPacket.getData()));
+          }
+          latch1.countDown();
+        },
+        throwable -> {
+          errorMsg.set("请求异常");
           latch1.countDown();
         });
     latch1.await(3, TimeUnit.SECONDS);
+    if (errorMsg.get() != null) {
+      throw new Error(errorMsg.get());
+    }
     CDTPPacket reqPacket = PacketMaker.sendSingleCharPacket(sender, receive, message);
     CDTPPacket exptectRespPacket = sendSingleCharRespPacket(reqPacket);
-    when(requestHandler.dispach(reqPacket)).thenReturn(exptectRespPacket);
+    when(testRequestHandler.dispatch(reqPacket)).thenReturn(exptectRespPacket);
     CountDownLatch latch2 = new CountDownLatch(1);
+    errorMsg.set(null);
     client.asyncExecute(reqPacket,
         respPacket -> {
-          assertThat(respPacket).isEqualToComparingFieldByField(exptectRespPacket);
+          if (!exptectRespPacket.equals(respPacket)) {
+            errorMsg.set("返回值不对，\n期望值：" + exptectRespPacket + "\n实际值：" + respPacket);
+          }
+          latch2.countDown();
+        },
+        throwable -> {
+          errorMsg.set("请求异常");
           latch2.countDown();
         });
     latch2.await(2, TimeUnit.SECONDS);
+    if (errorMsg.get() != null) {
+      throw new Error(errorMsg.get());
+    }
   }
 
   @Test
@@ -114,29 +139,7 @@ public class CDTPClientTest {
         1, TimeUnit.NANOSECONDS);
     latch.await(3, TimeUnit.SECONDS);
     if (errorMsg.get() != null) {
-      throw new RuntimeException(errorMsg.get());
+      throw new Error(errorMsg.get());
     }
   }
-
-  private interface RequestHandler {
-
-    default CDTPPacket dispach(CDTPPacket reqPacket) {
-      return reqPacket;
-    }
-  }
-
-  private static class TestRequestService implements RequestService {
-
-    private RequestHandler handler;
-
-    private TestRequestService(RequestHandler handler) {
-      this.handler = handler;
-    }
-
-    @Override
-    public void handleRequest(CDTPPacket reqPacket, Consumer<CDTPPacket> responseHandler) {
-      responseHandler.accept(handler.dispach(reqPacket));
-    }
-  }
-
 }

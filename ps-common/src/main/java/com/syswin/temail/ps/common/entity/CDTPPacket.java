@@ -1,8 +1,9 @@
 package com.syswin.temail.ps.common.entity;
 
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
-import static com.syswin.temail.ps.common.entity.CommandType.PING;
-import static com.syswin.temail.ps.common.entity.CommandType.PONG;
+import static com.syswin.temail.ps.common.entity.CommandType.INTERNAL_ERROR_CODE;
+import static com.syswin.temail.ps.common.entity.CommandType.PING_CODE;
+import static com.syswin.temail.ps.common.entity.CommandType.PONG_CODE;
 
 import java.util.Arrays;
 import lombok.AllArgsConstructor;
@@ -39,6 +40,11 @@ public final class CDTPPacket {
 
   public boolean isHearbeat() {
     return commandSpace == CHANNEL_CODE &&
-        (command == PING.getCode() || command == PONG.getCode());
+        (command == PING_CODE || command == PONG_CODE);
+  }
+
+  public boolean isInternalError() {
+    return commandSpace == CHANNEL_CODE &&
+        (command == INTERNAL_ERROR_CODE);
   }
 }
