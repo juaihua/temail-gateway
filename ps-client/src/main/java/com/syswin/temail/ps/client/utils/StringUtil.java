@@ -1,29 +1,28 @@
 package com.syswin.temail.ps.client.utils;
 
-import com.sun.istack.internal.Nullable;
-
 /**
  * @author 姚华成
  * @date 2018-9-14
  */
 public class StringUtil {
-  public static boolean isEmpty(@Nullable Object str) {
+
+  public static boolean isEmpty(Object str) {
     return (str == null || "".equals(str));
   }
 
-  public static boolean hasLength(@Nullable CharSequence str) {
+  public static boolean hasLength(CharSequence str) {
     return (str != null && str.length() > 0);
   }
 
-  public static boolean hasLength(@Nullable String str) {
+  public static boolean hasLength(String str) {
     return (str != null && !str.isEmpty());
   }
 
-  public static boolean hasText(@Nullable CharSequence str) {
+  public static boolean hasText(CharSequence str) {
     return (str != null && str.length() > 0 && containsText(str));
   }
 
-  public static boolean hasText(@Nullable String str) {
+  public static boolean hasText(String str) {
     return (str != null && !str.isEmpty() && containsText(str));
   }
 

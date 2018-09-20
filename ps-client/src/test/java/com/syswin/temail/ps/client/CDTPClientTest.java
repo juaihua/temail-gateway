@@ -53,7 +53,7 @@ public class CDTPClientTest {
   }
 
   @Test
-  public void syncExecute() throws InterruptedException {
+  public void syncExecute() {
     CDTPPacket reqPacket = PacketMaker.loginPacket(sender);
     CDTPPacket respPacket = client.syncExecute(reqPacket);
     assertThat(respPacket).isEqualToComparingFieldByField(reqPacket);
