@@ -1,5 +1,6 @@
 package com.syswin.temail.ps.client;
 
+import static com.syswin.temail.ps.client.SignatureAlgorithm.ECC512_CODE;
 import static com.syswin.temail.ps.common.Constants.CDTP_VERSION;
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.LOGIN;
@@ -12,6 +13,8 @@ import com.syswin.temail.ps.client.utils.StringUtil;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.Map;
@@ -144,11 +147,20 @@ class PsClientImpl implements PsClient {
   }
 
   private void genSignature(CDTPPacket packet) {
-//    String temail = packet.getHeader().getSender();
-//    byte[] unsigned = new byte[100];
-//    String sign = Base64.getEncoder().encodeToString(cipher.sign(temail, null));
+    try {
+      CDTPHeader header = packet.getHeader();
+      byte[] dataSha256 = MessageDigest.getInstance("SHA-256").digest(packet.getData());
+      String unsigned =
+          String.valueOf(packet.getCommandSpace() + packet.getCommand()) + header.getTargetAddress() + String
+              .valueOf(header.getTimestamp()) + Base64.getEncoder().encodeToString(dataSha256);
+      String temail = header.getSender();
+      String sign = Base64.getEncoder().encodeToString(cipher.sign(temail, unsigned));
+      header.setSignatureAlgorithm(ECC512_CODE);
+      header.setSignature(sign);
+    } catch (NoSuchAlgorithmException e) {
+      throw new PsClientException("对数据进行签名时出错！", e);
+    }
 
-    // TODO(姚华成) 签名待实现
   }
 
   private HostAndPort parseHostAndPort(String targetAddress) {
