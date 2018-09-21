@@ -33,14 +33,14 @@ class PsClientImpl implements PsClient {
   private String deviceId;
   private String defaultHost;
   private int port;
-  private int writeIdleTimeSeconds;
+  private int idleTimeSeconds;
 //  private KeyAwareAsymmetricCipher cipher = new VaultKeeper().asymmetricCipher(CipherAlgorithm.ECDSA);
 
-  PsClientImpl(String deviceId, String defaultHost, int port, int writeIdleTimeSeconds) {
+  PsClientImpl(String deviceId, String defaultHost, int port, int idleTimeSeconds) {
     this.deviceId = deviceId;
     this.defaultHost = defaultHost;
     this.port = port;
-    this.writeIdleTimeSeconds = writeIdleTimeSeconds;
+    this.idleTimeSeconds = idleTimeSeconds;
   }
 
   @Override
@@ -85,7 +85,7 @@ class PsClientImpl implements PsClient {
     }
     CDTPClientEntity cdtpClientEntity = cdtpClientMap.computeIfAbsent(hostAndPort,
         key -> {
-          CDTPClient cdtpClient = new CDTPClient(key.getHost(), key.getPort(), writeIdleTimeSeconds);
+          CDTPClient cdtpClient = new CDTPClient(key.getHost(), key.getPort(), idleTimeSeconds);
           cdtpClient.connect();
           return new CDTPClientEntity(cdtpClient);
         });

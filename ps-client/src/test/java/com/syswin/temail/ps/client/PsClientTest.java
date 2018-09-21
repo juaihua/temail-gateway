@@ -40,14 +40,12 @@ public class PsClientTest {
 
   @BeforeClass
   public static void startServer() {
-
     PsServer psServer =
         new PsServer(
             new TestSessionService(),
             new TestRequestService(testRequestHandler),
             serverPort, serverReadIdleTimeSeconds);
     psServer.run();
-
   }
 
   @Before

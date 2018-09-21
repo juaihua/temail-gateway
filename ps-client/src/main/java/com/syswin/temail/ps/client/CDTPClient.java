@@ -40,17 +40,17 @@ class CDTPClient {
   private final String host;
   private final int port;
   private final ConcurrentHashMap<String, Request> requestMap = new ConcurrentHashMap<>();
-  private final int writeIdleTimeSeconds;
+  private final int idleTimeSeconds;
   private final EventLoopGroup bossGroup = new NioEventLoopGroup();
 
   private Bootstrap bootstrap;
   private Channel channel;
   private CDTPClientHandler CDTPClientHandler;
 
-  CDTPClient(String host, int port, int writeIdleTimeSeconds) {
+  CDTPClient(String host, int port, int idleTimeSeconds) {
     this.host = host;
     this.port = port;
-    this.writeIdleTimeSeconds = writeIdleTimeSeconds;
+    this.idleTimeSeconds = idleTimeSeconds;
     CDTPClientHandler = new CDTPClientHandler();
   }
 
@@ -126,7 +126,7 @@ class CDTPClient {
   private ChannelHandler[] handlers() {
     return new ChannelHandler[]{
 //        watchdog,
-        new IdleStateHandler(0, writeIdleTimeSeconds, 0),
+        new IdleStateHandler(0, idleTimeSeconds, 0),
         new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH),
         new LengthFieldPrepender(LENGTH_FIELD_LENGTH),
         new PacketDecoder(),
