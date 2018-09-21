@@ -1,5 +1,22 @@
 package com.syswin.temail.gateway.status;
 
+import au.com.dius.pact.consumer.ConsumerPactTestMk2;
+import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.model.RequestResponsePact;
+import com.google.gson.Gson;
+import com.syswin.temail.gateway.TemailGatewayProperties;
+import com.syswin.temail.gateway.entity.Response;
+import com.syswin.temail.gateway.entity.TemailAccoutLocation;
+import com.syswin.temail.gateway.entity.TemailAccoutLocations;
+import com.syswin.temail.gateway.grpc.GrpcClientWrapper;
+import com.syswin.temail.gateway.service.RemoteStatusService;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import org.jetbrains.annotations.NotNull;
+
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -10,23 +27,6 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
-import au.com.dius.pact.consumer.ConsumerPactTestMk2;
-import au.com.dius.pact.consumer.MockServer;
-import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.RequestResponsePact;
-import com.google.gson.Gson;
-import com.syswin.temail.gateway.TemailGatewayProperties;
-import com.syswin.temail.gateway.entity.Response;
-import com.syswin.temail.gateway.entity.TemailAccoutLocation;
-import com.syswin.temail.gateway.entity.TemailAccoutLocations;
-import com.syswin.temail.gateway.service.RemoteStatusService;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.web.reactive.function.client.WebClient;
 
 
 public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
@@ -81,7 +81,7 @@ public class DiscoveryConsumerTest extends ConsumerPactTestMk2 {
     properties.getRocketmq().setMqTopic(mqTopic);
     properties.getInstance().setMqTag(mqTag);
 
-    RemoteStatusService statusService = new RemoteStatusService(properties, WebClient.create());
+    RemoteStatusService statusService = new RemoteStatusService(properties, new GrpcClientWrapper(properties));
     statusService.addSession(temail, deviceId, responses::add);
     waitAtMost(5, SECONDS).until(() -> !responses.isEmpty());
     assertThat(responses.poll().getCode()).isEqualTo(CREATED.value());

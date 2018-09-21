@@ -14,6 +14,8 @@ public class TemailGatewayProperties {
   private String verifyUrl;
   private String dispatchUrl;
   private String updateSocketStatusUrl;
+  private String grpcServerHost;
+  private String grpcServerPort;
 
   private Netty netty = new Netty();
   private Rocketmq rocketmq = new Rocketmq();

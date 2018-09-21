@@ -1,12 +1,11 @@
 package com.syswin.temail.gateway.service;
 
-import static java.util.Collections.singletonList;
-
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.TemailGatewayProperties.Instance;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.TemailAccoutLocation;
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
+import com.syswin.temail.gateway.grpc.GrpcStatusAdapter;
 import com.syswin.temail.ps.server.entity.Session;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,28 +14,31 @@ import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.WebClient;
+
+import static java.util.Collections.singletonList;
 
 @Slf4j
 public class RemoteStatusService {
 
   private final TemailGatewayProperties properties;
 
-  private final WebClient statusWebClient;
+  //private final WebClient statusWebClient;
+
+  private GrpcStatusAdapter grpcStatusAdapter;
 
   // a async queue used for retry failed task
   private final PendingTaskQueue<Pair> pendingTaskQueue = new PendingTaskQueue<>(
       5000,
-      pair -> reqUpdSts4Upd(pair.getTemailAccoutLocations(), pair.getTemailAcctUptOptType(), ignored -> {})
+      pair -> reqUpdSts4Upd(pair.getTemailAccoutLocations(), pair.getTemailAcctUptOptType(), ignored -> {
+      })
   );
 
   private final ParameterizedTypeReference<Response<Void>> typeReference = new ParameterizedTypeReference<Response<Void>>() {
   };
 
-  public RemoteStatusService(TemailGatewayProperties properties, WebClient statusWebClient) {
+  public RemoteStatusService(TemailGatewayProperties properties, GrpcStatusAdapter grpcStatusAdapter) {
     this.properties = properties;
-    this.statusWebClient = statusWebClient;
+    this.grpcStatusAdapter = grpcStatusAdapter;
     this.pendingTaskQueue.run();
   }
 
@@ -48,7 +50,8 @@ public class RemoteStatusService {
     updSessionByType(temail, deviceId, TemailAcctUptOptType.del, consumer);
   }
 
-  private void updSessionByType(String temail, String deviceId, TemailAcctUptOptType optType, Consumer<Response<Void>> consumer) {
+  private void updSessionByType(String temail, String deviceId, TemailAcctUptOptType optType,
+      Consumer<Response<Void>> consumer) {
     reqUpdSts4Upd(
         new TemailAccoutLocations(singletonList(buildAcctSts(temail, deviceId))),
         optType,
@@ -71,24 +74,17 @@ public class RemoteStatusService {
         properties.getRocketmq().getMqTopic(), instance.getMqTag());
   }
 
-  private void reqUpdSts4Upd(TemailAccoutLocations temailAccoutLocations, TemailAcctUptOptType type, Consumer<Response<Void>> consumer) {
-    statusWebClient.method(type.getMethod())
-        .uri(properties.getUpdateSocketStatusUrl())
-        .contentType(MediaType.APPLICATION_JSON_UTF8)
-        .syncBody(temailAccoutLocations)
-        .exchange()
-        .subscribe(clientResponse -> {
-          if (!clientResponse.statusCode().is2xxSuccessful()) {
-            log.debug("upd temailAccoutLocations fail {} , will try agagin later! ", clientResponse.statusCode());
-            pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
-          } else {
-            clientResponse.bodyToMono(typeReference)
-                .subscribe(result -> {
-              log.debug("response from status server: {}", result.toString());
-              consumer.accept(result);
-            });
-          }
-        });
+  private void reqUpdSts4Upd(TemailAccoutLocations temailAccoutLocations,
+      TemailAcctUptOptType type, Consumer<Response<Void>> consumer) {
+    if (type == TemailAcctUptOptType.add) {
+      if (!grpcStatusAdapter.syncChannelLocationes(temailAccoutLocations)) {
+        pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
+      }
+    } else {
+      if (!grpcStatusAdapter.removeChannelLocationes(temailAccoutLocations)) {
+        pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
+      }
+    }
   }
 
   enum TemailAcctUptOptType {
