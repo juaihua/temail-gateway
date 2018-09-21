@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
-import com.syswin.temail.ps.server.connection.PsServer;
+import com.syswin.temail.ps.server.PsServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -39,8 +39,9 @@ public class CDTPClientTest {
         new PsServer(
             new AbstractSessionService() {
             },
-            new TestRequestService(testRequestHandler));
-    psServer.run(serverPort, serverReadIdleTimeSeconds);
+            new TestRequestService(testRequestHandler),
+            serverPort, serverReadIdleTimeSeconds);
+    psServer.run();
   }
 
   @Before

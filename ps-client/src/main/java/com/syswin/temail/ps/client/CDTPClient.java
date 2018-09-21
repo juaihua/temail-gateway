@@ -26,6 +26,7 @@ import io.netty.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -74,15 +75,29 @@ class CDTPClient {
       String packetId = reqPacket.getHeader()
           .getPacketId();
       CountDownLatch latch = new CountDownLatch(1);
-      Response response = new Response();
-      Request request = new Request(reqPacket, packet -> {
-        response.respPacket = packet;
-        latch.countDown();
-      });
+      AtomicReference<CDTPPacket> respPpacket = new AtomicReference<>();
+      AtomicReference<PsClientException> exception = new AtomicReference<>();
+      Request request = new Request(reqPacket,
+          respPacket -> {
+            respPpacket.set(respPacket);
+            latch.countDown();
+          },
+          throwable -> {
+            if (throwable instanceof PsClientException) {
+              exception.set((PsClientException) throwable);
+            } else {
+              exception.set(new PsClientException("PsClient请求失败，请求参数" + reqPacket, throwable));
+            }
+            latch.countDown();
+          });
       requestMap.put(packetId, request);
       channel.writeAndFlush(reqPacket);
       latch.await(timeout, timeUnit);
-      return response.respPacket;
+      if (exception.get() != null) {
+        throw exception.get();
+      } else {
+        return respPpacket.get();
+      }
     } catch (InterruptedException e) {
       throw new PsClientException("执行CDTP请求出错", e);
     }
@@ -97,7 +112,7 @@ class CDTPClient {
       Consumer<Throwable> errorConsumer, long timeout, TimeUnit timeUnit) {
     String packetId = reqPacket.getHeader()
         .getPacketId();
-    Request request = new Request(reqPacket, responseConsumer, errorConsumer, timeout, timeUnit);
+    Request request = new Request(reqPacket, responseConsumer, errorConsumer);
     ScheduledFuture<?> timeoutFuture = bossGroup.schedule(new TimeoutTask(request), timeout, timeUnit);
     request.setTimeoutFuture(timeoutFuture);
     requestMap.put(packetId, request);
@@ -144,6 +159,7 @@ class CDTPClient {
       try {
         CDTPPacket respPacket = CDTPClientHandler.getReceivedMessages().take();
         try {
+
           CDTPHeader header = respPacket.getHeader();
           String packetId = header.getPacketId();
           Request request = null;
@@ -152,7 +168,11 @@ class CDTPClient {
           } else {
             // 无主的服务器端错误，而客户端只有一个请求，那就是它了
             if (requestMap.size() == 1) {
-              request = requestMap.values().iterator().next();
+              Request tempRequest = requestMap.values().iterator().next();
+              String reqPacketId = tempRequest.getReqPacket().getHeader().getPacketId();
+              if (requestMap.size() == 1) {
+                request = requestMap.remove(reqPacketId);
+              }
             } else {
               log.error("服务器返回无主错误，而客户端有多个请求，无法处理, 返回值：{}", respPacket);
             }
@@ -162,8 +182,7 @@ class CDTPClient {
             if (timeoutFuture != null) {
               timeoutFuture.cancel(false);
             }
-            Consumer<CDTPPacket> responseConsumer = request.getResponseConsumer();
-            responseConsumer.accept(respPacket);
+            request.getResponseConsumer().accept(respPacket);
           }
         } catch (RuntimeException e) {
           // 其他异常无须处理

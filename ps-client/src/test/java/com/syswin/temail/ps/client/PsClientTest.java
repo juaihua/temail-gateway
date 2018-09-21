@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.ps.server.Constants;
-import com.syswin.temail.ps.server.connection.PsServer;
+import com.syswin.temail.ps.server.PsServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
 import java.util.Arrays;
 import java.util.List;
@@ -44,8 +44,9 @@ public class PsClientTest {
     PsServer psServer =
         new PsServer(
             new TestSessionService(),
-            new TestRequestService(testRequestHandler));
-    psServer.run(serverPort, serverReadIdleTimeSeconds);
+            new TestRequestService(testRequestHandler),
+            serverPort, serverReadIdleTimeSeconds);
+    psServer.run();
 
   }
 

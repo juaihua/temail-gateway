@@ -1,7 +1,7 @@
 package com.syswin.temail.gateway.service;
 
 
-import static com.syswin.temail.gateway.service.SignatureUtil.resetSignature;
+import static com.syswin.temail.gateway.encrypt.util.SignatureUtil.resetSignature;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.gateway.TemailGatewayProperties;

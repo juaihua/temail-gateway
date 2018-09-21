@@ -6,7 +6,7 @@ import com.syswin.temail.gateway.service.RequestServiceImpl;
 import com.syswin.temail.gateway.service.SessionServiceImpl;
 import com.syswin.temail.gateway.service.SilentResponseErrorHandler;
 import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
-import com.syswin.temail.ps.server.connection.PsServer;
+import com.syswin.temail.ps.server.PsServer;
 import com.syswin.temail.ps.server.service.ChannelHolder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -56,9 +56,11 @@ public class TemailGatewayApplication {
         new PsServer(
             sessionService,
             new RequestServiceImpl(webClient, properties),
+            properties.getNetty().getPort(),
+            properties.getNetty().getReadIdleTimeSeconds(),
             new CommandAwareBodyExtractor(
                 new SimpleBodyExtractor()));
-    psServer.run(properties.getNetty().getPort(), properties.getNetty().getReadIdleTimeSeconds());
+    psServer.run();
 
     return sessionService.getChannelHolder();
   }
