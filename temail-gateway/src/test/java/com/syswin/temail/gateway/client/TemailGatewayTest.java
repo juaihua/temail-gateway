@@ -32,6 +32,7 @@ import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.ps.common.entity.CommandType;
 import io.netty.channel.Channel;
+import java.util.Objects;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -86,8 +87,6 @@ public class TemailGatewayTest {
   private static final String ackMessage = uniquify("Sent");
   private static Channel channel;
   private final String sender = "jack@t.email";
-  private final String receiver = "sean@t.email";
-  private final String message = "hello world";
   private final String deviceId = uniquify("deviceId");
   private final ClientResponseHandler responseHandler = new ClientResponseHandler(() -> loginPacket(sender, deviceId));
   private final NettyClient nettyClient = new NettyClient(responseHandler);
@@ -150,6 +149,7 @@ public class TemailGatewayTest {
     try {
       Thread.sleep(3000);
     } catch (InterruptedException e) {
+      // 不需要处理
     }
     mqProducer.setNamesrvAddr(rocketMqNameSrv.getContainerIpAddress() + ":" + MQ_SERVER_PORT);
     mqProducer.start();
@@ -181,17 +181,19 @@ public class TemailGatewayTest {
     // login
     await().atMost(30, SECONDS).until(() -> !responseHandler.receivedMessages().isEmpty());
     CDTPPacket packet = responseHandler.receivedMessages().poll();
-    assertThat(packet.getCommandSpace()).isEqualTo((CHANNEL_CODE));
+    assertThat(Objects.requireNonNull(packet).getCommandSpace()).isEqualTo((CHANNEL_CODE));
     assertThat(packet.getCommand()).isEqualTo(CommandType.LOGIN.getCode());
 
     CDTPLoginResp loginResp = CDTPLoginResp.parseFrom(packet.getData());
     assertThat(loginResp.getCode()).isEqualTo(200);
 
     // ack for sent message
-    channel.writeAndFlush(singleChatPacket(sender, receiver, message, deviceId)).syncUninterruptibly();
+    String receiver = "sean@t.email";
+    String message = "hello world";
+    channel.writeAndFlush(singleChatPacket(sender, receiver, message, deviceId));
     await().atMost(30, SECONDS).until(() -> !responseHandler.receivedMessages().isEmpty());
     packet = responseHandler.receivedMessages().poll();
-    assertThat(packet.getCommandSpace()).isEqualTo(SINGLE_MESSAGE_CODE);
+    assertThat(Objects.requireNonNull(packet).getCommandSpace()).isEqualTo(SINGLE_MESSAGE_CODE);
     assertThat(packet.getCommand()).isEqualTo(SEND_MESSAGE.getCode());
 
     Response response = GSON.fromJson(new String(packet.getData()), Response.class);
@@ -204,7 +206,7 @@ public class TemailGatewayTest {
         GSON.toJson(mqMsgPayload(sender, message)).getBytes()), 3000);
     await().atMost(50, SECONDS).until(() -> !responseHandler.receivedMessages().isEmpty());
     packet = responseHandler.receivedMessages().poll();
-    assertThat(packet.getCommandSpace()).isEqualTo(SYNC_STATUS_CODE);
+    assertThat(Objects.requireNonNull(packet).getCommandSpace()).isEqualTo(SYNC_STATUS_CODE);
     assertThat(packet.getCommand()).isEqualTo(NOTIFY_COMMAND);
 
     response = GSON.fromJson(new String(packet.getData()), Response.class);

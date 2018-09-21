@@ -71,7 +71,7 @@ public class YHCNettyClient {
     try {
       CountDownLatch latch = new CountDownLatch(1);
       responseHandler.resetLatch(latch);
-      channel.writeAndFlush(reqPacket).syncUninterruptibly();
+      channel.writeAndFlush(reqPacket);
       latch.await(timeout, timeUnit);
       return responseHandler.getResult();
     } catch (InterruptedException e) {

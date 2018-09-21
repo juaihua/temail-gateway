@@ -34,7 +34,7 @@ public class ClientResponseHandler extends SimpleChannelInboundHandler<CDTPPacke
   public void channelActive(ChannelHandlerContext ctx) {
     CDTPPacket packet = loginSupplier.get();
     log.info("Channel active, sending login packet {}", packet);
-    ctx.writeAndFlush(packet).syncUninterruptibly();
+    ctx.writeAndFlush(packet);
   }
 
   public BlockingQueue<CDTPPacket> receivedMessages() {

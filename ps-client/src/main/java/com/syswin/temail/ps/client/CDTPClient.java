@@ -80,7 +80,7 @@ class CDTPClient {
         latch.countDown();
       });
       requestMap.put(packetId, request);
-      channel.writeAndFlush(reqPacket).syncUninterruptibly();
+      channel.writeAndFlush(reqPacket);
       latch.await(timeout, timeUnit);
       return response.respPacket;
     } catch (InterruptedException e) {
@@ -101,7 +101,7 @@ class CDTPClient {
     ScheduledFuture<?> timeoutFuture = bossGroup.schedule(new TimeoutTask(request), timeout, timeUnit);
     request.setTimeoutFuture(timeoutFuture);
     requestMap.put(packetId, request);
-    channel.writeAndFlush(reqPacket).syncUninterruptibly();
+    channel.writeAndFlush(reqPacket);
   }
 
   boolean isActive() {

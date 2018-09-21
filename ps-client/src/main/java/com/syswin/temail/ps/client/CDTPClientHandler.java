@@ -58,7 +58,7 @@ class CDTPClientHandler extends SimpleChannelInboundHandler<CDTPPacket> {
     if (evt instanceof IdleStateEvent) {
       if (((IdleStateEvent) evt).state() == IdleState.WRITER_IDLE) {
         log.debug("发送心跳数据");
-        ctx.channel().writeAndFlush(HEARTBEAT_PACKET).syncUninterruptibly();
+        ctx.channel().writeAndFlush(HEARTBEAT_PACKET);
       }
     }
     super.userEventTriggered(ctx, evt);
