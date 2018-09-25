@@ -143,8 +143,10 @@ class PsClientImpl implements PsClient {
           String.valueOf(packet.getCommandSpace() + packet.getCommand()) + header.getTargetAddress() + String
               .valueOf(header.getTimestamp()) + Base64.getEncoder().encodeToString(dataSha256);
       String temail = header.getSender();
-      header.setSignatureAlgorithm(signer.getAlgorithm());
-      header.setSignature(signer.sign(temail, unsigned));
+      if (signer != null) {
+        header.setSignatureAlgorithm(signer.getAlgorithm());
+        header.setSignature(signer.sign(temail, unsigned));
+      }
     } catch (NoSuchAlgorithmException e) {
       throw new PsClientException("对数据进行签名时出错！", e);
     }

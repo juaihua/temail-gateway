@@ -38,13 +38,10 @@ public class PsClientBuilder {
   public PsClient build() {
     assert StringUtil.hasText(deviceId);
     if (signer == null) {
-      if (StringUtil.hasText(vaultRegistryUrl) ||
-          StringUtil.hasText(tenantId)) {
-        throw new PsClientException("signer和vaultRegistryUrl+tenantId不能同时为空！");
+      if (StringUtil.hasText(vaultRegistryUrl) && StringUtil.hasText(tenantId)) {
+        signer = new KeyAwareSigner(vaultRegistryUrl, tenantId);
       }
-      signer = new KeyAwareSigner(vaultRegistryUrl, tenantId);
     }
-
     return new PsClientImpl(deviceId, defaultHost, defaultPort, idleTimeSeconds, signer);
   }
 
