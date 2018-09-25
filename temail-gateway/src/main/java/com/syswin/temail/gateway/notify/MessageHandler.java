@@ -1,5 +1,7 @@
 package com.syswin.temail.gateway.notify;
 
+import static com.syswin.temail.gateway.encrypt.util.SignatureUtil.resetSignature;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.syswin.temail.ps.server.service.ChannelHolder;
@@ -27,6 +29,7 @@ class MessageHandler {
       String receiver = packet.getHeader().getReceiver();
       Iterable<Channel> channels = channelHolder.getChannels(receiver);
       for (Channel channel : channels) {
+        resetSignature(packet);
         log.info("当前推送的通道信息：{}，推送的内容信息：{}", channel, packet);
         channel.writeAndFlush(packet);
       }
