@@ -18,6 +18,10 @@ class TestRequestService implements RequestService {
 
   @Override
   public void handleRequest(CDTPPacket reqPacket, Consumer<CDTPPacket> responseHandler) {
-    responseHandler.accept(handler.dispatch(reqPacket));
+    CDTPPacket respPacket = handler.dispatch(reqPacket);
+    if (respPacket == null) {
+      System.out.println(reqPacket);
+    }
+    responseHandler.accept(respPacket);
   }
 }

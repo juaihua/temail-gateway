@@ -4,13 +4,15 @@ import static com.syswin.temail.ps.client.Constants.DEFAULT_EXECUTE_TIMEOUT;
 import static com.syswin.temail.ps.common.Constants.CDTP_VERSION;
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.LOGIN;
-import static com.syswin.temail.ps.common.utils.SignatureUtil.genSignature;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.ps.client.utils.StringUtil;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -29,18 +31,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class PsClientImpl implements PsClient {
 
-  private Map<HostAndPort, CDTPClientEntity> cdtpClientMap = new ConcurrentHashMap<>();
-  private String deviceId;
-  private String defaultHost;
-  private int port;
-  private int idleTimeSeconds;
-//  private KeyAwareAsymmetricCipher cipher = new VaultKeeper().asymmetricCipher(CipherAlgorithm.ECDSA);
+  private final Map<HostAndPort, CDTPClientEntity> cdtpClientMap = new ConcurrentHashMap<>();
+  private final String deviceId;
+  private final String defaultHost;
+  private final int port;
+  private final int idleTimeSeconds;
+  private final Signer signer;
 
-  PsClientImpl(String deviceId, String defaultHost, int port, int idleTimeSeconds) {
+  PsClientImpl(String deviceId, String defaultHost, int port, int idleTimeSeconds, Signer signer) {
     this.deviceId = deviceId;
     this.defaultHost = defaultHost;
     this.port = port;
     this.idleTimeSeconds = idleTimeSeconds;
+    this.signer = signer;
   }
 
   @Override
@@ -50,6 +53,7 @@ class PsClientImpl implements PsClient {
 
   @Override
   public Message sendMessage(Message message, long timeout, TimeUnit timeUnit) {
+    checkMessage(message);
     CDTPClient cdtpClient = getCdtpClient(message);
     CDTPPacket packet = getCdtpPacket(message);
     CDTPPacket respPacket = cdtpClient.syncExecute(packet, timeout, timeUnit);
@@ -64,6 +68,7 @@ class PsClientImpl implements PsClient {
   @Override
   public void sendMessage(Message message, Consumer<Message> responseConsumer, Consumer<Throwable> errorConsumer,
       long timeout, TimeUnit timeUnit) {
+    checkMessage(message);
     CDTPClient cdtpClient = getCdtpClient(message);
     CDTPPacket reqPacket = getCdtpPacket(message);
     cdtpClient.asyncExecute(reqPacket,
@@ -71,8 +76,29 @@ class PsClientImpl implements PsClient {
         errorConsumer, timeout, timeUnit);
   }
 
+  private void checkMessage(Message message) {
+    Header header = message.getHeader();
+    if (header == null) {
+      throw new PsClientException("header不允许为空！");
+    }
+    if (!StringUtil.hasText(header.getSender())) {
+      throw new PsClientException("Sender不允许为空！");
+    }
+    if (!StringUtil.hasText(header.getSenderPK())) {
+      throw new PsClientException("SenderPK不允许为空！");
+    }
+    if (!StringUtil.hasText(header.getPacketId())) {
+      throw new PsClientException("PacketId不允许为空！");
+    }
+
+    if (message.getPayload() == null) {
+      throw new PsClientException("payload不允许为空！");
+    }
+  }
+
   private CDTPClient getCdtpClient(Message message) {
-    String targetAddress = message.getHeader().getTargetAddress();
+    Header header = message.getHeader();
+    String targetAddress = header.getTargetAddress();
     if (StringUtil.isEmpty(targetAddress)) {
       targetAddress = defaultHost;
     }
@@ -93,10 +119,10 @@ class PsClientImpl implements PsClient {
     if (!cdtpClient.isActive()) {
       cdtpClient.realConnect();
     }
-    String sender = message.getHeader().getSender();
+    String sender = header.getSender();
     // 检查本地是否存在会话，如果没有本地会话，则登录
     if (!isLogged(sender, cdtpClientEntity)) {
-      login(sender, cdtpClientEntity);
+      login(sender, header.getSenderPK(), cdtpClientEntity);
     }
 
     return cdtpClient;
@@ -109,7 +135,22 @@ class PsClientImpl implements PsClient {
     return packet;
   }
 
-  private CDTPPacket genLoginPacket(String temail) {
+  public void genSignature(CDTPPacket packet) {
+    try {
+      CDTPHeader header = packet.getHeader();
+      byte[] dataSha256 = MessageDigest.getInstance("SHA-256").digest(packet.getData());
+      String unsigned =
+          String.valueOf(packet.getCommandSpace() + packet.getCommand()) + header.getTargetAddress() + String
+              .valueOf(header.getTimestamp()) + Base64.getEncoder().encodeToString(dataSha256);
+      String temail = header.getSender();
+      header.setSignatureAlgorithm(signer.getAlgorithm());
+      header.setSignature(signer.sign(temail, unsigned));
+    } catch (NoSuchAlgorithmException e) {
+      throw new PsClientException("对数据进行签名时出错！", e);
+    }
+  }
+
+  private CDTPPacket genLoginPacket(String temail, String temailPK) {
     CDTPPacket packet = new CDTPPacket();
     packet.setCommandSpace(CHANNEL_CODE);
     packet.setCommand(LOGIN.getCode());
@@ -117,8 +158,7 @@ class PsClientImpl implements PsClient {
     CDTPHeader header = new CDTPHeader();
     header.setDeviceId(deviceId);
     header.setSender(temail);
-//    cipher.publicKey(temail).ifPresent(key -> header.setSenderPK(
-//        Base64.getUrlEncoder().encodeToString(key)));
+    header.setSenderPK(temailPK);
     header.setPacketId(UUID.randomUUID().toString());
 
     packet.setHeader(header);
@@ -130,10 +170,10 @@ class PsClientImpl implements PsClient {
     return cdtpClientEntity.getLoggedTemails().contains(sender);
   }
 
-  private void login(String temail, CDTPClientEntity cdtpClientEntity) {
+  private void login(String temail, String temailPK, CDTPClientEntity cdtpClientEntity) {
     try {
       CDTPClient cdtpClient = cdtpClientEntity.getCdtpClient();
-      CDTPPacket packet = genLoginPacket(temail);
+      CDTPPacket packet = genLoginPacket(temail, temailPK);
       genSignature(packet);
       CDTPPacket respPacket = cdtpClient.syncExecute(packet);
       if (respPacket == null) {

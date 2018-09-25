@@ -41,6 +41,7 @@ class PacketMaker {
     CDTPHeader header = new CDTPHeader();
     header.setDeviceId("deviceId");
     header.setSender(temail);
+    header.setSenderPK("SenderPK");
     header.setPacketId(UUID.randomUUID().toString());
     packet.setHeader(header);
     packet.setData("".getBytes());
@@ -59,7 +60,9 @@ class PacketMaker {
     header.setPacketId(UUID.randomUUID().toString());
 
     header.setSender(sender);
+    header.setSenderPK("SenderPK");
     header.setReceiver(receiver);
+    header.setReceiverPK("ReceiverPK");
     Map<String, Object> extraData = new HashMap<>();
     extraData.put("from", sender);
     extraData.put("to", receiver);

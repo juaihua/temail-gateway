@@ -9,6 +9,6 @@ class Constants {
   /**
    * 默认的方法执行时间
    */
-  static final int DEFAULT_EXECUTE_TIMEOUT = 3;
+  static final int DEFAULT_EXECUTE_TIMEOUT = 2;
 
 }

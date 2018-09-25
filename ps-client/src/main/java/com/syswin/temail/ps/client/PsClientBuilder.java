@@ -1,5 +1,6 @@
 package com.syswin.temail.ps.client;
 
+import com.syswin.temail.ps.client.utils.StringUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +26,9 @@ public class PsClientBuilder {
   private String defaultHost = "127.0.0.1";
   private int defaultPort = DEFAULT_PORT;
   private int idleTimeSeconds = DEFAULT_IDLE_TIME_SECONDS;
+  private Signer signer;
+  private String vaultRegistryUrl;
+  private String tenantId;
 
   /**
    * 构建PsClient对象
@@ -32,7 +36,16 @@ public class PsClientBuilder {
    * @return 构造好的PsClient对象
    */
   public PsClient build() {
-    return new PsClientImpl(deviceId, defaultHost, defaultPort, idleTimeSeconds);
+    assert StringUtil.hasText(deviceId);
+    if (signer == null) {
+      if (StringUtil.hasText(vaultRegistryUrl) ||
+          StringUtil.hasText(tenantId)) {
+        throw new PsClientException("signer和vaultRegistryUrl+tenantId不能同时为空！");
+      }
+      signer = new KeyAwareSigner(vaultRegistryUrl, tenantId);
+    }
+
+    return new PsClientImpl(deviceId, defaultHost, defaultPort, idleTimeSeconds, signer);
   }
 
   public PsClientBuilder defaultHost(String defaultHost) {
@@ -47,6 +60,21 @@ public class PsClientBuilder {
 
   public PsClientBuilder idleTimeSeconds(int idleTimeSeconds) {
     this.idleTimeSeconds = idleTimeSeconds;
+    return this;
+  }
+
+  public PsClientBuilder vaultRegistryUrl(String vaultRegistryUrl) {
+    this.vaultRegistryUrl = vaultRegistryUrl;
+    return this;
+  }
+
+  public PsClientBuilder tenantId(String tenantId) {
+    this.tenantId = tenantId;
+    return this;
+  }
+
+  public PsClientBuilder signer(Signer signer) {
+    this.signer = signer;
     return this;
   }
 }
