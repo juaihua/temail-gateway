@@ -31,7 +31,7 @@ import org.mockito.Mockito;
 @Slf4j
 public class PsClientTest {
 
-  private static final int serverPort = 8099;
+  private static final int serverPort = 8098;
   private static final int serverReadIdleTimeSeconds = 300;
   private static TestRequestHandler testRequestHandler = Mockito.mock(TestRequestHandler.class);
   private static String sender = "jack@t.email";
@@ -61,7 +61,7 @@ public class PsClientTest {
       PsClientBuilder builder =
           new PsClientBuilder(deviceId)
               .defaultHost("127.0.0.1")
-              .defaultPort(8099)
+              .defaultPort(serverPort)
               .signer(signer);
       psClient = builder.build();
     }

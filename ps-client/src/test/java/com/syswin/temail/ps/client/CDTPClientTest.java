@@ -25,7 +25,7 @@ import org.mockito.Mockito;
  */
 public class CDTPClientTest {
 
-  private static final int serverPort = 8099;
+  private static final int serverPort = 8097;
   private static final int serverReadIdleTimeSeconds = 300;
   private static TestRequestHandler testRequestHandler = Mockito.mock(TestRequestHandler.class);
   private static CDTPClient client;

@@ -59,7 +59,9 @@ import org.testcontainers.containers.Network;
         "temail.gateway.dispatchUrl=http://localhost:8090/dispatch",
         "temail.gateway.updateSocketStatusUrl=http://localhost:8090/locations",
         "temail.gateway.rocketmq.mq-topic=temail-gateway",
-        "temail.gateway.netty.read-idle-time-seconds=3000"
+        "temail.gateway.netty.read-idle-time-seconds=3000",
+        "temail.gateway.netty.port=" + TemailGatewayTest.PORT,
+        "temail.gateway.rocketmq.namesrv-addr=rocketmq-temail:" + TemailGatewayTest.MQ_SERVER_PORT,
     })
 @RunWith(SpringRunner.class)
 @ActiveProfiles({"debug", "dev"})
@@ -67,22 +69,22 @@ public class TemailGatewayTest {
 
   @ClassRule
   public static final WireMockRule wireMockRule = new WireMockRule(8090);
+  static final int MQ_SERVER_PORT = 9876;
+  static final int PORT = 8099;
   private static final Network NETWORK = Network.newNetwork();
-  private static final int MQ_SERVER_PORT = 9876;
   private static final RocketMqNameServerContainer rocketMqNameSrv = new RocketMqNameServerContainer()
       .withNetwork(NETWORK)
       .withNetworkAliases("namesrv")
-      .withFixedExposedPort(MQ_SERVER_PORT, MQ_SERVER_PORT);
+      .withFixedExposedPort(MQ_SERVER_PORT, 9876);
   private static final RocketMqBrokerContainer rocketMqBroker = new RocketMqBrokerContainer()
       .withNetwork(NETWORK)
-      .withEnv("NAMESRV_ADDR", "namesrv:9876")
+      .withEnv("NAMESRV_ADDR", "namesrv:" + MQ_SERVER_PORT)
       .withFixedExposedPort(10909, 10909)
       .withFixedExposedPort(10911, 10911);
   @ClassRule
   public static final RuleChain RULES = RuleChain.outerRule(rocketMqNameSrv)
       .around(rocketMqBroker);
   private static final DefaultMQProducer mqProducer = new DefaultMQProducer("test-producer-group");
-
   private static final Gson GSON = new Gson();
   private static final String ackMessage = uniquify("Sent");
   private static Channel channel;
@@ -155,12 +157,11 @@ public class TemailGatewayTest {
     mqProducer.start();
     // ensure topic exists before consumer connects, or no message will be received
     await().atMost(10, SECONDS).until(() -> {
-
       try {
         mqProducer.createTopic(mqProducer.getCreateTopicKey(), "temail-gateway", 1);
         return true;
       } catch (MQClientException e) {
-        e.printStackTrace();
+//        e.printStackTrace();
         return false;
       }
     });
@@ -168,7 +169,7 @@ public class TemailGatewayTest {
 
   @Before
   public void init() {
-    channel = nettyClient.start("127.0.0.1", 8099);
+    channel = nettyClient.start("127.0.0.1", PORT);
   }
 
   @After

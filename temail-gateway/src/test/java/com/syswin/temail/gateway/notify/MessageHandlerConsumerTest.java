@@ -19,12 +19,14 @@ import com.syswin.temail.ps.server.service.ChannelHolder;
 import io.netty.channel.Channel;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
 
+@Slf4j
 public class MessageHandlerConsumerTest {
 
   @Rule
@@ -70,8 +72,12 @@ public class MessageHandlerConsumerTest {
   }
 
   private ArgumentMatcher<CDTPPacket> matchesPayload(CDTPPacketTrans payload) {
-    return packet -> gson.toJson(payload)
-        .equals(gson.toJson(new CDTPPacketTrans(packet)));
+    return packet -> {
+
+      String payloadJson = gson.toJson(payload);
+      String paramJson = gson.toJson(new CDTPPacketTrans(packet));
+      return payloadJson.equals(paramJson);
+    };
   }
 
   private PactDslJsonBody packetJson(CDTPPacketTrans cdtpPacketTrans, PactDslJsonBody body) {
