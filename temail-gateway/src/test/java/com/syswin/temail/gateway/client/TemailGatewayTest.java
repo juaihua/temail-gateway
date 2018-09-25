@@ -44,6 +44,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.runner.RunWith;
@@ -65,6 +66,7 @@ import org.testcontainers.containers.Network;
     })
 @RunWith(SpringRunner.class)
 @ActiveProfiles({"debug", "dev"})
+@Ignore
 public class TemailGatewayTest {
 
   @ClassRule
