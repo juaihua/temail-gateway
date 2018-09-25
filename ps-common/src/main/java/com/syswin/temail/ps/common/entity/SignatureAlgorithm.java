@@ -15,7 +15,7 @@ public enum SignatureAlgorithm {
   SM2(3),
   ;
 
-  public static final int NONE_CODE = RSA2048.code;
+  public static final int NONE_CODE = NONE.code;
   public static final int RSA2048_CODE = RSA2048.code;
   public static final int ECC512_CODE = ECC512.code;
   public static final int SM2_CODE = SM2.code;
