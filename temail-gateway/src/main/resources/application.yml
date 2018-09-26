@@ -3,20 +3,20 @@ spring:
         web-application-type: none
 channel:
   client:
-    serverHost: temail-channel-registry
+    serverHost: channel.innermail.com
     serverPort: 8765
     writeIdle: 10
     max-retry-internal: 60
 
 temail:
     gateway:
-        verifyUrl: http://temail-dispatch:8081/verify
-        dispatchUrl: http://temail-dispatch:8081/dispatch
-        updateSocketStatusUrl: http://temail-channel-registry:9100/locations
+        verifyUrl: http://dispatcher.innermail.com:8081/verify
+        dispatchUrl: http://dispatcher.innermail.com:8081/dispatch
+        updateSocketStatusUrl: http://channel.innermail.com:9100/locations
         netty:
             port: 8099
             read-idle-time-seconds: 1800
         rocketmq:
-            namesrv-addr: rocketmq-temail:9876
+            namesrv-addr: n1.rocketmq.innermail.com:9876
             consumer-group: temail-gateway-consumer
             mq-topic: temail-gateway-notify
