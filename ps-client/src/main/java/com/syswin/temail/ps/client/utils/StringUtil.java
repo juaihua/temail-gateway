@@ -6,6 +6,8 @@ package com.syswin.temail.ps.client.utils;
  */
 public class StringUtil {
 
+  public static final String EMPTY = "";
+
   public static boolean isEmpty(Object str) {
     return (str == null || "".equals(str));
   }
@@ -34,5 +36,13 @@ public class StringUtil {
       }
     }
     return false;
+  }
+
+  public static String defaultString(final String str) {
+    return str == null ? EMPTY : str;
+  }
+
+  public static String defaultString(final String str, final String defaultStr) {
+    return str == null ? defaultStr : str;
   }
 }

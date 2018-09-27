@@ -1,18 +1,18 @@
 package com.syswin.temail.ps.client;
 
 import static com.syswin.temail.ps.client.Constants.DEFAULT_EXECUTE_TIMEOUT;
+import static com.syswin.temail.ps.client.utils.StringUtil.defaultString;
 import static com.syswin.temail.ps.common.Constants.CDTP_VERSION;
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.LOGIN;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.syswin.temail.ps.client.utils.DigestUtil;
+import com.syswin.temail.ps.client.utils.HexUtil;
 import com.syswin.temail.ps.client.utils.StringUtil;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -136,19 +136,20 @@ class PsClientImpl implements PsClient {
   }
 
   public void genSignature(CDTPPacket packet) {
-    try {
-      CDTPHeader header = packet.getHeader();
-      byte[] dataSha256 = MessageDigest.getInstance("SHA-256").digest(packet.getData());
-      String unsigned =
-          String.valueOf(packet.getCommandSpace() + packet.getCommand()) + header.getTargetAddress() + String
-              .valueOf(header.getTimestamp()) + Base64.getEncoder().encodeToString(dataSha256);
-      String temail = header.getSender();
-      if (signer != null) {
-        header.setSignatureAlgorithm(signer.getAlgorithm());
-        header.setSignature(signer.sign(temail, unsigned));
-      }
-    } catch (NoSuchAlgorithmException e) {
-      throw new PsClientException("对数据进行签名时出错！", e);
+    CDTPHeader header = packet.getHeader();
+    byte[] data = packet.getData();
+    String dataSha256 = data == null ? "" : HexUtil.encodeHex(DigestUtil.sha256(data));
+    String targetAddress = defaultString(header.getTargetAddress());
+
+    String unsigned =
+        String.valueOf(packet.getCommandSpace() + packet.getCommand())
+            + targetAddress
+            + String.valueOf(header.getTimestamp())
+            + dataSha256;
+    String temail = header.getSender();
+    if (signer != null) {
+      header.setSignatureAlgorithm(signer.getAlgorithm());
+      header.setSignature(signer.sign(temail, unsigned));
     }
   }
 
