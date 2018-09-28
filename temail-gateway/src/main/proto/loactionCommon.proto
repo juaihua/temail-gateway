@@ -1,0 +1,42 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "com.syswin.temail.channel.grpc.servers";
+option java_outer_classname = "GrpcLocationBeans";
+option objc_class_prefix = "CRY";
+package channel;
+
+enum GatewayServerState{
+    onLine = 0;
+    offLine = 1;
+    cleaning = 2;
+    history = 3;
+}
+
+message GatewayServer{
+  string ip = 1;
+  string processId = 2;
+  string curStateBeginTime = 3;
+  GatewayServerState gatewayServerState = 4;
+}
+
+message CommonResponse{
+  string msg = 1;
+  bool isSuccess = 2;
+}
+
+message ChannelLocation{
+  string account = 1;
+  string devId = 2;
+  string hostOf = 3;
+  string processId = 4;
+  string mqTopic = 5;
+  string mqTag = 6;
+}
+
+message ChannelLocations{
+ repeated ChannelLocation channelLocationList = 1;
+}
+
+message UserAccount{
+  string account = 1;
+}

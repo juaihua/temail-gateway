@@ -6,16 +6,16 @@ public interface GrpcStatusAdapter {
 
   /**
    * add chanel locations
-   * @param channelLocationes
+   * @param channelLocations
    * @return
    */
-   boolean syncChannelLocationes(TemailAccoutLocations channelLocationes);
+   boolean syncChannelLocations(TemailAccoutLocations channelLocations);
 
   /**
    * remove channel locations
-   * @param channelLocationes
+   * @param channelLocations
    * @return
    */
-   boolean removeChannelLocationes(TemailAccoutLocations channelLocationes);
+   boolean removeChannelLocations(TemailAccoutLocations channelLocations);
 
 }

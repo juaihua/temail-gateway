@@ -1,0 +1,24 @@
+syntax = "proto3";
+import "loactionCommon.proto";
+option java_multiple_files = true;
+option java_package = "com.syswin.temail.channel.grpc.servers";
+option java_outer_classname = "ChannelRegistry";
+option objc_class_prefix = "CRY";
+package channel;
+
+//服务端功能定义
+service GatewayRegistrySyncServer{
+
+  //gateserver注册服务
+  rpc serverRegistry(GatewayServer) returns(CommonResponse) {}
+
+  //gateServer心跳处理服务
+  rpc serverHeartBeat(GatewayServer) returns(CommonResponse) {}
+
+  //gatesServer上的channel信息同步到存储层
+  rpc syncChannelLocations(ChannelLocations) returns(CommonResponse) {}
+
+  //从存储层移除指定的channels信息
+  rpc removeChannelLocations(ChannelLocations) returns(CommonResponse) {}
+
+}

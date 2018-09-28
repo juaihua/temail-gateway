@@ -50,15 +50,15 @@ public class GrpcReconnectManager {
       executorService.submit(new Runnable() {
         @Override
         public void run() {
-          while (true) {
+          while (!Thread.currentThread().isInterrupted()) {
             try {
-              GrpcClient grpcClient = grpcClientBuilder.buildGrpcClient();
-              if (!grpcClient.serverRegistry(gatewayServer)) {
+              //keep trying to reconnect by invoke grpcClient.serevrRegistry(). until invoke success.
+              if (grpcClientWrapper.getGrpcClient().serverRegistry(gatewayServer)) {
                 log.error("reconnect fail, {} seconds try again! ", reconnectDelay);
                 throw new IllegalStateException("reconnect fail.");
               }
               log.info("reconnect success.");
-              grpcClientWrapper.reconnectSuccessful(grpcClient);
+              grpcClientWrapper.reconnectSuccessful();
               if (consumer != null) {
                 consumer.accept(Boolean.TRUE);
               }
@@ -71,6 +71,7 @@ public class GrpcReconnectManager {
               try {
                 TimeUnit.SECONDS.sleep(reconnectDelay);
               } catch (InterruptedException e1) {
+                Thread.currentThread().interrupt();
                 e1.printStackTrace();
               }
             }
@@ -79,7 +80,7 @@ public class GrpcReconnectManager {
         }
       });
     } else {
-      throw new IllegalAccessException("more than one reconnect work is not allowed!");
+      log.warn("more than one reconnect work is not allowed!");
     }
   }
 }

@@ -77,11 +77,11 @@ public class RemoteStatusService {
   private void reqUpdSts4Upd(TemailAccoutLocations temailAccoutLocations,
       TemailAcctUptOptType type, Consumer<Response<Void>> consumer) {
     if (type == TemailAcctUptOptType.add) {
-      if (!grpcStatusAdapter.syncChannelLocationes(temailAccoutLocations)) {
+      if (!grpcStatusAdapter.syncChannelLocations(temailAccoutLocations)) {
         pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
       }
     } else {
-      if (!grpcStatusAdapter.removeChannelLocationes(temailAccoutLocations)) {
+      if (!grpcStatusAdapter.removeChannelLocations(temailAccoutLocations)) {
         pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
       }
     }

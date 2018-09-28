@@ -1,6 +1,6 @@
 package com.syswin.temail.gateway.grpc;
 
-import com.syswin.temail.channel.grpc.servers.ChannelLocationes;
+import com.syswin.temail.channel.grpc.servers.ChannelLocations;
 import com.syswin.temail.channel.grpc.servers.GatewayServer;
 
 public interface GrpcClient {
@@ -33,16 +33,16 @@ public interface GrpcClient {
 
   /**
    * add chanel locations
-   * @param channelLocationes
+   * @param channelLocations
    * @return
    */
-  public boolean syncChannelLocationes(ChannelLocationes channelLocationes);
+  public boolean syncChannelLocations(ChannelLocations channelLocations);
 
   /**
    * remove channel locations
-   * @param channelLocationes
+   * @param channelLocations
    * @return
    */
-  public boolean removeChannelLocationes(ChannelLocationes channelLocationes);
+  public boolean removeChannelLocations(ChannelLocations channelLocations);
 
 }

@@ -1,6 +1,6 @@
 package com.syswin.temail.gateway.grpc;
 
-import com.syswin.temail.channel.grpc.servers.ChannelLocationes;
+import com.syswin.temail.channel.grpc.servers.ChannelLocations;
 import com.syswin.temail.channel.grpc.servers.GatewayRegistrySyncServerGrpc;
 import com.syswin.temail.channel.grpc.servers.GatewayServer;
 import io.grpc.ManagedChannel;
@@ -42,13 +42,13 @@ class GrpcClientImpl implements GrpcClient {
   }
 
   @Override
-  public boolean syncChannelLocationes(ChannelLocationes channelLocationes) {
-    return serverBlockingStub.syncChannelLocationes(channelLocationes).getIsSuccess();
+  public boolean syncChannelLocations(ChannelLocations channelLocations) {
+    return serverBlockingStub.syncChannelLocations(channelLocations).getIsSuccess();
   }
 
   @Override
-  public boolean removeChannelLocationes(ChannelLocationes channelLocationes) {
-    return serverBlockingStub.removeChannelLocationes(channelLocationes).getIsSuccess();
+  public boolean removeChannelLocations(ChannelLocations channelLocations) {
+    return serverBlockingStub.removeChannelLocations(channelLocations).getIsSuccess();
   }
 
 }

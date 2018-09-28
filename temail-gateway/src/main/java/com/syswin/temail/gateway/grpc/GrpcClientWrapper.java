@@ -1,7 +1,7 @@
 package com.syswin.temail.gateway.grpc;
 
 import com.syswin.temail.channel.grpc.servers.ChannelLocation;
-import com.syswin.temail.channel.grpc.servers.ChannelLocationes;
+import com.syswin.temail.channel.grpc.servers.ChannelLocations;
 import com.syswin.temail.channel.grpc.servers.GatewayServer;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
@@ -52,7 +52,7 @@ public class GrpcClientWrapper implements GrpcClient, GrpcStatusAdapter {
 
 
   /**
-   *  register and start heartBeat for default current server
+   * register and start heartBeat for default current server
    */
   public void startClient() {
     this.serverRegistry(curServerInfo);
@@ -106,16 +106,16 @@ public class GrpcClientWrapper implements GrpcClient, GrpcStatusAdapter {
 
 
   @Override
-  public boolean syncChannelLocationes(ChannelLocationes channelLocationes) {
+  public boolean syncChannelLocations(ChannelLocations channelLocations) {
     try {
       if (!serviceIsAvaliable) {
-        log.warn("sync channel locationes fail, cause grpcServer is unavalilable, reconnect logic is being executed.");
+        log.warn("sync channel Locations fail, cause grpcServer is unavalilable, reconnect logic is being executed.");
         return false;
       }
-      log.info("sync channel locationes success : {}", channelLocationes.toString());
-      return grpcClient.syncChannelLocationes(channelLocationes);
+      log.info("sync channel Locations success : {}", channelLocations.toString());
+      return grpcClient.syncChannelLocations(channelLocations);
     } catch (Exception e) {
-      log.error("sync channel locationes fail : {} ", channelLocationes.toString(), e);
+      log.error("sync channel Locations fail : {} ", channelLocations.toString(), e);
       reconnect();
       return false;
     }
@@ -123,17 +123,17 @@ public class GrpcClientWrapper implements GrpcClient, GrpcStatusAdapter {
 
 
   @Override
-  public boolean removeChannelLocationes(ChannelLocationes channelLocationes) {
+  public boolean removeChannelLocations(ChannelLocations channelLocations) {
     try {
       if (!serviceIsAvaliable) {
         log.warn(
-            "remove channel locationes fail, cause grpcServer is unavalilable, reconnect logic is being executed.");
+            "remove channel Locations fail, cause grpcServer is unavalilable, reconnect logic is being executed.");
         return false;
       }
-      log.info("remove channel locationes success : {} - success. ", channelLocationes.toString());
-      return grpcClient.removeChannelLocationes(channelLocationes);
+      log.info("remove channel Locations success : {} - success. ", channelLocations.toString());
+      return grpcClient.removeChannelLocations(channelLocations);
     } catch (Exception e) {
-      log.error("remove channel locationes fail : {} ", channelLocationes.toString(), e);
+      log.error("remove channel Locations fail : {} ", channelLocations.toString(), e);
       reconnect();
       return false;
     }
@@ -147,15 +147,7 @@ public class GrpcClientWrapper implements GrpcClient, GrpcStatusAdapter {
     try {
       log.info("grpc client is unavailible, try to reconncet again!");
       serviceIsAvaliable = false;
-      grpcReconnectManager.reconnect(new Consumer<Boolean>() {
-        @Override
-        public void accept(Boolean o) {
-          if (o.booleanValue()) {
-            log.info("reconnect success, register server:{} again.", curServerInfo.toString());
-            serverRegistry(curServerInfo);
-          }
-        }
-      });
+      grpcReconnectManager.reconnect(t -> { });
     } catch (IllegalAccessException e) {
       log.error(e.getMessage());
     }
@@ -164,35 +156,32 @@ public class GrpcClientWrapper implements GrpcClient, GrpcStatusAdapter {
 
   /**
    * reconnect success, then reset grpc client and its status
-   *
-   * @param grpcClient
    */
-  public void reconnectSuccessful(GrpcClient grpcClient) {
+  public void reconnectSuccessful() {
     log.info("grpc client reconnect success.");
-    this.grpcClient = grpcClient;
     this.serviceIsAvaliable = true;
   }
 
 
   @Override
-  public boolean syncChannelLocationes(TemailAccoutLocations channelLocationes) {
-    ChannelLocationes.Builder builder = ChannelLocationes.newBuilder();
-    extractGrpcLocations(channelLocationes, builder);
-    return this.syncChannelLocationes(builder.build());
+  public boolean syncChannelLocations(TemailAccoutLocations channelLocations) {
+    ChannelLocations.Builder builder = ChannelLocations.newBuilder();
+    extractGrpcLocations(channelLocations, builder);
+    return this.syncChannelLocations(builder.build());
   }
 
 
   @Override
-  public boolean removeChannelLocationes(TemailAccoutLocations channelLocationes) {
-    ChannelLocationes.Builder builder = ChannelLocationes.newBuilder();
-    extractGrpcLocations(channelLocationes, builder);
-    return this.removeChannelLocationes(builder.build());
+  public boolean removeChannelLocations(TemailAccoutLocations channelLocations) {
+    ChannelLocations.Builder builder = ChannelLocations.newBuilder();
+    extractGrpcLocations(channelLocations, builder);
+    return this.removeChannelLocations(builder.build());
   }
 
 
-  private void extractGrpcLocations(TemailAccoutLocations channelLocationes,
-      ChannelLocationes.Builder builder) {
-    channelLocationes.getStatuses().forEach(lc -> {
+  private void extractGrpcLocations(TemailAccoutLocations channelLocations,
+      ChannelLocations.Builder builder) {
+    channelLocations.getStatuses().forEach(lc -> {
       builder.addChannelLocationList(
           ChannelLocation.newBuilder().setAccount(lc.getAccount())
               .setDevId(lc.getDevId()).setHostOf(lc.getHostOf())
