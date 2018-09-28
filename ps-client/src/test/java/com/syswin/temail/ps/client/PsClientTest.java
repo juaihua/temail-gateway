@@ -60,8 +60,8 @@ public class PsClientTest {
       String deviceId = "deviceId";
       PsClientBuilder builder =
           new PsClientBuilder(deviceId)
-              .defaultHost("127.0.0.1")
-              .defaultPort(serverPort)
+              .defaultHost("msgseal.systoon.com")
+              .defaultPort(8099)
               .signer(signer);
       psClient = builder.build();
     }
@@ -73,6 +73,7 @@ public class PsClientTest {
     CDTPPacket packet = MessageConverter.toCDTPPacket(reqMessage);
     mockDispatch(packet);
     Message respMessage = psClient.sendMessage(reqMessage);
+    System.out.println(new String(respMessage.getPayload()));
     assertThat(respMessage).isEqualTo(reqMessage);
     Thread.sleep(100);
   }

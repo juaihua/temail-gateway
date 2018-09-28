@@ -46,7 +46,7 @@ class CDTPClientHandler extends SimpleChannelInboundHandler<CDTPPacket> {
       log.debug("接收到心跳数据响应");
       return;
     }
-    log.info("从服务器端收到的信息：{}", packet);
+    log.debug("从服务器端收到的信息：{}", packet);
     if (packet.isInternalError()) {
       log.error(new String(packet.getData()));
     }

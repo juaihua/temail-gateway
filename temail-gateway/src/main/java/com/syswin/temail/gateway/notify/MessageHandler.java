@@ -23,14 +23,14 @@ class MessageHandler {
 
   void onMessageReceived(String message) {
     try {
-      log.info("从MQ接受到消息: {}", message);
+      log.debug("从MQ接受到消息: {}", message);
       CDTPPacket packet = gson.fromJson(message, CDTPPacketTrans.class).toCDTPPacket();
 
       String receiver = packet.getHeader().getReceiver();
       Iterable<Channel> channels = channelHolder.getChannels(receiver);
       for (Channel channel : channels) {
         resetSignature(packet);
-        log.info("当前推送的通道信息：{}，推送的内容信息：{}", channel, packet);
+        log.debug("当前推送的通道信息：{}，推送的内容信息：{}", channel, packet);
         channel.writeAndFlush(packet);
       }
     } catch (JsonSyntaxException e) {

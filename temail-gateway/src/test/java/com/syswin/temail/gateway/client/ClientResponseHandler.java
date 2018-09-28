@@ -25,7 +25,7 @@ public class ClientResponseHandler extends SimpleChannelInboundHandler<CDTPPacke
 
   @Override
   protected void channelRead0(ChannelHandlerContext channelHandlerContext, CDTPPacket packet) {
-    log.info("从服务器端收到的信息：{}", packet);
+    log.debug("从服务器端收到的信息：{}", packet);
     result = packet;
     receivedMessages.offer(packet);
   }
@@ -33,7 +33,7 @@ public class ClientResponseHandler extends SimpleChannelInboundHandler<CDTPPacke
   @Override
   public void channelActive(ChannelHandlerContext ctx) {
     CDTPPacket packet = loginSupplier.get();
-    log.info("Channel active, sending login packet {}", packet);
+    log.debug("Channel active, sending login packet {}", packet);
     ctx.writeAndFlush(packet);
   }
 

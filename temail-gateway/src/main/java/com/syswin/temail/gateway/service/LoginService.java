@@ -57,7 +57,7 @@ class LoginService {
     try {
       ResponseEntity<Response> responseResponseEntity = restTemplate
           .postForEntity(authUrl, requestEntity, Response.class);
-      log.info("signature valid result : {},  data : {}, url : {} ",
+      log.debug("signature valid result : {},  data : {}, url : {} ",
           responseResponseEntity.getStatusCode(), authDataJson, authUrl);
       return responseResponseEntity;
     } catch (RestClientException e) {
