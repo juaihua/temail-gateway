@@ -28,9 +28,9 @@ public class GrpcConcurrentTaskOnLine implements Runnable {
     while (true) {
       try {
         for (int i = 0; i < grpcConcrData.temailAccoutLocations.size(); i++) {
-          grpcConcrData.grpcClientWrapper.syncChannelLocationes(grpcConcrData.temailAccoutLocations.get(i));
+          grpcConcrData.grpcClientWrapper.syncChannelLocations(grpcConcrData.temailAccoutLocations.get(i));
           TimeUnit.MILLISECONDS.sleep(RANDOM.nextInt(20));
-          grpcConcrData.grpcClientWrapper.removeChannelLocationes(grpcConcrData.temailAccoutLocations.get(i));
+          grpcConcrData.grpcClientWrapper.removeChannelLocations(grpcConcrData.temailAccoutLocations.get(i));
           TimeUnit.MILLISECONDS.sleep(RANDOM.nextInt(20));
         }
         TimeUnit.MILLISECONDS.sleep(100+RANDOM.nextInt(100));

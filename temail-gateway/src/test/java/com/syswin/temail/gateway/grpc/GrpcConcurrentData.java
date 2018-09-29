@@ -1,6 +1,6 @@
 package com.syswin.temail.gateway.grpc;
 
-import com.syswin.temail.channel.grpc.servers.ChannelLocationes;
+import com.syswin.temail.channel.grpc.servers.ChannelLocations;
 import com.syswin.temail.channel.grpc.servers.GatewayServer;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
@@ -17,7 +17,7 @@ public class GrpcConcurrentData {
 
   public TemailGatewayProperties temailGatewayProperties;
 
-  public List<ChannelLocationes> channelLocationes = new ArrayList<>();
+  public List<ChannelLocations> channelLocations = new ArrayList<>();
 
   public List<TemailAccoutLocations> temailAccoutLocations = new ArrayList<>();
 

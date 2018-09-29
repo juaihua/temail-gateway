@@ -26,7 +26,7 @@ public class GrpcClientWrapperTest {
 
   /**
    * in this method, 8 threads will keep calling grpc servers by calling different
-   * methods(removeChannelLocationes, asysnChannelLocationes, heartBear, etc.)
+   * methods(removeChannelLocations, asysnChannelLocations, heartBear, etc.)
    * , and in a single thread we will keep disconnect the grpClients of the 8 threads.
    * <p>
    * in this condition, the behavior of the grpcClient wo hoped is :

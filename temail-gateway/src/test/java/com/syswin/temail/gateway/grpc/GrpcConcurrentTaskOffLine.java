@@ -32,7 +32,7 @@ public class GrpcConcurrentTaskOffLine implements Runnable {
     //begin the test
     int curIndex = 0;
     for (int i = 0; i < grpcConcrData.temailAccoutLocations.size(); i++) {
-      grpcConcrData.grpcClientWrapper.syncChannelLocationes(grpcConcrData.temailAccoutLocations.get(i));
+      grpcConcrData.grpcClientWrapper.syncChannelLocations(grpcConcrData.temailAccoutLocations.get(i));
     }
     if( consumer != null){
       this.consumer.accept("finsished");

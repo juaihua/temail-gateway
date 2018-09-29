@@ -1,7 +1,7 @@
 package com.syswin.temail.gateway.grpc;
 
 import com.syswin.temail.channel.grpc.servers.ChannelLocation;
-import com.syswin.temail.channel.grpc.servers.ChannelLocationes;
+import com.syswin.temail.channel.grpc.servers.ChannelLocations;
 import com.syswin.temail.channel.grpc.servers.GatewayServer;
 import com.syswin.temail.gateway.entity.TemailAccoutLocation;
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
@@ -21,16 +21,16 @@ public class GrpcConcurentDataUtil {
 
   private Integer lcCountPerServer;
 
-  private Integer lcCountPerLocationes;
+  private Integer lcCountPerLocations;
 
   @Getter
   public List<GrpcConcurrentData> grpcTestUnits;
 
   public GrpcConcurentDataUtil(Integer gateServerCount,
-      Integer lcCountPerServer, Integer lcCountPerLocationes) {
+      Integer lcCountPerServer, Integer lcCountPerLocations) {
     this.gateServerCount = Optional.ofNullable(gateServerCount).orElse(10);
     this.lcCountPerServer = Optional.ofNullable(lcCountPerServer).orElse(200);
-    this.lcCountPerLocationes = Optional.ofNullable(lcCountPerLocationes).orElse(1+random.nextInt(4));
+    this.lcCountPerLocations = Optional.ofNullable(lcCountPerLocations).orElse(1+random.nextInt(4));
     this.grpcTestUnits = this.geneData();
   }
 
@@ -44,10 +44,10 @@ public class GrpcConcurentDataUtil {
           .build();
 
       for (Integer j = 0; j < lcCountPerServer; j++) {
-        ChannelLocationes.Builder channelLocationesBuilder = ChannelLocationes.newBuilder();
+        ChannelLocations.Builder channelLocationsBuilder = ChannelLocations.newBuilder();
 
-        for (Integer k = 0; k < lcCountPerLocationes; k++) {
-          channelLocationesBuilder.addChannelLocationList(ChannelLocation.newBuilder()
+        for (Integer k = 0; k < lcCountPerLocations; k++) {
+          channelLocationsBuilder.addChannelLocationList(ChannelLocation.newBuilder()
               .setDevId(CommonDataGeneUtil.extractChar(CommonDataGeneUtil.ExtractType.UPPER, 10))
               .setAccount(CommonDataGeneUtil.extractChar(CommonDataGeneUtil.ExtractType.LOWER, 5) + "@temail")
               .setHostOf(gatewayServer.getIp())
@@ -57,9 +57,9 @@ public class GrpcConcurentDataUtil {
               .setProcessId(CommonDataGeneUtil.extractUUID())
               .build());
         }
-        ChannelLocationes channelLocationes = channelLocationesBuilder.build();
-        grpcTestUnit.getChannelLocationes().add(channelLocationes);
-        grpcTestUnit.getTemailAccoutLocations().add(transfrom(channelLocationes));
+        ChannelLocations channelLocations = channelLocationsBuilder.build();
+        grpcTestUnit.getChannelLocations().add(channelLocations);
+        grpcTestUnit.getTemailAccoutLocations().add(transfrom(channelLocations));
       }
       grpcTestUnit.setGatewayServer(gatewayServer);
       grpcTestUnits.add(grpcTestUnit);
@@ -67,10 +67,10 @@ public class GrpcConcurentDataUtil {
     return grpcTestUnits;
   }
   
-  public TemailAccoutLocations transfrom(ChannelLocationes channelLocationes){
+  public TemailAccoutLocations transfrom(ChannelLocations channelLocations){
     List<TemailAccoutLocation> accoutLocations = new ArrayList<TemailAccoutLocation>();
     TemailAccoutLocations temailAccoutLocations = new TemailAccoutLocations(accoutLocations);
-    for (ChannelLocation channelLocation : channelLocationes.getChannelLocationListList()) {
+    for (ChannelLocation channelLocation : channelLocations.getChannelLocationListList()) {
       TemailAccoutLocation temailAccoutLocation = new TemailAccoutLocation();
       temailAccoutLocation.setAccount(channelLocation.getAccount());
       temailAccoutLocation.setDevId(channelLocation.getDevId());
