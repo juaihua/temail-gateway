@@ -60,7 +60,9 @@ public class PsClientTest {
       String deviceId = "deviceId";
       PsClientBuilder builder =
           new PsClientBuilder(deviceId)
-              .defaultHost("msgseal.systoon.com")
+              .defaultHost("127.0.0.1")
+//              .defaultHost("tmail.msgseal.com")
+//              .defaultHost("msgseal.systoon.com")
               .defaultPort(8099)
               .signer(signer);
       psClient = builder.build();
