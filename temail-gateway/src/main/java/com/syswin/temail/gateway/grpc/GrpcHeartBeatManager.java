@@ -64,7 +64,6 @@ public class GrpcHeartBeatManager {
           }
         } catch (Exception e) {
           log.error("heart beat fail, try again after {} seconds .", heartBeatDelay);
-          e.printStackTrace();
         }
       }, heartBeatDelay, heartBeatDelay, TimeUnit.SECONDS);
     } else {

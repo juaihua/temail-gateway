@@ -50,21 +50,23 @@ public class GrpcReconnectManager {
       executorService.submit(new Runnable() {
         @Override
         public void run() {
+          log.info("reconnect logic will being executed.");
           while (!Thread.currentThread().isInterrupted()) {
             try {
               //keep trying to reconnect by invoke grpcClient.serevrRegistry(). until invoke success.
-              if (grpcClientWrapper.getGrpcClient().serverRegistry(gatewayServer)) {
+              if (!grpcClientWrapper.getGrpcClient().serverRegistry(gatewayServer)) {
                 log.error("reconnect fail, {} seconds try again! ", reconnectDelay);
                 throw new IllegalStateException("reconnect fail.");
               }
-              log.info("reconnect success.");
               grpcClientWrapper.reconnectSuccessful();
               if (consumer != null) {
                 consumer.accept(Boolean.TRUE);
               }
               isReconnectWorking.compareAndSet(true, false);
+              log.info("reconnect success, now exit the reconnect loop! ");
               break;
             } catch (Exception e) {
+              log.warn("reconnect fail, it will try again after {} seconds ! ", reconnectDelay, e);
               if (consumer != null) {
                 consumer.accept(Boolean.TRUE);
               }
@@ -72,10 +74,10 @@ public class GrpcReconnectManager {
                 TimeUnit.SECONDS.sleep(reconnectDelay);
               } catch (InterruptedException e1) {
                 Thread.currentThread().interrupt();
+                log.warn("reconnect loop is interrupted, now exit!");
                 e1.printStackTrace();
               }
             }
-            log.info("reconnect finish, now exit the reconnect loop! ");
           }
         }
       });
