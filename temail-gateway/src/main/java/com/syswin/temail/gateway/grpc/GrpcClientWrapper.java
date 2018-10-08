@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Slf4j
 @Data
 //@Component
-public class GrpcClientWrapper implements GrpcClient, GrpcStatusAdapter {
+public class GrpcClientWrapper implements GrpcClient, StatusSyncClient {
 
   private TemailGatewayProperties temailGatewayProperties;
 
@@ -54,7 +54,7 @@ public class GrpcClientWrapper implements GrpcClient, GrpcStatusAdapter {
   /**
    * register and start heartBeat for default current server
    */
-  public void startClient() {
+  public void initClient() {
     this.serverRegistry(curServerInfo);
     grpcHeartBeatManager.heartBeat(new Consumer<Boolean>() {
       @Override

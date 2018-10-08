@@ -24,7 +24,7 @@ public class GrpcConcurrentTaskOnLine implements Runnable {
     //start registry and heartBeat
     //sleep leave us time to check reconnect log
     grpcConcrData.init4Test();
-    grpcConcrData.grpcClientWrapper.startClient();
+    grpcConcrData.grpcClientWrapper.initClient();
     while (true) {
       try {
         for (int i = 0; i < grpcConcrData.temailAccoutLocations.size(); i++) {

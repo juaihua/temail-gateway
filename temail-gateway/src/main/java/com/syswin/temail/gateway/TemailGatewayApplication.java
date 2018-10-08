@@ -2,7 +2,7 @@ package com.syswin.temail.gateway;
 
 import com.syswin.temail.gateway.codec.CommandAwareBodyExtractor;
 import com.syswin.temail.gateway.grpc.GrpcClientWrapper;
-import com.syswin.temail.gateway.grpc.GrpcStatusAdapter;
+import com.syswin.temail.gateway.grpc.StatusSyncClient;
 import com.syswin.temail.gateway.service.RemoteStatusService;
 import com.syswin.temail.gateway.service.RequestServiceImpl;
 import com.syswin.temail.gateway.service.SessionServiceImpl;
@@ -45,8 +45,8 @@ public class TemailGatewayApplication {
     return WebClient.create();
   }
 
-  @Bean(initMethod = "startClient")
-  public GrpcStatusAdapter initGrpcClient(TemailGatewayProperties properties){
+  @Bean(initMethod = "initClient")
+  public StatusSyncClient initGrpcClient(TemailGatewayProperties properties){
     return new GrpcClientWrapper(properties);
   }
 
@@ -55,11 +55,11 @@ public class TemailGatewayApplication {
       TemailGatewayProperties properties,
       RestTemplate restTemplate,
       WebClient webClient,
-      GrpcStatusAdapter grpcStatusAdapter) {
+      StatusSyncClient statusSyncClient) {
 
     SessionServiceImpl sessionService =
         new SessionServiceImpl(restTemplate, properties,
-            new RemoteStatusService(properties, grpcStatusAdapter));
+            new RemoteStatusService(properties, statusSyncClient));
 
     PsServer psServer =
         new PsServer(

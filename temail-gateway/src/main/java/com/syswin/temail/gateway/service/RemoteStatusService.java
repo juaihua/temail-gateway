@@ -5,7 +5,7 @@ import com.syswin.temail.gateway.TemailGatewayProperties.Instance;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.TemailAccoutLocation;
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
-import com.syswin.temail.gateway.grpc.GrpcStatusAdapter;
+import com.syswin.temail.gateway.grpc.StatusSyncClient;
 import com.syswin.temail.ps.server.entity.Session;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +24,7 @@ public class RemoteStatusService {
 
   //private final WebClient statusWebClient;
 
-  private GrpcStatusAdapter grpcStatusAdapter;
+  private StatusSyncClient statusSyncClient;
 
   // a async queue used for retry failed task
   private final PendingTaskQueue<Pair> pendingTaskQueue = new PendingTaskQueue<>(
@@ -36,9 +36,9 @@ public class RemoteStatusService {
   private final ParameterizedTypeReference<Response<Void>> typeReference = new ParameterizedTypeReference<Response<Void>>() {
   };
 
-  public RemoteStatusService(TemailGatewayProperties properties, GrpcStatusAdapter grpcStatusAdapter) {
+  public RemoteStatusService(TemailGatewayProperties properties, StatusSyncClient statusSyncClient) {
     this.properties = properties;
-    this.grpcStatusAdapter = grpcStatusAdapter;
+    this.statusSyncClient = statusSyncClient;
     this.pendingTaskQueue.run();
   }
 
@@ -77,11 +77,11 @@ public class RemoteStatusService {
   private void reqUpdSts4Upd(TemailAccoutLocations temailAccoutLocations,
       TemailAcctUptOptType type, Consumer<Response<Void>> consumer) {
     if (type == TemailAcctUptOptType.add) {
-      if (!grpcStatusAdapter.syncChannelLocations(temailAccoutLocations)) {
+      if (!statusSyncClient.syncChannelLocations(temailAccoutLocations)) {
         pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
       }
     } else {
-      if (!grpcStatusAdapter.removeChannelLocations(temailAccoutLocations)) {
+      if (!statusSyncClient.removeChannelLocations(temailAccoutLocations)) {
         pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
       }
     }

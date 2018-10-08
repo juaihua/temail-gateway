@@ -28,7 +28,7 @@ public class GrpcConcurrentTaskOffLine implements Runnable {
   public void run() {
     //start registry and heartBeat
     grpcConcrData.init4Test();
-    grpcConcrData.grpcClientWrapper.startClient();
+    grpcConcrData.grpcClientWrapper.initClient();
     //begin the test
     int curIndex = 0;
     for (int i = 0; i < grpcConcrData.temailAccoutLocations.size(); i++) {
