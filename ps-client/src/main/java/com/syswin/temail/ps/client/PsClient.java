@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  *         PsClientBuilder builder =
  *             new PsClientBuilder(deviceId)
  *                 .defaultHost("127.0.0.1")
- *                 .defaultPort(8099);
+ *                 .defaultPort(10101);
  *         psClient = builder.build();
  *     }
  * }

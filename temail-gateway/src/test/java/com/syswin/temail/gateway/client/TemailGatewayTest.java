@@ -72,7 +72,7 @@ public class TemailGatewayTest {
   @ClassRule
   public static final WireMockRule wireMockRule = new WireMockRule(8090);
   static final int MQ_SERVER_PORT = 9876;
-  static final int PORT = 8099;
+  static final int PORT = 10101;
   private static final Network NETWORK = Network.newNetwork();
   private static final RocketMqNameServerContainer rocketMqNameSrv = new RocketMqNameServerContainer()
       .withNetwork(NETWORK)

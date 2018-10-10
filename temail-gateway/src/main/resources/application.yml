@@ -14,7 +14,7 @@ temail:
         dispatchUrl: http://dispatcher.msgseal.com:8081/dispatch
         updateSocketStatusUrl: http://channel.msgseal.com:9100/locations
         netty:
-            port: 8099
+            port: 10101
             read-idle-time-seconds: 1800
         rocketmq:
             namesrv-addr: n1.rocketmq.msgseal.com:9876
