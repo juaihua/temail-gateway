@@ -1,4 +1,4 @@
-package com.syswin.temail.gateway.utils;
+package com.syswin.temail.ps.common.utils;
 
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.SignatureAlgorithm;

@@ -30,6 +30,15 @@ import java.util.function.Consumer;
 public interface PsClient {
 
   /**
+   * 登录服务器
+   *
+   * @param temail 需要登录的账号
+   * @param temailPK 账号的公钥
+   * @return 是否登录成功
+   */
+  boolean login(String temail, String temailPK);
+
+  /**
    * 同步发送消息给服务端
    *
    * @param message 需要发送的消息对象

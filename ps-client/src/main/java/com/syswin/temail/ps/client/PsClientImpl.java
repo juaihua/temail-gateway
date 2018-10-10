@@ -13,9 +13,7 @@ import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
 import java.util.Base64;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class PsClientImpl implements PsClient {
 
-  private final Map<HostAndPort, CDTPClientEntity> cdtpClientMap = new ConcurrentHashMap<>();
+  private final Map<HostAndPort, CDTPClient> cdtpClientMap = new ConcurrentHashMap<>();
   private final String deviceId;
   private final String defaultHost;
   private final int port;
@@ -44,6 +42,13 @@ class PsClientImpl implements PsClient {
     this.port = port;
     this.idleTimeSeconds = idleTimeSeconds;
     this.signer = signer;
+  }
+
+  @Override
+  public boolean login(String temail, String temailPK) {
+    CDTPClient cdtpClient = getCdtpClient(defaultHost);
+    login(temail, temailPK, cdtpClient);
+    return false;
   }
 
   @Override
@@ -102,6 +107,10 @@ class PsClientImpl implements PsClient {
     if (StringUtil.isEmpty(targetAddress)) {
       targetAddress = defaultHost;
     }
+    return getCdtpClient(targetAddress);
+  }
+
+  private CDTPClient getCdtpClient(String targetAddress) {
     HostAndPort hostAndPort = parseHostAndPort(targetAddress);
     if (hostAndPort.getHost() == null) {
       hostAndPort.setHost(defaultHost);
@@ -109,22 +118,15 @@ class PsClientImpl implements PsClient {
     if (hostAndPort.getPort() == 0) {
       hostAndPort.setPort(port);
     }
-    CDTPClientEntity cdtpClientEntity = cdtpClientMap.computeIfAbsent(hostAndPort,
+    CDTPClient cdtpClient = cdtpClientMap.computeIfAbsent(hostAndPort,
         key -> {
-          CDTPClient cdtpClient = new CDTPClient(key.getHost(), key.getPort(), idleTimeSeconds);
-          cdtpClient.connect();
-          return new CDTPClientEntity(cdtpClient);
+          CDTPClient client = new CDTPClient(key.getHost(), key.getPort(), idleTimeSeconds);
+          client.connect();
+          return client;
         });
-    CDTPClient cdtpClient = cdtpClientEntity.getCdtpClient();
     if (!cdtpClient.isActive()) {
       cdtpClient.realConnect();
     }
-    String sender = header.getSender();
-    // 检查本地是否存在会话，如果没有本地会话，则登录
-    if (!isLogged(sender, cdtpClientEntity)) {
-      login(sender, header.getSenderPK(), cdtpClientEntity);
-    }
-
     return cdtpClient;
   }
 
@@ -169,13 +171,8 @@ class PsClientImpl implements PsClient {
     return packet;
   }
 
-  private boolean isLogged(String sender, CDTPClientEntity cdtpClientEntity) {
-    return cdtpClientEntity.getLoggedTemails().contains(sender);
-  }
-
-  private void login(String temail, String temailPK, CDTPClientEntity cdtpClientEntity) {
+  private void login(String temail, String temailPK, CDTPClient cdtpClient) {
     try {
-      CDTPClient cdtpClient = cdtpClientEntity.getCdtpClient();
       CDTPPacket packet = genLoginPacket(temail, temailPK);
       genSignature(packet);
       CDTPPacket respPacket = cdtpClient.syncExecute(packet);
@@ -187,7 +184,6 @@ class PsClientImpl implements PsClient {
         // 登录失败的处理，暂时简单抛出异常
         throw new PsClientException(temail + "登录失败，状态码：" + loginResp.getCode() + "，错误描述：" + loginResp.getDesc());
       }
-      cdtpClientEntity.getLoggedTemails().add(temail);
     } catch (InvalidProtocolBufferException e) {
       throw new PsClientException("登录失败", e);
     }
@@ -216,14 +212,4 @@ class PsClientImpl implements PsClient {
     private int port;
   }
 
-  @Data
-  private class CDTPClientEntity {
-
-    private CDTPClient cdtpClient;
-    private Set<String> loggedTemails = new HashSet<>();
-
-    public CDTPClientEntity(CDTPClient cdtpClient) {
-      this.cdtpClient = cdtpClient;
-    }
-  }
 }

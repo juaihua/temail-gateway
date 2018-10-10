@@ -31,7 +31,7 @@ import org.mockito.Mockito;
 @Slf4j
 public class PsClientTest {
 
-  private static final int serverPort = 8098;
+  private static final int serverPort = 10101;
   private static final int serverReadIdleTimeSeconds = 300;
   private static TestRequestHandler testRequestHandler = Mockito.mock(TestRequestHandler.class);
   private static String sender = "jack@t.email";
@@ -63,7 +63,7 @@ public class PsClientTest {
               .defaultHost("127.0.0.1")
 //              .defaultHost("tmail.msgseal.com")
 //              .defaultHost("msgseal.systoon.com")
-              .defaultPort(8099)
+              .defaultPort(serverPort)
               .signer(signer);
       psClient = builder.build();
     }
@@ -90,15 +90,17 @@ public class PsClientTest {
     Thread.sleep(100);
   }
 
-
-  @Test(expected = PsClientException.class)
-  public void sendMessageInvalidUser() throws InterruptedException {
-    // 先通过发送一个正常消息，建立并保持连接，以避免服务器通道中只有一个无效用户而把通道断开
-    sendMessage();
-    Message reqMessage = MessageMaker.sendSingleChatMessage("invalidUser", receive, content);
-    psClient.sendMessage(reqMessage);
-    Thread.sleep(100);
-  }
+  // 由于发送消息上不需要登录，无效用户发送消息不会抛异常，只能以无法通过验签的方式报错
+  //  @Test
+  //  public void sendMessageInvalidUser() throws InterruptedException {
+  //    Message reqMessage = MessageMaker.sendSingleChatMessage("invalidUser", receive, content);
+  //    CDTPPacket packet = MessageConverter.toCDTPPacket(reqMessage);
+  //    mockDispatch(packet);
+  //    Message respMessage = psClient.sendMessage(reqMessage);
+  //    String data = new String(respMessage.getPayload());
+  //    new Gson().fromJson(data, Response.class);
+  //    Thread.sleep(100000);
+  //  }
 
   @Test
   public void sendMessageAsync() throws InterruptedException {
@@ -109,6 +111,7 @@ public class PsClientTest {
     CountDownLatch latch = new CountDownLatch(1);
     AtomicReference<String> errorMsg = new AtomicReference<>();
     psClient.sendMessage(reqMessage, message -> {
+      System.out.println(new String(message.getPayload()));
       if (!message.equals(reqMessage)) {
         errorMsg.set("返回对象不是期望的对象,\n返回值：" + message + "\n期望值：" + reqMessage);
       }
