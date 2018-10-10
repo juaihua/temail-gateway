@@ -45,7 +45,7 @@ public class GrpcReconnectManager {
   /**
    * be aware of only one reconnect task can be triggered in the same time
    */
-  public void reconnect(Consumer consumer) throws IllegalAccessException {
+  public void reconnect(Consumer consumer, Runnable runnable) throws IllegalAccessException {
     if (isReconnectWorking.compareAndSet(false, true)) {
       executorService.submit(new Runnable() {
         @Override
@@ -58,6 +58,7 @@ public class GrpcReconnectManager {
                 log.error("reconnect fail, {} seconds try again! ", reconnectDelay);
                 throw new IllegalStateException("reconnect fail.");
               }
+              runnable.run();
               grpcClientWrapper.reconnectSuccessful();
               if (consumer != null) {
                 consumer.accept(Boolean.TRUE);

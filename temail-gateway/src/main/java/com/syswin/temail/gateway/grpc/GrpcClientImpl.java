@@ -10,15 +10,13 @@ import lombok.Data;
 @Data
 class GrpcClientImpl implements GrpcClient {
 
-  private GatewayRegistrySyncServerGrpc.GatewayRegistrySyncServerBlockingStub serverBlockingStub;
+  private final GatewayRegistrySyncServerGrpc.GatewayRegistrySyncServerBlockingStub serverBlockingStub;
 
-  private ManagedChannel channel;
+  private final ManagedChannel channel;
 
   private String host;
 
   private int port;
-
-  public GrpcClientImpl() {}
 
   public GrpcClientImpl(String host, int port) {
     this(ManagedChannelBuilder.forAddress(host, port).usePlaintext());
@@ -26,7 +24,7 @@ class GrpcClientImpl implements GrpcClient {
     this.port = port;
   }
 
-  public GrpcClientImpl(ManagedChannelBuilder<?> channelBuilder) {
+  private GrpcClientImpl(ManagedChannelBuilder<?> channelBuilder) {
     this.channel = channelBuilder.build();
     this.serverBlockingStub = GatewayRegistrySyncServerGrpc.newBlockingStub(channel);
   }

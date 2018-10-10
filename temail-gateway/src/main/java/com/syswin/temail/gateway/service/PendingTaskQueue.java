@@ -38,12 +38,12 @@ class PendingTaskQueue<T> implements Runnable {
         while (!Thread.currentThread().isInterrupted()) {
           T pair = obtainTask();
           try {
-            log.debug("obtain one retry task: {}", pair.toString());
+            log.debug("obtain one retry task: {}", pair);
             taskConsumer.accept(pair);
-            Thread.sleep(delayInMillis);
           } catch (Exception e) {
             log.debug("failed to add retry task: ", e);
             pendingTaskQueue.offer(pair);
+            Thread.sleep(delayInMillis);
           }
         }
       } catch (InterruptedException e) {

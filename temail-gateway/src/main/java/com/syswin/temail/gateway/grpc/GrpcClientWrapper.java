@@ -5,6 +5,7 @@ import com.syswin.temail.channel.grpc.servers.ChannelLocations;
 import com.syswin.temail.channel.grpc.servers.GatewayServer;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * in wrapper we add reconnect and heartBeat logic and keep original client clean.<p>
- * be aware of keeping client fail fast when channel-server is not avalilable
+ * be aware of keeping client fail fast when channel-server is not available
  * , and my be we can update the channel in batch for this fail fast afterwards ...
  */
 @Slf4j
@@ -20,17 +21,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 //@Component
 public class GrpcClientWrapper implements GrpcClient, StatusSyncClient {
 
-  private TemailGatewayProperties temailGatewayProperties;
+  private final AtomicReference<GrpcClient> grpcClientReference;
+  private final GrpcClient alwaysFailGrpcClient = new AlwaysFailGrpcClient();
+  private final TemailGatewayProperties temailGatewayProperties;
 
   private volatile boolean serviceIsAvaliable = false;
 
-  private GrpcReconnectManager grpcReconnectManager;
+  private final GrpcReconnectManager grpcReconnectManager;
 
-  private GrpcHeartBeatManager grpcHeartBeatManager;
+  private final GrpcHeartBeatManager grpcHeartBeatManager;
 
-  private GrpcClient grpcClient;
+  private final GrpcClient grpcClient;
 
-  private GatewayServer curServerInfo;
+  private final GatewayServer curServerInfo;
 
   private final String host;
 
@@ -48,9 +51,10 @@ public class GrpcClientWrapper implements GrpcClient, StatusSyncClient {
     this.grpcReconnectManager = new GrpcReconnectManager(this, temailGatewayProperties);
     this.grpcHeartBeatManager = new GrpcHeartBeatManager(this, temailGatewayProperties);
     serviceIsAvaliable = true;
+    this.grpcClientReference = new AtomicReference<>(grpcClient);
   }
 
-
+  // TODO: 2018/10/10 where is corresponding disconnect?
   /**
    * register and start heartBeat for default current server
    */
@@ -60,12 +64,13 @@ public class GrpcClientWrapper implements GrpcClient, StatusSyncClient {
       @Override
       public void accept(Boolean aBoolean) {
         if (!aBoolean.booleanValue()) {
-          // if heartBean fail, that means grpcServer is unavailible
+          // if heartBean fail, that means grpcServer is unavailable
           // and if the serviceIsAvaliable is true means need to reconnect!
           if (serviceIsAvaliable) {
-            reconnect();
+            reconnect(() -> {
+            });
           } else {
-            log.info("grpc server not availible, reconnect is beging executed. wait.");
+            log.info("grpc server not available, reconnect is being executed. wait.");
           }
         }
       }
@@ -77,13 +82,14 @@ public class GrpcClientWrapper implements GrpcClient, StatusSyncClient {
   public boolean serverRegistry(GatewayServer gatewayServer) {
     try {
       if (!serviceIsAvaliable) {
-        log.warn("server registry fail, cause grpcServer is unavalilable, reconnect logic is being executed.");
+        log.warn("server registry fail, cause grpcServer is unavailable, reconnect logic is being executed.");
         return false;
       }
       return grpcClient.serverRegistry(gatewayServer);
     } catch (Exception e) {
       log.error("server registry fail, try to reconnect grpcServer.", e);
-      reconnect();
+      reconnect(() -> {
+      });
       return false;
     }
   }
@@ -92,8 +98,17 @@ public class GrpcClientWrapper implements GrpcClient, StatusSyncClient {
   @Override
   public boolean serverHeartBeat(GatewayServer gatewayServer) {
     try {
+      return grpcClientReference.get().serverHeartBeat(gatewayServer);
+    } catch (Exception e) {
+      if (grpcClientReference.compareAndSet(grpcClient, alwaysFailGrpcClient)) {
+        reconnect(() -> grpcClientReference.compareAndSet(alwaysFailGrpcClient, grpcClient));
+      }
+      return false;
+    }
+/*
+    try {
       if (!serviceIsAvaliable) {
-        log.warn("server heart beat fail, cause grpcServer is unavalilable, reconnect logic is being executed.");
+        log.warn("server heart beat fail, cause grpcServer is unavailable, reconnect logic is being executed.");
         return false;
       }
       return grpcClient.serverHeartBeat(gatewayServer);
@@ -102,6 +117,7 @@ public class GrpcClientWrapper implements GrpcClient, StatusSyncClient {
       reconnect();
       return false;
     }
+*/
   }
 
 
@@ -109,14 +125,15 @@ public class GrpcClientWrapper implements GrpcClient, StatusSyncClient {
   public boolean syncChannelLocations(ChannelLocations channelLocations) {
     try {
       if (!serviceIsAvaliable) {
-        log.warn("sync channel Locations fail, cause grpcServer is unavalilable, reconnect logic is being executed.");
+        log.warn("sync channel Locations fail, cause grpcServer is unavailable, reconnect logic is being executed.");
         return false;
       }
       log.info("sync channel Locations success : {}", channelLocations.toString());
       return grpcClient.syncChannelLocations(channelLocations);
     } catch (Exception e) {
       log.error("sync channel Locations fail : {} ", channelLocations.toString(), e);
-      reconnect();
+      reconnect(() -> {
+      });
       return false;
     }
   }
@@ -127,14 +144,15 @@ public class GrpcClientWrapper implements GrpcClient, StatusSyncClient {
     try {
       if (!serviceIsAvaliable) {
         log.warn(
-            "remove channel Locations fail, cause grpcServer is unavalilable, reconnect logic is being executed.");
+            "remove channel Locations fail, cause grpcServer is unavailable, reconnect logic is being executed.");
         return false;
       }
       log.info("remove channel Locations success : {} - success. ", channelLocations.toString());
       return grpcClient.removeChannelLocations(channelLocations);
     } catch (Exception e) {
       log.error("remove channel Locations fail : {} ", channelLocations.toString(), e);
-      reconnect();
+      reconnect(() -> {
+      });
       return false;
     }
   }
@@ -142,12 +160,13 @@ public class GrpcClientWrapper implements GrpcClient, StatusSyncClient {
 
   /**
    * reconnect client, once success then registry the server info again
+   * @param runnable
    */
-  public void reconnect() {
+  void reconnect(Runnable runnable) {
     try {
-      log.info("grpc client is unavailible, try to reconncet again!");
+      log.info("grpc client is unavailable, try to reconnect again!");
       serviceIsAvaliable = false;
-      grpcReconnectManager.reconnect(t -> { });
+      grpcReconnectManager.reconnect(t -> { }, runnable);
     } catch (IllegalAccessException e) {
       log.error(e.getMessage());
     }

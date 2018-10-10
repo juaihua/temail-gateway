@@ -77,6 +77,7 @@ public class RemoteStatusService {
   private void reqUpdSts4Upd(TemailAccoutLocations temailAccoutLocations,
       TemailAcctUptOptType type, Consumer<Response<Void>> consumer) {
     if (type == TemailAcctUptOptType.add) {
+      // TODO: 2018/10/10 no exception thrown
       if (!statusSyncClient.syncChannelLocations(temailAccoutLocations)) {
         pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
       }
