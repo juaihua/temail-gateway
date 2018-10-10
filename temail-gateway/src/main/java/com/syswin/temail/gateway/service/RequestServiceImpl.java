@@ -1,6 +1,6 @@
 package com.syswin.temail.gateway.service;
 
-import static com.syswin.temail.gateway.encrypt.util.SignatureUtil.resetSignature;
+import static com.syswin.temail.gateway.utils.SignatureUtil.resetSignature;
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.INTERNAL_ERROR;
 

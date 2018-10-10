@@ -1,12 +1,13 @@
 package com.syswin.temail.gateway.notify;
 
-import static com.syswin.temail.gateway.encrypt.util.SignatureUtil.resetSignature;
+
+import static com.syswin.temail.gateway.utils.SignatureUtil.resetSignature;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.syswin.temail.ps.server.service.ChannelHolder;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
+import com.syswin.temail.ps.server.service.ChannelHolder;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 

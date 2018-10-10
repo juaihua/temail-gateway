@@ -33,7 +33,7 @@ public class CDTPPacketTrans {
       return new byte[0];
     }
     if (isSendSingleMsg(packet.getCommandSpace(), packet.getCommand())) {
-      return Base64.getDecoder().decode(data);
+      return Base64.getUrlDecoder().decode(data);
     } else {
       return data.getBytes(StandardCharsets.UTF_8);
     }
@@ -41,7 +41,7 @@ public class CDTPPacketTrans {
 
   private static String encodeData(CDTPPacket packet) {
     if (isSendSingleMsg(packet.getCommandSpace(), packet.getCommand())) {
-      return Base64.getEncoder().encodeToString(packet.getData());
+      return Base64.getUrlEncoder().encodeToString(packet.getData());
     } else {
       return new String(packet.getData(), StandardCharsets.UTF_8);
     }

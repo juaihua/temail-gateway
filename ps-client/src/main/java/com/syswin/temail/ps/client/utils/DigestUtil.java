@@ -26,36 +26,6 @@ public class DigestUtil {
   }
 
   /**
-   * 对数据进行md5签名
-   *
-   * @param data 原始数据
-   * @return 以16进制字符串表示的数据的签名
-   */
-  public static String md5AsHex(String data) {
-    return HexUtil.encodeHex(md5(data.getBytes()));
-  }
-
-  /**
-   * 对数据进行md5签名
-   *
-   * @param data 原始数据
-   * @return 以Base64编码的数据的签名
-   */
-  public static String md5AsBase64(String data) {
-    return Base64Util.encodeToString(md5(data.getBytes()));
-  }
-
-  /**
-   * 对数据进行md5签名
-   *
-   * @param data 原始数据
-   * @return 以URL安全的Base64编码的数据的签名
-   */
-  public static String md5AsBase64UrlSafe(String data) {
-    return Base64Util.encodeToUrlSafeString(md5(data.getBytes()));
-  }
-
-  /**
    * 对数据进行sha224签名
    *
    * @param data 原始数据
@@ -63,36 +33,6 @@ public class DigestUtil {
    */
   public static byte[] sha224(byte[] data) {
     return digest(ALGORITHM_SHA224, data);
-  }
-
-  /**
-   * 对数据进行sha224签名
-   *
-   * @param data 原始数据
-   * @return 以16进制字符串表示的数据的签名
-   */
-  public static String sha224AsHex(String data) {
-    return HexUtil.encodeHex(sha224(data.getBytes()));
-  }
-
-  /**
-   * 对数据进行sha224签名
-   *
-   * @param data 原始数据
-   * @return 以Base64编码的数据的签名
-   */
-  public static String sha224AsBase64(String data) {
-    return Base64Util.encodeToString(sha224(data.getBytes()));
-  }
-
-  /**
-   * 对数据进行sha224签名
-   *
-   * @param data 原始数据
-   * @return 以URL安全的Base64编码的数据的签名
-   */
-  public static String sha224AsBase64UrlSafe(String data) {
-    return Base64Util.encodeToUrlSafeString(sha224(data.getBytes()));
   }
 
   /**
@@ -106,36 +46,6 @@ public class DigestUtil {
   }
 
   /**
-   * 对数据进行sha256签名
-   *
-   * @param data 原始数据
-   * @return 以16进制字符串表示的数据的签名
-   */
-  public static String sha256AsHex(String data) {
-    return HexUtil.encodeHex(sha256(data.getBytes()));
-  }
-
-  /**
-   * 对数据进行sha256签名
-   *
-   * @param data 原始数据
-   * @return 以Base64编码的数据的签名
-   */
-  public static String sha256AsBase64(String data) {
-    return Base64Util.encodeToString(sha256(data.getBytes()));
-  }
-
-  /**
-   * 对数据进行sha256签名
-   *
-   * @param data 原始数据
-   * @return 以URL安全的Base64编码的数据的签名
-   */
-  public static String sha256AsBase64UrlSafe(String data) {
-    return Base64Util.encodeToUrlSafeString(sha256(data.getBytes()));
-  }
-
-  /**
    * 对数据进行sha384签名
    *
    * @param data 原始数据
@@ -146,36 +56,6 @@ public class DigestUtil {
   }
 
   /**
-   * 对数据进行sha384签名
-   *
-   * @param data 原始数据
-   * @return 以16进制字符串表示的数据的签名
-   */
-  public static String sha384AsHex(String data) {
-    return HexUtil.encodeHex(sha384(data.getBytes()));
-  }
-
-  /**
-   * 对数据进行sha384签名
-   *
-   * @param data 原始数据
-   * @return 以Base64编码的数据的签名
-   */
-  public static String sha384AsBase64(String data) {
-    return Base64Util.encodeToString(sha384(data.getBytes()));
-  }
-
-  /**
-   * 对数据进行sha384签名
-   *
-   * @param data 原始数据
-   * @return 以URL安全的Base64编码的数据的签名
-   */
-  public static String sha384AsBase64UrlSafe(String data) {
-    return Base64Util.encodeToUrlSafeString(sha384(data.getBytes()));
-  }
-
-  /**
    * 对数据进行sha512签名
    *
    * @param data 原始数据
@@ -183,36 +63,6 @@ public class DigestUtil {
    */
   public static byte[] sha512(byte[] data) {
     return digest(ALGORITHM_SHA512, data);
-  }
-
-  /**
-   * 对数据进行sha512签名
-   *
-   * @param data 原始数据
-   * @return 以16进制字符串表示的数据的签名
-   */
-  public static String sha512AsHex(String data) {
-    return HexUtil.encodeHex(sha512(data.getBytes()));
-  }
-
-  /**
-   * 对数据进行sha512签名
-   *
-   * @param data 原始数据
-   * @return 以Base64编码的数据的签名
-   */
-  public static String sha512AsBase64(String data) {
-    return Base64Util.encodeToString(sha512(data.getBytes()));
-  }
-
-  /**
-   * 对数据进行sha512签名
-   *
-   * @param data 原始数据
-   * @return 以URL安全的Base64编码的数据的签名
-   */
-  public static String sha512AsBase64UrlSafe(String data) {
-    return Base64Util.encodeToUrlSafeString(sha512(data.getBytes()));
   }
 
   private static MessageDigest getDigest(String algorithm) {
@@ -227,7 +77,4 @@ public class DigestUtil {
     return getDigest(algorithm).digest(data);
   }
 
-  public static void main(String[] args) {
-    System.out.println(HexUtil.encodeHex(DigestUtil.sha256(new byte[0])));
-  }
 }

@@ -7,9 +7,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.utils.DigestUtil;
-import com.syswin.temail.gateway.utils.HexUtil;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +71,7 @@ class LoginService {
     CDTPHeader header = packet.getHeader();
     String targetAddress = defaultString(header.getTargetAddress());
     byte[] data = packet.getData();
-    String dataSha256 = data == null ? "" : HexUtil.encodeHex(DigestUtil.sha256(data));
+    String dataSha256 = data == null ? "" : Base64.getUrlEncoder().encodeToString(DigestUtil.sha256(data));
 
     return String.valueOf(packet.getCommandSpace() + packet.getCommand())
         + targetAddress

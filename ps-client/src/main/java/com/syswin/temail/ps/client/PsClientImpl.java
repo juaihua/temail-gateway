@@ -8,11 +8,11 @@ import static com.syswin.temail.ps.common.entity.CommandType.LOGIN;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.ps.client.utils.DigestUtil;
-import com.syswin.temail.ps.client.utils.HexUtil;
 import com.syswin.temail.ps.client.utils.StringUtil;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -138,7 +138,7 @@ class PsClientImpl implements PsClient {
   public void genSignature(CDTPPacket packet) {
     CDTPHeader header = packet.getHeader();
     byte[] data = packet.getData();
-    String dataSha256 = data == null ? "" : HexUtil.encodeHex(DigestUtil.sha256(data));
+    String dataSha256 = data == null ? "" : Base64.getUrlEncoder().encodeToString(DigestUtil.sha256(data));
     String targetAddress = defaultString(header.getTargetAddress());
 
     String unsigned =
