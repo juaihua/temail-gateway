@@ -20,5 +20,5 @@ temail:
             namesrv-addr: n1.rocketmq.msgseal.com:9876
             consumer-group: temail-gateway-consumer
             mq-topic: temail-gateway-notify
-        grpcServerHost: temail-channel
+        grpcServerHost: channel.msgseal.com
         grpcServerPort: 9110
