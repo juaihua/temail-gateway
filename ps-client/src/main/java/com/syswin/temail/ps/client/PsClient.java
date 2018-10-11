@@ -34,9 +34,9 @@ public interface PsClient {
    *
    * @param temail 需要登录的账号
    * @param temailPK 账号的公钥
-   * @return 是否登录成功
+   * @throws PsClientException 登录不成功，以异常的方式返回。具体原因在异常里描述
    */
-  boolean login(String temail, String temailPK);
+  void login(String temail, String temailPK);
 
   /**
    * 同步发送消息给服务端

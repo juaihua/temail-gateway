@@ -45,10 +45,9 @@ class PsClientImpl implements PsClient {
   }
 
   @Override
-  public boolean login(String temail, String temailPK) {
+  public void login(String temail, String temailPK) {
     CDTPClient cdtpClient = getCdtpClient(defaultHost);
     login(temail, temailPK, cdtpClient);
-    return false;
   }
 
   @Override
@@ -206,7 +205,7 @@ class PsClientImpl implements PsClient {
 
   @Data
   @AllArgsConstructor
-  private class HostAndPort {
+  private static class HostAndPort {
 
     private String host;
     private int port;
