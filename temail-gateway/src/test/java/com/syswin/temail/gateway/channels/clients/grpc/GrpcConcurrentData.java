@@ -1,4 +1,4 @@
-package com.syswin.temail.gateway.grpc;
+package com.syswin.temail.gateway.channels.clients.grpc;
 
 import com.syswin.temail.channel.grpc.servers.ChannelLocations;
 import com.syswin.temail.channel.grpc.servers.GatewayServer;
@@ -23,7 +23,7 @@ public class GrpcConcurrentData {
 
   public void init4Test() {
     this.temailGatewayProperties = new TemailGatewayProperties();
-    this.temailGatewayProperties.setGrpcServerHost("temail-channel");
+    this.temailGatewayProperties.setGrpcServerHost("channel.msgseal.com");
     this.temailGatewayProperties.setGrpcServerPort("9110");
     this.temailGatewayProperties.getInstance().setHostOf(this.getGatewayServer().getIp());
     this.temailGatewayProperties.getInstance().setProcessId(this.gatewayServer.getProcessId());
@@ -31,9 +31,7 @@ public class GrpcConcurrentData {
   }
 
   public void changeClientStatusUnavailible(){
-    //
-    grpcClientWrapper.reconnect(() -> {
-    });
+    grpcClientWrapper.reconnect();
   }
 
 }

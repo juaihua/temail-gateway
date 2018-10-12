@@ -1,4 +1,4 @@
-package com.syswin.temail.gateway.grpc;
+package com.syswin.temail.gateway.channels.clients.grpc;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -12,13 +12,13 @@ public class CommonDataGeneUtil {
 
     private static final Random RANDOM = new Random(1);
 
-    private static char[] UPPER_CASE = new char[26];
+    private static final char[] UPPER_CASE = new char[26];
 
-    private static char[] LOWER_CASE = new char[26];
+    private static final char[] LOWER_CASE = new char[26];
 
-    private static char[] NUMBER = new char[10];
+    private static final char[] NUMBER = new char[10];
 
-    public static enum ExtractType{UPPER,LOWER,NUM};
+    public enum ExtractType{UPPER,LOWER,NUM};
 
     static {
         for(int i = 0; i < 26; i++){

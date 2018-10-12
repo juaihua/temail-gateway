@@ -21,4 +21,6 @@ service GatewayRegistrySyncServer{
   //从存储层移除指定的channels信息
   rpc removeChannelLocations(ChannelLocations) returns(CommonResponse) {}
 
+   //gateserver注销服务
+   rpc serverOffLine(GatewayServer) returns(CommonResponse) {}
 }

@@ -1,13 +1,21 @@
-package com.syswin.temail.gateway.grpc;
+package com.syswin.temail.gateway.channels;
 
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
 
-public interface StatusSyncClient {
+/**
+ * channels sync interface
+ */
+public interface ChannelsSyncClient {
 
    /**
    * init client
    */
-   public void initClient();
+  public void initClient();
+
+  /**
+   * destroy client
+   */
+  public void destroyClient();
 
   /**
    * add chanel locations

@@ -42,7 +42,8 @@ class PendingTaskQueue<T> implements Runnable {
             taskConsumer.accept(pair);
           } catch (Exception e) {
             log.debug("failed to add retry task: ", e);
-            pendingTaskQueue.offer(pair);
+            // the caller will add fail task again.
+            // pendingTaskQueue.offer(pair);
             Thread.sleep(delayInMillis);
           }
         }

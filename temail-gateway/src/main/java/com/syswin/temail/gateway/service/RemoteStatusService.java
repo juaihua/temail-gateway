@@ -2,10 +2,10 @@ package com.syswin.temail.gateway.service;
 
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.TemailGatewayProperties.Instance;
+import com.syswin.temail.gateway.channels.ChannelsSyncClient;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.TemailAccoutLocation;
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
-import com.syswin.temail.gateway.grpc.StatusSyncClient;
 import com.syswin.temail.ps.server.entity.Session;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +24,7 @@ public class RemoteStatusService {
 
   //private final WebClient statusWebClient;
 
-  private StatusSyncClient statusSyncClient;
+  private ChannelsSyncClient channelsSyncClient;
 
   // a async queue used for retry failed task
   private final PendingTaskQueue<Pair> pendingTaskQueue = new PendingTaskQueue<>(
@@ -36,9 +36,9 @@ public class RemoteStatusService {
   private final ParameterizedTypeReference<Response<Void>> typeReference = new ParameterizedTypeReference<Response<Void>>() {
   };
 
-  public RemoteStatusService(TemailGatewayProperties properties, StatusSyncClient statusSyncClient) {
+  public RemoteStatusService(TemailGatewayProperties properties, ChannelsSyncClient channelsSyncClient) {
+    this.channelsSyncClient = channelsSyncClient;
     this.properties = properties;
-    this.statusSyncClient = statusSyncClient;
     this.pendingTaskQueue.run();
   }
 
@@ -78,11 +78,11 @@ public class RemoteStatusService {
       TemailAcctUptOptType type, Consumer<Response<Void>> consumer) {
     if (type == TemailAcctUptOptType.add) {
       // TODO: 2018/10/10 no exception thrown
-      if (!statusSyncClient.syncChannelLocations(temailAccoutLocations)) {
+      if (!channelsSyncClient.syncChannelLocations(temailAccoutLocations)) {
         pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
       }
     } else {
-      if (!statusSyncClient.removeChannelLocations(temailAccoutLocations)) {
+      if (!channelsSyncClient.removeChannelLocations(temailAccoutLocations)) {
         pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
       }
     }

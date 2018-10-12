@@ -1,4 +1,4 @@
-package com.syswin.temail.gateway.grpc;
+package com.syswin.temail.gateway.channels.clients.grpc;
 
 import com.syswin.temail.channel.grpc.servers.GatewayServer;
 import com.syswin.temail.gateway.TemailGatewayProperties;
@@ -17,23 +17,21 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 public class GrpcHeartBeatManager {
 
-  private TemailGatewayProperties temailGatewayProperties;
+  private final TemailGatewayProperties temailGatewayProperties;
 
-  private Object heartBeatSingleLock = new Object();
+  private final AtomicBoolean isHeartBeatKeeping = new AtomicBoolean(false);
 
-  private ScheduledExecutorService executorService;
+  private final ScheduledExecutorService executorService;
 
-  private AtomicBoolean isHeartBeatKeeping = new AtomicBoolean(false);
+  private final String instanceProcessId;
 
-  private GatewayServer gatewayServer;
+  private final GatewayServer gatewayServer;
 
-  private String instanceProcessId;
+  private final int heartBeatDelay = 20;
 
-  private int heartBeatDelay = 20;
+  private final GrpcClient grpcClient;
 
-  private GrpcClient grpcClient;
-
-  private String instanceIp;
+  private final String instanceIp;
 
   public GrpcHeartBeatManager(GrpcClient grpcClient, TemailGatewayProperties temailGatewayProperties) {
     this.executorService = Executors.newSingleThreadScheduledExecutor();
@@ -57,13 +55,14 @@ public class GrpcHeartBeatManager {
         try {
           if (grpcClient.serverHeartBeat(gatewayServer)) {
             consumer.accept(Boolean.TRUE);
-            log.info("heart beat result success.");
+            log.info("heart beat success : {}-{}",gatewayServer.getIp(), gatewayServer.getProcessId());
           } else {
             consumer.accept(Boolean.FALSE);
-            throw new IllegalAccessException();
+            log.error("heart beat fail, try again after {} seconds .", heartBeatDelay);
           }
         } catch (Exception e) {
-          log.error("heart beat fail, try again after {} seconds .", heartBeatDelay);
+          consumer.accept(Boolean.FALSE);
+          log.error("execption happened in heart beat." , e);
         }
       }, heartBeatDelay, heartBeatDelay, TimeUnit.SECONDS);
     } else {

@@ -1,4 +1,4 @@
-package com.syswin.temail.gateway.grpc;
+package com.syswin.temail.gateway.channels.clients.grpc;
 
 import com.syswin.temail.channel.grpc.servers.ChannelLocations;
 import com.syswin.temail.channel.grpc.servers.GatewayRegistrySyncServerGrpc;
@@ -14,14 +14,8 @@ class GrpcClientImpl implements GrpcClient {
 
   private final ManagedChannel channel;
 
-  private String host;
-
-  private int port;
-
   public GrpcClientImpl(String host, int port) {
     this(ManagedChannelBuilder.forAddress(host, port).usePlaintext());
-    this.host = host;
-    this.port = port;
   }
 
   private GrpcClientImpl(ManagedChannelBuilder<?> channelBuilder) {
@@ -30,8 +24,23 @@ class GrpcClientImpl implements GrpcClient {
   }
 
   @Override
+  public boolean retryConnection(GatewayServer gatewayServer) {
+    return this.serverRegistry(gatewayServer);
+  }
+
+  @Override
+  public void closeConnection() {
+    channel.shutdown();
+  }
+
+  @Override
   public boolean serverRegistry(GatewayServer gatewayServer) {
     return serverBlockingStub.serverRegistry(gatewayServer).getIsSuccess();
+  }
+
+  @Override
+  public boolean serverOffLine(GatewayServer gatewayServer) {
+    return serverBlockingStub.serverOffLine(gatewayServer).getIsSuccess();
   }
 
   @Override

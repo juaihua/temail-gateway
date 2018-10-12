@@ -1,4 +1,4 @@
-package com.syswin.temail.gateway.grpc;
+package com.syswin.temail.gateway.channels.clients.grpc;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -11,9 +11,9 @@ public class GrpcConcurrentTaskOnLine implements Runnable {
 
   private static final Random RANDOM = new Random(2);
 
-  private int cyclicTimes = 5;
+  private final int cyclicTimes = 5;
 
-  private GrpcConcurrentData grpcConcrData;
+  private final GrpcConcurrentData grpcConcrData;
 
   public GrpcConcurrentTaskOnLine(GrpcConcurrentData grpcConcrData) {
     this.grpcConcrData = grpcConcrData;

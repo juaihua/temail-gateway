@@ -1,4 +1,4 @@
-package com.syswin.temail.gateway.grpc;
+package com.syswin.temail.gateway.channels.clients.grpc;
 
 import com.syswin.temail.channel.grpc.servers.ChannelLocation;
 import com.syswin.temail.channel.grpc.servers.ChannelLocations;
@@ -15,13 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GrpcConcurentDataUtil {
 
-  private Random random = new Random(2);
+  private final Random random = new Random(2);
 
-  private Integer gateServerCount;
+  private final Integer gateServerCount;    //GateServers count
 
-  private Integer lcCountPerServer;
+  private final Integer lcCountPerServer;   //ChannelLocationses per gateServer
 
-  private Integer lcCountPerLocations;
+  private final Integer lcCountPerLocations;  //ChannelLocationes per ChannelLocations
 
   @Getter
   public List<GrpcConcurrentData> grpcTestUnits;
