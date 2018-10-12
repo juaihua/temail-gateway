@@ -43,12 +43,16 @@ public class SessionServiceImpl extends AbstractSessionService {
     String deviceId = reqPacket.getHeader().getDeviceId();
     try {
       if (!StringUtils.hasText(temail) || !StringUtils.hasText(deviceId)) {
+        loginFailure(reqPacket, respPacket,
+            Response.failed(HttpStatus.BAD_REQUEST, "temail或者deviceId为空！"));
         return false;
       }
       try {
         CDTPLogin cdtpLogin = CDTPLogin.parseFrom(reqPacket.getData());
         log.debug("暂没有用的调试信息", cdtpLogin);
       } catch (InvalidProtocolBufferException e) {
+        loginFailure(reqPacket, respPacket,
+            Response.failed(HttpStatus.BAD_REQUEST, e.getMessage()));
         return false;
       }
       ResponseEntity<Response> responseEntity = loginService.validSignature(reqPacket);
