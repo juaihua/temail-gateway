@@ -3,66 +3,63 @@ Configuration:
   monitorInterval: 1800
   properties:
     property:
-      -
-        name: LogFile
-        value: @project.artifactId@.log
-      -
-        name: TraceFile
-        value: @project.artifactId@-TRACE.log
+    - name: LogFile
+      value: @project.artifactId@.log
+    - name: TraceFile
+      value: @project.artifactId@-TRACE.log
   appenders:
     Console:
       name: CONSOLE
       PatternLayout:
         Pattern: "[%date{yyyy-MM-dd HH:mm:ss.SSS}] %highlight{%-5level} [%thread] => %cyan{%logger{1.}}.%method[%file:%line] - %msg%n"
     RollingRandomAccessFile:
-      -
-        name: LOGFILE
-        fileName: /home/logs/${LogFile}
-        filePattern: /home/logs/${LogFile}.%i
-        immediateFlush: false
-        PatternLayout:
-          Pattern: "[@project.artifactId@] [%date{yyyy-MM-dd HH:mm:ss.SSS}] %-5level [%thread] => %logger.%method[%file:%line] - %msg%n"
-        SizeBasedTriggeringPolicy:
-          size: 50M
-        DefaultRolloverStrategy:
-          max: 20
+    - name: LOGFILE
+      fileName: /home/logs/${LogFile}
+      filePattern: /home/logs/${LogFile}.%i
+      immediateFlush: false
+      PatternLayout:
+        Pattern: "[@project.artifactId@] [%date{yyyy-MM-dd HH:mm:ss.SSS}] %-5level [%thread] => %logger.%method[%file:%line] - %msg%n"
+      SizeBasedTriggeringPolicy:
+        size: 50M
+      DefaultRolloverStrategy:
+        max: 20
     Async:
-      -
-        name: ASYNC_LOGFILE
-        bufferSize: 512
-        includeLocation: false
-        AppenderRef:
-          ref: LOGFILE
+    - name: ASYNC_LOGFILE
+      bufferSize: 512
+      includeLocation: false
+      AppenderRef:
+        ref: LOGFILE
   loggers:
     logger:
-      -
-        name: com.systoon
-        level: info
-        additivity: false
-        AppenderRef:
-          ref: ASYNC_LOGFILE
-      -
-        name: com.syswin
-        level: info
-        additivity: false
-        AppenderRef:
-          ref: ASYNC_LOGFILE
-      -
-        name: com.syswin.temail.ps.server.PsServer
-        level: info
-        additivity: false
-        AppenderRef:
-          - ref: CONSOLE
-          - ref: ASYNC_LOGFILE
-      -
-        name: com.syswin.temail.gateway.TemailGatewayApplication
-        level: info
-        additivity: false
-        AppenderRef:
-          - ref: CONSOLE
-          - ref: ASYNC_LOGFILE
+    - name: com.systoon
+      level: info
+      additivity: false
+      AppenderRef:
+        ref: ASYNC_LOGFILE
+    - name: com.syswin
+      level: info
+      additivity: false
+      AppenderRef:
+        ref: ASYNC_LOGFILE
+    - name: com.syswin.temail.ps.server.PsServer
+      level: info
+      additivity: false
+      AppenderRef:
+      - ref: CONSOLE
+      - ref: ASYNC_LOGFILE
+    - name: com.syswin.temail.gateway.TemailGatewayApplication
+      level: info
+      additivity: false
+      AppenderRef:
+      - ref: CONSOLE
+      - ref: ASYNC_LOGFILE
+    - name: com.syswin.temail.ps.common.codec
+      level: debug
+      additivity: false
+      AppenderRef:
+      - ref: ASYNC_LOGFILE
     root:
       level: info
       AppenderRef:
-        - ref: ASYNC_LOGFILE
-        - ref: CONSOLE
+      - ref: ASYNC_LOGFILE
+      - ref: CONSOLE
