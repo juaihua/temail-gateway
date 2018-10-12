@@ -21,7 +21,7 @@ Configuration:
         filePattern: /home/logs/${LogFile}.%i
         immediateFlush: false
         PatternLayout:
-          Pattern: "[@project.artifactId@] [%date{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %-5level => %logger.%method[%file:%line] - %msg%n"
+          Pattern: "[@project.artifactId@] [%date{yyyy-MM-dd HH:mm:ss.SSS}] %-5level [%thread] => %logger.%method[%file:%line] - %msg%n"
         SizeBasedTriggeringPolicy:
           size: 50M
         DefaultRolloverStrategy:
@@ -40,26 +40,29 @@ Configuration:
         level: info
         additivity: false
         AppenderRef:
-          ref: CONSOLE
+          ref: ASYNC_LOGFILE
       -
         name: com.syswin
         level: info
         additivity: false
         AppenderRef:
-          ref: CONSOLE
+          ref: ASYNC_LOGFILE
       -
-        name: com.syswin.temail.gateway.connection.PsServer
+        name: com.syswin.temail.ps.server.PsServer
         level: info
         additivity: false
         AppenderRef:
-          ref: CONSOLE
+          - ref: CONSOLE
+          - ref: ASYNC_LOGFILE
       -
         name: com.syswin.temail.gateway.TemailGatewayApplication
         level: info
         additivity: false
         AppenderRef:
-          ref: CONSOLE
+          - ref: CONSOLE
+          - ref: ASYNC_LOGFILE
     root:
       level: info
       AppenderRef:
-        ref: CONSOLE
+        - ref: ASYNC_LOGFILE
+        - ref: CONSOLE
