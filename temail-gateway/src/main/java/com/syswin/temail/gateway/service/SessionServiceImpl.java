@@ -1,8 +1,6 @@
 package com.syswin.temail.gateway.service;
 
 
-import static com.syswin.temail.ps.common.utils.SignatureUtil.resetSignature;
-
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.Response;
@@ -19,12 +17,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
+import static com.syswin.temail.ps.common.utils.SignatureUtil.resetSignature;
+
 @Slf4j
 public class SessionServiceImpl extends AbstractSessionService {
 
   private final LoginService loginService;
 
-  private final Consumer<Response<Void>> responseConsumer = ignored -> {
+  private final Consumer<Boolean> responseConsumer = ignored -> {
   };
 
   private final RemoteStatusService remoteStatusService;

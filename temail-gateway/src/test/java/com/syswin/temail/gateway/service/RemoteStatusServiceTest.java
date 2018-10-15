@@ -1,108 +1,108 @@
 package com.syswin.temail.gateway.service;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.google.gson.Gson;
+
 import com.syswin.temail.gateway.TemailGatewayProperties;
-import com.syswin.temail.gateway.channels.clients.grpc.GrpcClientWrapper;
-import com.syswin.temail.gateway.entity.Response;
+import com.syswin.temail.gateway.channels.ChannelsSyncClient;
 import com.syswin.temail.gateway.entity.TemailAccoutLocation;
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
 import com.syswin.temail.ps.server.entity.Session;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import org.awaitility.Awaitility;
 import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.put;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static java.util.Arrays.asList;
-import static org.apache.http.HttpHeaders.CONTENT_TYPE;
-import static org.apache.http.HttpStatus.SC_CREATED;
-import static org.apache.http.HttpStatus.SC_OK;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.awaitility.Awaitility.waitAtMost;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.mockito.Mockito.when;
+
 
 @Slf4j
 public class RemoteStatusServiceTest {
 
-  private static final Gson GSON = new Gson();
+  private final TemailGatewayProperties.Instance instance = new TemailGatewayProperties.Instance();
 
   private final TemailGatewayProperties properties = new TemailGatewayProperties();
-  private final RemoteStatusService remoteStatusService = new RemoteStatusService(properties, new GrpcClientWrapper(properties));
 
-  private final List<Response<Void>> results = new ArrayList<>();
+  private final ChannelsSyncClient grpcClientWrapper = Mockito.mock(ChannelsSyncClient.class);
 
-  @ClassRule
-  public static final WireMockRule WIRE_MOCK_RULE = new WireMockRule(wireMockConfig().dynamicPort());
+  private final RemoteStatusService remoteStatusService = new RemoteStatusService(properties, grpcClientWrapper);
 
-  @BeforeClass
-  public static void initMockServer() {
-    stubFor(post(urlEqualTo("/locations"))
-        .willReturn(aResponse()
-            .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-            .withStatus(SC_CREATED)
-            .withBody(GSON.toJson(Response.ok()))));
+  private final List<Session> sessions = new ArrayList<>();
 
-    stubFor(put(urlEqualTo("/locations"))
-        .willReturn(
-            aResponse()
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withStatus(SC_OK)
-                .withBody(GSON.toJson(Response.ok()))));
+  private final List<Boolean> results = new ArrayList<Boolean>();
 
-    List<TemailAccoutLocation> stses = asList(
-        new TemailAccoutLocation("sean@temail.com", "123456", "192.168.197.23", "232", "topic", "mqTopic"),
-        new TemailAccoutLocation("jean@temail.com", "654321", "192.168.197.24", "235", "topid", "mqTopid"));
+  private TemailAccoutLocations temailAccoutLocationsSingle = null;
 
-    TemailAccoutLocations data = new TemailAccoutLocations(stses);
-    stubFor(get(urlMatching("/locations/.*"))
-        .willReturn(
-            aResponse()
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withStatus(SC_OK)
-                .withBody(GSON.toJson(Response.ok(data)))));
-  }
+  private TemailAccoutLocations temailAccoutLocationsBatch = null;
+
 
   @Before
   public void init() {
-    properties.setUpdateSocketStatusUrl("http://localhost:" + WIRE_MOCK_RULE.port() + "/locations");
-    results.clear();
+
+    instance.setHostOf("localhost");
+    instance.setProcessId("2e0wd0d2e2ie0iwhfoqie92h2u");
+    properties.setInstance(instance);
+
+    properties.setGrpcServerHost("192.168.10.10");
+    properties.setGrpcServerPort("9110");
+
+    sessions.add(new Session("sean@temail.com", "123"));
+    temailAccoutLocationsSingle = buildTemailAccoutLocations(sessions);
+
+    sessions.add(new Session("jean@temail.com", "123"));
+    temailAccoutLocationsBatch = buildTemailAccoutLocations(sessions);
+
+    when(grpcClientWrapper.removeChannelLocations(temailAccoutLocationsBatch)).thenReturn(true);
+    when(grpcClientWrapper.removeChannelLocations(temailAccoutLocationsSingle)).thenReturn(true);
+    when(grpcClientWrapper.syncChannelLocations(temailAccoutLocationsSingle)).thenReturn(true);
+
+  }
+
+
+  private TemailAccoutLocations buildTemailAccoutLocations(Collection<Session> sessions) {
+    List<TemailAccoutLocation> statuses = new ArrayList<>(sessions.size());
+    for (Session session : sessions) {
+      statuses.add(buildAcctSts(session.getTemail(), session.getDeviceId()));
+    }
+    return new TemailAccoutLocations(statuses);
+  }
+
+
+  private TemailAccoutLocation buildAcctSts(String temail, String deviceId) {
+    TemailGatewayProperties.Instance instance = properties.getInstance();
+    return new TemailAccoutLocation(temail, deviceId,
+        instance.getHostOf(), instance.getProcessId(),
+        properties.getRocketmq().getMqTopic(), instance.getMqTag());
   }
 
 
   @Test
   public void testAddSession() {
-    remoteStatusService.addSession("sean_1@temail.com", "12345678", results::add);
-    waitAtMost(1, TimeUnit.SECONDS).until(() -> !results.isEmpty());
-    assertThat(results.get(0)).isInstanceOf(Response.class);
+    //for testing addSession
+    remoteStatusService.reqUpdSts4Upd(temailAccoutLocationsSingle,
+        RemoteStatusService.TemailAcctUptOptType.add, results::add);
+    Awaitility.waitAtMost(1, TimeUnit.SECONDS).until(()->{
+      return results.remove(0);
+    });
+
+
+    //for testing removeSession
+    remoteStatusService.reqUpdSts4Upd(temailAccoutLocationsBatch,
+        RemoteStatusService.TemailAcctUptOptType.del, results::add);
+    Awaitility.waitAtMost(1, TimeUnit.SECONDS).until(()->{
+      return results.remove(0);
+    });
+
+    //for testing removeSessions
+    remoteStatusService.reqUpdSts4Upd(temailAccoutLocationsBatch,
+        RemoteStatusService.TemailAcctUptOptType.del, results::add);
+    Awaitility.waitAtMost(1, TimeUnit.SECONDS).until(()->{
+      return results.remove(0);
+    });
+
   }
 
-  @Test
-  public void testRemoveSession() {
-    remoteStatusService.removeSession("sean_1@temail.com", "12345678", results::add);
-    waitAtMost(1, TimeUnit.SECONDS).until(() -> !results.isEmpty());
-    assertThat(results.get(0)).isInstanceOf(Response.class);
-  }
-
-  @Test
-  public void testRemoveSessions() {
-    List<Session> sessions = asList(
-      new Session("sean@temail.com", "123"),
-      new Session("jean@temail.com", "123"));
-
-    remoteStatusService.removeSessions(sessions, results::add);
-    waitAtMost(1, TimeUnit.SECONDS).until(() -> !results.isEmpty());
-    assertThat(results.get(0)).isInstanceOf(Response.class);
-  }
 }

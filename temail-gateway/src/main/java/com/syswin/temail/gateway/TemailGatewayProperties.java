@@ -64,7 +64,7 @@ public class TemailGatewayProperties {
      */
     private String mqTag;
 
-    private Instance() {
+    public Instance() {
       hostOf = LocalMachineUtil.getLocalIp();
       //processId = LocalMachineUtil.getLocalProccesId();
       processId = UUID.randomUUID().toString().replace("-", "").toLowerCase();

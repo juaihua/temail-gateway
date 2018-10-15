@@ -3,7 +3,6 @@ package com.syswin.temail.gateway.service;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.TemailGatewayProperties.Instance;
 import com.syswin.temail.gateway.channels.ChannelsSyncClient;
-import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.gateway.entity.TemailAccoutLocation;
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
 import com.syswin.temail.ps.server.entity.Session;
@@ -12,7 +11,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 
 import static java.util.Collections.singletonList;
@@ -39,23 +37,23 @@ public class RemoteStatusService {
     this.pendingTaskQueue.run();
   }
 
-  public void addSession(String temail, String deviceId, Consumer<Response<Void>> consumer) {
+  public void addSession(String temail, String deviceId, Consumer<Boolean> consumer) {
     updSessionByType(temail, deviceId, TemailAcctUptOptType.add, consumer);
   }
 
-  public void removeSession(String temail, String deviceId, Consumer<Response<Void>> consumer) {
+  public void removeSession(String temail, String deviceId, Consumer<Boolean> consumer) {
     updSessionByType(temail, deviceId, TemailAcctUptOptType.del, consumer);
   }
 
   private void updSessionByType(String temail, String deviceId, TemailAcctUptOptType optType,
-      Consumer<Response<Void>> consumer) {
+      Consumer<Boolean> consumer) {
     reqUpdSts4Upd(
         new TemailAccoutLocations(singletonList(buildAcctSts(temail, deviceId))),
         optType,
         consumer);
   }
 
-  void removeSessions(Collection<Session> sessions, Consumer<Response<Void>> consumer) {
+  void removeSessions(Collection<Session> sessions, Consumer<Boolean> consumer) {
     List<TemailAccoutLocation> statuses = new ArrayList<>(sessions.size());
     for (Session session : sessions) {
       statuses.add(buildAcctSts(session.getTemail(), session.getDeviceId()));
@@ -71,15 +69,19 @@ public class RemoteStatusService {
         properties.getRocketmq().getMqTopic(), instance.getMqTag());
   }
 
-  private void reqUpdSts4Upd(TemailAccoutLocations temailAccoutLocations,
-      TemailAcctUptOptType type, Consumer<Response<Void>> consumer) {
+  public void reqUpdSts4Upd(TemailAccoutLocations temailAccoutLocations,
+      TemailAcctUptOptType type, Consumer<Boolean> consumer) {
     if (type == TemailAcctUptOptType.add) {
       // TODO: 2018/10/10 no exception thrown
-      if (!channelsSyncClient.syncChannelLocations(temailAccoutLocations)) {
+      boolean addResult = channelsSyncClient.syncChannelLocations(temailAccoutLocations);
+      consumer.accept(addResult);
+      if (!addResult) {
         pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
       }
     } else {
-      if (!channelsSyncClient.removeChannelLocations(temailAccoutLocations)) {
+      boolean remResult = channelsSyncClient.removeChannelLocations(temailAccoutLocations);
+      consumer.accept(remResult);
+      if (!remResult) {
         pendingTaskQueue.addTask(new Pair(type, temailAccoutLocations));
       }
     }
