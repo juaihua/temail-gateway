@@ -53,8 +53,7 @@ public class GrpcClientWrapper implements GrpcClient, ChannelsSyncClient {
   @Override
   public void initClient() {
     this.serverRegistry(curServerInfo);
-    grpcHeartBeatManager.heartBeat(b -> {
-    });
+    grpcHeartBeatManager.heartBeat();
   }
 
 
@@ -145,17 +144,11 @@ public class GrpcClientWrapper implements GrpcClient, ChannelsSyncClient {
   /**
    * reconnect client by trying to registry current server.
    */
-  public void reconnect() {
+  void reconnect() {
     if (grpcClientReference.compareAndSet(grpcClient, alwaysFailGrpcClient)) {
       log.info("grpc client is unavailable, try to reconnect!");
-      try {
-        grpcReconnectManager.reconnect(
-            () -> {
-              grpcClientReference.compareAndSet(alwaysFailGrpcClient, grpcClient);
-            });
-      } catch (IllegalAccessException e) {
-        log.error(e.getMessage());
-      }
+      grpcReconnectManager.reconnect(
+          () -> grpcClientReference.compareAndSet(alwaysFailGrpcClient, grpcClient));
     }
   }
 

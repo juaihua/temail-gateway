@@ -6,7 +6,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,9 +14,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Data
-public class GrpcHeartBeatManager {
+class GrpcHeartBeatManager {
 
-  private final TemailGatewayProperties temailGatewayProperties;
 
   private final AtomicBoolean isHeartBeatKeeping = new AtomicBoolean(false);
 
@@ -33,9 +31,8 @@ public class GrpcHeartBeatManager {
 
   private final String instanceIp;
 
-  public GrpcHeartBeatManager(GrpcClient grpcClient, TemailGatewayProperties temailGatewayProperties) {
+  GrpcHeartBeatManager(GrpcClient grpcClient, TemailGatewayProperties temailGatewayProperties) {
     this.executorService = Executors.newSingleThreadScheduledExecutor();
-    this.temailGatewayProperties = temailGatewayProperties;
     this.instanceProcessId = temailGatewayProperties.getInstance().getProcessId();
     this.instanceIp = temailGatewayProperties.getInstance().getHostOf();
     this.gatewayServer = GatewayServer.newBuilder().setProcessId(instanceProcessId).setIp(instanceIp).build();
@@ -45,24 +42,20 @@ public class GrpcHeartBeatManager {
   /**
    * heart beat logic
    *
-   * @param consumer
    */
-  public void heartBeat(Consumer<Boolean> consumer) {
+  void heartBeat() {
     // so the heart beat task will be submitted for only one time;
     if (isHeartBeatKeeping.compareAndSet(false, true)) {
-      log.info("heart beat is begining.");
+      log.info("heart beat is beginning.");
       executorService.scheduleWithFixedDelay(() -> {
         try {
           if (grpcClient.serverHeartBeat(gatewayServer)) {
-            consumer.accept(Boolean.TRUE);
             log.info("heart beat success : {}-{}",gatewayServer.getIp(), gatewayServer.getProcessId());
           } else {
-            consumer.accept(Boolean.FALSE);
             log.error("heart beat fail, try again after {} seconds .", heartBeatDelay);
           }
         } catch (Exception e) {
-          consumer.accept(Boolean.FALSE);
-          log.error("execption happened in heart beat." , e);
+          log.error("exception happened in heart beat." , e);
         }
       }, heartBeatDelay, heartBeatDelay, TimeUnit.SECONDS);
     } else {

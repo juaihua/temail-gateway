@@ -24,7 +24,7 @@ public class RemoteStatusService {
 
   //private final WebClient statusWebClient;
 
-  private ChannelsSyncClient channelsSyncClient;
+  private final ChannelsSyncClient channelsSyncClient;
 
   // a async queue used for retry failed task
   private final PendingTaskQueue<Pair> pendingTaskQueue = new PendingTaskQueue<>(
@@ -32,9 +32,6 @@ public class RemoteStatusService {
       pair -> reqUpdSts4Upd(pair.getTemailAccoutLocations(), pair.getTemailAcctUptOptType(), ignored -> {
       })
   );
-
-  private final ParameterizedTypeReference<Response<Void>> typeReference = new ParameterizedTypeReference<Response<Void>>() {
-  };
 
   public RemoteStatusService(TemailGatewayProperties properties, ChannelsSyncClient channelsSyncClient) {
     this.channelsSyncClient = channelsSyncClient;

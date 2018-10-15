@@ -31,7 +31,6 @@ public class GrpcReconnectManager {
     this.gatewayServer = GatewayServer.newBuilder()
         .setIp(temailGatewayProperties.getInstance().getHostOf())
         .setProcessId(temailGatewayProperties.getInstance().getProcessId()).build();
-    Integer.parseInt(temailGatewayProperties.getGrpcServerPort());
     this.executorService = Executors.newSingleThreadExecutor();
     this.grpcClientWrapper = grpcClientWrapper;
   }
@@ -39,7 +38,7 @@ public class GrpcReconnectManager {
   /**
    * be aware of only one reconnect task can be triggered in the same time
    */
-  public void reconnect(Runnable runnable) throws IllegalAccessException {
+  public void reconnect(Runnable onConnectedHandler) {
     executorService.submit(() -> {
       log.info("reconnect logic will be executed.");
       while (!Thread.currentThread().isInterrupted()) {
@@ -48,7 +47,7 @@ public class GrpcReconnectManager {
             log.error("reconnect fail, {} seconds try again! ", reconnectDelay);
             throw new IllegalStateException("reconnect fail.");
           }
-          runnable.run();
+          onConnectedHandler.run();
           log.info("reconnect success, now exit the reconnect loop! ");
           break;
         } catch (Exception e) {
@@ -57,8 +56,7 @@ public class GrpcReconnectManager {
             TimeUnit.SECONDS.sleep(reconnectDelay);
           } catch (InterruptedException e1) {
             Thread.currentThread().interrupt();
-            log.warn("reconnect loop is interrupted, now exit!");
-            e1.printStackTrace();
+            log.warn("reconnect loop is interrupted, now exit!", e1);
           }
         }
       }
