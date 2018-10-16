@@ -129,7 +129,7 @@ class CDTPClient {
         new IdleStateHandler(0, idleTimeSeconds, 0),
         new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH),
         new LengthFieldPrepender(LENGTH_FIELD_LENGTH),
-        new PacketDecoder(),
+        new PacketDecoder(true),
         new PacketEncoder(),
         CDTPClientHandler,
     };

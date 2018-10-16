@@ -6,7 +6,7 @@ import com.syswin.temail.ps.common.exception.PacketException;
  * @author 姚华成
  * @date 2018-9-20
  */
-public enum DataEncryptionMethod {
+public enum DataEncryptType {
   NONE(0),
   RSA_RECEIVER_PUB(1),
   RSA_SENDER_PUB(2),
@@ -21,15 +21,15 @@ public enum DataEncryptionMethod {
   public static final int ECC_RECEIVER_PUB_CODE = ECC_RECEIVER_PUB.code;
   public static final int ECC_SENDER_PUB_CODE = ECC_SENDER_PUB.code;
 
-  private int code;
+  private final int code;
 
 
-  DataEncryptionMethod(int code) {
+  DataEncryptType(int code) {
     this.code = code;
   }
 
-  public static DataEncryptionMethod valueOf(int code) {
-    for (DataEncryptionMethod value : values()) {
+  public static DataEncryptType valueOf(int code) {
+    for (DataEncryptType value : values()) {
       if (value.code == code) {
         return value;
       }

@@ -9,11 +9,20 @@
 
   <artifactId>ps-common</artifactId>
   <version>1.0.0-SNAPSHOT</version>
+  <properties>
+    <vault-keeper.version>1.0.1-SNAPSHOT</vault-keeper.version>
+  </properties>
 
   <dependencies>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-all</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.syswin.temail</groupId>
+      <artifactId>vault-keeper</artifactId>
+      <version>${vault-keeper.version}</version>
+      <optional>true</optional>
     </dependency>
 
     <dependency>

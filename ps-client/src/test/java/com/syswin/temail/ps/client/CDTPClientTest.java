@@ -40,7 +40,7 @@ public class CDTPClientTest {
             new AbstractSessionService() {
             },
             new TestRequestService(testRequestHandler),
-            serverPort, serverReadIdleTimeSeconds);
+            serverPort, serverReadIdleTimeSeconds, true);
     psServer.run();
   }
 

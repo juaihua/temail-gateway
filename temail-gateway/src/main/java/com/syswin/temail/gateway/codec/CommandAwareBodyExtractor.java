@@ -1,6 +1,7 @@
 package com.syswin.temail.gateway.codec;
 
 import com.syswin.temail.ps.common.codec.BodyExtractor;
+import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CommandSpaceType;
 import io.netty.buffer.ByteBuf;
 
@@ -22,6 +23,14 @@ public class CommandAwareBodyExtractor implements BodyExtractor {
       remaining += byteBuf.readableBytes() - readableBytes;
     }
     return bodyExtractor.fromBuffer(commandSpace, command, byteBuf, remaining);
+  }
+
+  @Override
+  public void decrypt(CDTPPacket packet) {
+    // 单聊消息无法也不需要解密
+    if (!isSendSingleMsg(packet.getCommandSpace(), packet.getCommand())) {
+      bodyExtractor.decrypt(packet);
+    }
   }
 
   private boolean isSendSingleMsg(short commandSpace, short command) {

@@ -14,13 +14,23 @@ import lombok.extern.slf4j.Slf4j;
 public class PacketDecoder extends ByteToMessageDecoder {
 
   private final BodyExtractor bodyExtractor;
+  private final boolean autoDecrypt;
 
   public PacketDecoder() {
-    this(new SimpleBodyExtractor());
+    this(false);
   }
 
   public PacketDecoder(BodyExtractor bodyExtractor) {
+    this(bodyExtractor, false);
+  }
+
+  public PacketDecoder(boolean autoDecrypt) {
+    this(new SimpleBodyExtractor(), autoDecrypt);
+  }
+
+  public PacketDecoder(BodyExtractor bodyExtractor, boolean autoDecrypt) {
     this.bodyExtractor = bodyExtractor;
+    this.autoDecrypt = autoDecrypt;
   }
 
   @Override
@@ -71,6 +81,11 @@ public class PacketDecoder extends ByteToMessageDecoder {
     byte[] data = bodyExtractor.fromBuffer(commandSpace, command, byteBuf, packetLength - headerLength - 8);
 
     packet.setData(data);
+
+    if (autoDecrypt) {
+      bodyExtractor.decrypt(packet);
+    }
+
     list.add(packet);
     if (!packet.isHearbeat()) {
       log.debug("{}通道读取的信息是：CommandSpace={},Command={},CDTPHeader={},"

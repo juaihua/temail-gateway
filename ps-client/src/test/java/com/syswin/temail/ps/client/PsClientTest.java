@@ -7,12 +7,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
+import com.syswin.temail.kms.vault.KeyAwareAsymmetricCipher;
+import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
+import com.syswin.temail.ps.common.entity.DataEncryptType;
 import com.syswin.temail.ps.server.Constants;
 import com.syswin.temail.ps.server.PsServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +43,8 @@ public class PsClientTest {
   private static String content = "hello world";
   private static List<String> validUsers = Arrays.asList(sender, receive);
   private static PsClient psClient;
+  private static KeyAwareAsymmetricCipher cipher = Mockito.mock(KeyAwareAsymmetricCipher.class);
+  private static SimpleBodyExtractor bodyExtractor = new SimpleBodyExtractor(cipher);
 
   @BeforeClass
   public static void startServer() {
@@ -46,7 +52,7 @@ public class PsClientTest {
         new PsServer(
             new TestSessionService(),
             new TestRequestService(testRequestHandler),
-            serverPort, serverReadIdleTimeSeconds);
+            serverPort, serverReadIdleTimeSeconds, true, bodyExtractor);
     psServer.run();
   }
 
@@ -61,9 +67,10 @@ public class PsClientTest {
       PsClientBuilder builder =
           new PsClientBuilder(deviceId)
               .defaultHost("127.0.0.1")
-//              .defaultHost("tmail.msgseal.com")
-//              .defaultHost("msgseal.systoon.com")
               .defaultPort(serverPort)
+//              .defaultHost("tmail.msgseal.com")
+              .defaultHost("msgseal.systoon.com")
+              .defaultPort(8099)
               .signer(signer);
       psClient = builder.build();
     }
@@ -124,6 +131,33 @@ public class PsClientTest {
     if (errorMsg.get() != null) {
       throw new Error(errorMsg.get());
     }
+    Thread.sleep(100);
+  }
+
+  @Test
+  public void sendEncryptMessage() throws InterruptedException {
+    Message reqMessage = MessageMaker.sendSingleChatMessage(sender, receive, content);
+    reqMessage.getHeader().setDataEncryptionMethod(DataEncryptType.ECC_RECEIVER_PUB_CODE);
+    CDTPPacket packet = MessageConverter.toCDTPPacket(reqMessage);
+    mockDispatch(packet);
+    String contentBase64 = Base64.getUrlEncoder().encodeToString(content.getBytes());
+    when(cipher.decrypt(receive, contentBase64)).thenReturn(contentBase64);
+    Message respMessage = psClient.sendMessage(reqMessage);
+    System.out.println(new String(respMessage.getPayload()));
+    assertThat(respMessage).isEqualTo(reqMessage);
+    Thread.sleep(100);
+  }
+
+  @Test
+  public void sendEncryptOtherMessage() throws InterruptedException {
+    Message reqMessage = MessageMaker.sendSingleChatMessage(sender, receive, content);
+    reqMessage.getHeader().setCommandSpace((short) 2);
+    reqMessage.getHeader().setDataEncryptionMethod(DataEncryptType.ECC_RECEIVER_PUB_CODE);
+    CDTPPacket packet = MessageConverter.toCDTPPacket(reqMessage);
+    mockDispatch(packet);
+    Message respMessage = psClient.sendMessage(reqMessage);
+    System.out.println(new String(respMessage.getPayload()));
+    assertThat(respMessage).isEqualTo(reqMessage);
     Thread.sleep(100);
   }
 
