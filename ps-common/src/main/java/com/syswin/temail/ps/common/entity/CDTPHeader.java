@@ -31,8 +31,6 @@ public final class CDTPHeader {
   }
 
   public CDTPHeader(CDTPProtoBuf.CDTPHeader cdtpHeader) {
-    // TODO(姚华成) 试试BeanUtils
-    // TODO: 2018/8/29 null for empty string from protobuf?
     this.setDeviceId(nullable(cdtpHeader.getDeviceId()));
     this.setSignatureAlgorithm(cdtpHeader.getSignatureAlgorithm());
     this.setSignature(nullable(cdtpHeader.getSignature()));
