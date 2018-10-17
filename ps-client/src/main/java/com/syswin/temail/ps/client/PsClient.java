@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  *         PsClientBuilder builder =
  *             new PsClientBuilder(deviceId)
  *                 .defaultHost("127.0.0.1")
- *                 .defaultPort(10101);
+ *                 .defaultPort(8099);
  *         psClient = builder.build();
  *     }
  * }
@@ -30,13 +30,72 @@ import java.util.function.Consumer;
 public interface PsClient {
 
   /**
+   * 建立与ps-server的连接<br>
+   * 由于登录、发送消息等能够自动建立连接，因此手工建立连接不是必要的
+   */
+  void connect();
+
+  /**
+   * 建立与ps-server的连接<br>
+   * 由于登录、发送消息等能够自动建立连接，因此手工建立连接不是必要的
+   *
+   * @param targetAddress 指定连接的服务器地址
+   */
+  void connect(String targetAddress);
+
+  /**
+   * 关闭与默认ps-server的连接
+   */
+  void disconnect();
+
+  /**
+   * 关闭与指定ps-server的连接
+   *
+   * @param targetAddress 指定断开连接的服务器地址
+   */
+  void disconnect(String targetAddress);
+
+  /**
    * 登录服务器
+   *
+   * @param temail 需要登录的账号
+   * @param temailPK 账号的公钥
+   * @param receiveCallback 接收消息的回调方法
+   * @throws PsClientException 登录不成功，以异常的方式返回。具体原因在异常里描述
+   */
+  void login(String temail, String temailPK, Consumer<Message> receiveCallback);
+
+  /**
+   * 登录指定服务器
+   *
+   * @param temail 需要登录的账号
+   * @param temailPK 账号的公钥
+   * @param targetAddress 指定登出的服务器地址
+   * @param receiveCallback 接收消息的回调方法
+   * @throws PsClientException 登录不成功，以异常的方式返回。具体原因在异常里描述
+   */
+  void login(String temail, String temailPK, String targetAddress, Consumer<Message> receiveCallback);
+
+  /**
+   * 登出服务器<br>
+   * 不能再接收消息，不影响发送消息
    *
    * @param temail 需要登录的账号
    * @param temailPK 账号的公钥
    * @throws PsClientException 登录不成功，以异常的方式返回。具体原因在异常里描述
    */
-  void login(String temail, String temailPK);
+  void logout(String temail, String temailPK);
+
+  /**
+   * 登出服务器<br>
+   * 不能再接收消息，不影响发送消息
+   *
+   * @param temail 需要登录的账号
+   * @param temailPK 账号的公钥
+   * @param targetAddress 指定登录的服务器地址
+   * @throws PsClientException 登出不成功，以异常的方式返回。具体原因在异常里描述
+   */
+  void logout(String temail, String temailPK, String targetAddress);
 
   /**
    * 同步发送消息给服务端
@@ -76,4 +135,5 @@ public interface PsClient {
    */
   void sendMessage(Message message, Consumer<Message> responseConsumer, Consumer<Throwable> errorConsumer,
       long timeout, TimeUnit timeUnit);
+
 }

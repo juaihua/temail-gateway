@@ -39,13 +39,14 @@ class CDTPClient {
 
   private final String host;
   private final int port;
-  private final ConcurrentHashMap<String, Request> requestMap = new ConcurrentHashMap<>();
   private final int idleTimeSeconds;
-  private final EventLoopGroup bossGroup = new NioEventLoopGroup();
+  private final ConcurrentHashMap<String, Request> requestMap = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, Consumer<Message>> receiverMap = new ConcurrentHashMap<>();
 
+  private EventLoopGroup bossGroup = new NioEventLoopGroup();
+  private CDTPClientHandler CDTPClientHandler;
   private Bootstrap bootstrap;
   private Channel channel;
-  private CDTPClientHandler CDTPClientHandler;
 
   CDTPClient(String host, int port, int idleTimeSeconds) {
     this.host = host;
@@ -64,6 +65,38 @@ class CDTPClient {
     bossGroup.submit(this::handleResponse);
 
     Runtime.getRuntime().addShutdownHook(new Thread(bossGroup::shutdownGracefully));
+  }
+
+  public void realConnect() {
+    //进行连接
+    ChannelFuture future;
+    bootstrap.handler(new ChannelInitializer<Channel>() {
+      //初始化channel
+      @Override
+      protected void initChannel(Channel ch) {
+        ch.pipeline().addLast(handlers());
+      }
+    });
+    try {
+      future = bootstrap.connect(host, port).sync();
+      channel = future.channel();
+    } catch (InterruptedException e) {
+      throw new PsClientException("连接服务器出错！", e);
+    }
+  }
+
+
+  public void close() {
+    this.channel.close();
+    this.channel = null;
+    this.CDTPClientHandler = null;
+    this.bossGroup = null;
+    this.receiverMap.clear();
+    this.requestMap.clear();
+  }
+
+  public boolean isActive() {
+    return channel != null && channel.isActive();
   }
 
   public CDTPPacket syncExecute(CDTPPacket reqPacket) {
@@ -119,10 +152,6 @@ class CDTPClient {
     channel.writeAndFlush(reqPacket);
   }
 
-  boolean isActive() {
-    return channel != null && channel.isActive();
-  }
-
   private ChannelHandler[] handlers() {
     return new ChannelHandler[]{
 //        watchdog,
@@ -135,31 +164,11 @@ class CDTPClient {
     };
   }
 
-  void realConnect() {
-    //进行连接
-    ChannelFuture future;
-    bootstrap.handler(new ChannelInitializer<Channel>() {
-      //初始化channel
-      @Override
-      protected void initChannel(Channel ch) {
-        ch.pipeline().addLast(handlers());
-      }
-    });
-    try {
-      future = bootstrap.connect(host, port).sync();
-      channel = future.channel();
-    } catch (InterruptedException e) {
-      throw new PsClientException("连接服务器出错！", e);
-    }
-  }
-
-
   private void handleResponse() {
     do {
       try {
         CDTPPacket respPacket = CDTPClientHandler.getReceivedMessages().take();
         try {
-
           CDTPHeader header = respPacket.getHeader();
           String packetId = header.getPacketId();
           Request request = null;
@@ -183,6 +192,16 @@ class CDTPClient {
               timeoutFuture.cancel(false);
             }
             request.getResponseConsumer().accept(respPacket);
+          } else {
+            String receiver = header.getReceiver();
+            if (receiver != null) {
+              Consumer<Message> messageConsumer = receiverMap.get(receiver);
+              if (messageConsumer != null) {
+                // 确认是否是接收的消息
+                Message message = MessageConverter.fromCDTPPacket(respPacket);
+                messageConsumer.accept(message);
+              }
+            }
           }
         } catch (RuntimeException e) {
           // 其他异常无须处理
@@ -193,6 +212,14 @@ class CDTPClient {
         Thread.currentThread().interrupt();
       }
     } while (!Thread.interrupted());
+  }
+
+  public void registerReceiver(String temail, Consumer<Message> receiveCallback) {
+    receiverMap.put(temail, receiveCallback);
+  }
+
+  public void deregisterReceiver(String temail) {
+    receiverMap.remove(temail);
   }
 
   private final class TimeoutTask implements Runnable {

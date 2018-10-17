@@ -35,7 +35,7 @@ import org.mockito.Mockito;
 @Slf4j
 public class PsClientTest {
 
-  private static final int serverPort = 10101;
+  private static final int serverPort = 8099;
   private static final int serverReadIdleTimeSeconds = 300;
   private static TestRequestHandler testRequestHandler = Mockito.mock(TestRequestHandler.class);
   private static String sender = "jack@t.email";

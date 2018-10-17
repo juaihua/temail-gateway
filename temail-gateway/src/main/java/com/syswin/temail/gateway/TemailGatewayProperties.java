@@ -32,7 +32,7 @@ public class TemailGatewayProperties {
   @Data
   public static class Netty {
     private int port;
-    private int readIdleTimeSeconds;
+    private int readIdleTimeSeconds = 180;
 
     public Netty() {
     }
@@ -78,7 +78,7 @@ public class TemailGatewayProperties {
       hostOf = LocalMachineUtil.getLocalIp();
       //processId = LocalMachineUtil.getLocalProccesId();
       processId = UUID.randomUUID().toString().replace("-", "").toLowerCase();
-      System.setProperty(INSTANCE_UNIQUE_TAG_4_HEARTBEAT,processId);
+      System.setProperty(INSTANCE_UNIQUE_TAG_4_HEARTBEAT, processId);
       mqTag = "temail-server-" + hostOf + "-" + processId;
     }
 

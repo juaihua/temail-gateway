@@ -13,7 +13,7 @@ temail:
     dispatchUrl: http://temail-dispatch:8081/dispatch
     updateSocketStatusUrl: http://temail-channel:9100/updateStatus
     netty:
-      port: 10101
+      port: 8099
       read-idle-time-seconds: 1800
     rocketmq:
       namesrv-addr: rocketmq-temail:9876
