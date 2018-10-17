@@ -23,7 +23,6 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author 姚华成
  * @date 2018/8/7
  */
-@EnableConfigurationProperties({TemailGatewayProperties.class})
 @SpringBootApplication
 public class TemailGatewayApplication {
 
