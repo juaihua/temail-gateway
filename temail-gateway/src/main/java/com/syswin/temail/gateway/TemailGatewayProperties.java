@@ -3,60 +3,37 @@ package com.syswin.temail.gateway;
 import com.syswin.temail.ps.server.utils.LocalMachineUtil;
 import java.util.UUID;
 import lombok.Data;
-import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 
 @Data
+@ConfigurationProperties(prefix = "app.gateway")
 @Component
 public class TemailGatewayProperties {
 
-  @Value("url.auth.verifyUrl")
   private String verifyUrl;
-  @Value("url.dispatch.dispatchUrl")
   private String dispatchUrl;
-  @Value("url.channel.updateSocketStatusUrl")
   private String updateSocketStatusUrl;
 
-  @Value("app.gateway.grpcServerHost")
   private String grpcServerHost;
-  @Value("app.gateway.grpcServerPort")
   private String grpcServerPort;
 
+
   private Netty netty = new Netty();
-  private Rocketmq rocketmq = new Rocketmq();
+
+  @Autowired
+  private Rocketmq rocketmq;
   private Instance instance = new Instance();
 
   @Data
   public static class Netty {
-
-    @Value("app.gateway.netty.port")
     private int port;
-    @Value("app.gateway.netty.read-idle-time-seconds")
     private int readIdleTimeSeconds;
 
     public Netty() {
-    }
-  }
-
-  @Data
-  public static class Rocketmq {
-
-    @Value("spring.rocketmq.namesrv-addr")
-    private String namesrvAddr;
-
-    @Value("spring.rocketmq.consumer-group")
-    private String consumerGroup;
-    /**
-     * 持有客户端链句柄的服务实例监听的消息队列topic
-     */
-    @Setter
-    @Value("spring.rocketmq.mq-topic")
-    private String mqTopic;
-
-    public Rocketmq() {
     }
   }
 
