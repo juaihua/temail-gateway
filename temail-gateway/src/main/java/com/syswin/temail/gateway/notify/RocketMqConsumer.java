@@ -1,7 +1,7 @@
 package com.syswin.temail.gateway.notify;
 
-import com.syswin.temail.gateway.Rocketmq;
 import com.syswin.temail.gateway.TemailGatewayProperties;
+import com.syswin.temail.gateway.TemailGatewayProperties.Rocketmq;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.MessageListener;

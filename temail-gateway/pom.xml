@@ -67,21 +67,21 @@
       <artifactId>rocketmq-client</artifactId>
     </dependency>
 
-    <!--<dependency>-->
-      <!--<groupId>com.systoon.integration</groupId>-->
-      <!--<artifactId>disconf-spring-boot-starter</artifactId>-->
-    <!--</dependency>-->
-    <!--<dependency>-->
-      <!--<groupId>com.baidu.disconf</groupId>-->
-      <!--<artifactId>disconf-client</artifactId>-->
-     <!--&lt;!&ndash;grpc要求依赖基于较高的版本&ndash;&gt;-->
-      <!--<exclusions>-->
-        <!--<exclusion>-->
-          <!--<groupId>com.google.guava</groupId>-->
-          <!--<artifactId>guava</artifactId>-->
-        <!--</exclusion>-->
-      <!--</exclusions>-->
-    <!--</dependency>-->
+    <dependency>
+      <groupId>com.systoon.integration</groupId>
+      <artifactId>disconf-spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.baidu.disconf</groupId>
+      <artifactId>disconf-client</artifactId>
+     <!--grpc要求依赖基于较高的版本-->
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
     <!--grpc依赖的高版本-->
     <dependency>
       <groupId>com.google.guava</groupId>

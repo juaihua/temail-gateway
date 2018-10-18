@@ -14,8 +14,8 @@ Configuration:
         Pattern: "[%date{yyyy-MM-dd HH:mm:ss.SSS}] %highlight{%-5level} [%thread] => %cyan{%logger{1.}}.%method[%file:%line] - %msg%n"
     RollingRandomAccessFile:
     - name: LOGFILE
-      fileName: /Users/yangguobao/logs/${LogFile}
-      filePattern: /Users/yangguobao/logs/${LogFile}.%i
+      fileName: /home/logs/${LogFile}
+      filePattern: /home/logs/${LogFile}.%i
       immediateFlush: false
       PatternLayout:
         Pattern: "[@project.artifactId@] [%date{yyyy-MM-dd HH:mm:ss.SSS}] %-5level [%thread] => %logger.%method[%file:%line] - %msg%n"

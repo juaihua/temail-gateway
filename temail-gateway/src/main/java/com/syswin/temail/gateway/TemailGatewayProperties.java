@@ -3,6 +3,7 @@ package com.syswin.temail.gateway;
 import com.syswin.temail.ps.server.utils.LocalMachineUtil;
 import java.util.UUID;
 import lombok.Data;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -36,6 +37,24 @@ public class TemailGatewayProperties {
     public Netty() {
     }
   }
+
+  @Data
+  @Component
+  @ConfigurationProperties(prefix = "spring.rocketmq")
+  public static class Rocketmq {
+
+    private String namesrvAddr;
+    private String consumerGroup;
+    /**
+     * 持有客户端链句柄的服务实例监听的消息队列topic
+     */
+    @Setter
+    private String mqTopic;
+
+    public Rocketmq() {
+    }
+  }
+
 
   @Data
   public static class Instance {
