@@ -1,6 +1,6 @@
 package com.syswin.temail.gateway.service;
 
-import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
+import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import java.util.function.Consumer;
 
 /**

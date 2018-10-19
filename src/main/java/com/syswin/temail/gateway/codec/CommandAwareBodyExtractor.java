@@ -1,5 +1,8 @@
 package com.syswin.temail.gateway.codec;
 
+import static com.syswin.temail.gateway.codec.PacketDecode.isSendGroupMsg;
+import static com.syswin.temail.gateway.codec.PacketDecode.isSendSingleMsg;
+
 import com.syswin.temail.ps.common.codec.BodyExtractor;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CommandSpaceType;
@@ -16,7 +19,7 @@ public class CommandAwareBodyExtractor implements BodyExtractor {
   @Override
   public byte[] fromBuffer(short commandSpace, short command, ByteBuf byteBuf, int remainingBytes) {
     int remaining = remainingBytes;
-    if (isSendSingleMsg(commandSpace, command)) {
+    if (isSendSingleMsg(commandSpace, command) || isSendGroupMsg(commandSpace, command)) {
       // 单聊的消息比较特殊，把CDTP协议的整个数据打包编码后，放到Packet的Data里。
       int readableBytes = byteBuf.readableBytes();
       byteBuf.resetReaderIndex();
