@@ -7,6 +7,7 @@ public interface BodyExtractor {
 
   byte[] fromBuffer(short commandSpace, short command, ByteBuf byteBuf, int remainingBytes);
 
-  void decrypt(CDTPPacket packet);
+  default void decrypt(CDTPPacket packet) {
+  }
 
 }

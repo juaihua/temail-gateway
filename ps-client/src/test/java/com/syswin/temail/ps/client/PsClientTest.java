@@ -44,7 +44,7 @@ public class PsClientTest {
   private static List<String> validUsers = Arrays.asList(sender, receive);
   private static PsClient psClient;
   private static KeyAwareAsymmetricCipher cipher = Mockito.mock(KeyAwareAsymmetricCipher.class);
-  private static SimpleBodyExtractor bodyExtractor = new SimpleBodyExtractor(cipher);
+  private static SimpleBodyExtractor bodyExtractor = new SimpleBodyExtractor();
 
   @BeforeClass
   public static void startServer() {
@@ -52,7 +52,7 @@ public class PsClientTest {
         new PsServer(
             new TestSessionService(),
             new TestRequestService(testRequestHandler),
-            serverPort, serverReadIdleTimeSeconds, true, bodyExtractor);
+            serverPort, serverReadIdleTimeSeconds, bodyExtractor);
     psServer.run();
   }
 

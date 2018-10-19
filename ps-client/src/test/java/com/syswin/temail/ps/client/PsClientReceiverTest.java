@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.syswin.temail.kms.vault.KeyAwareAsymmetricCipher;
 import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
@@ -36,8 +35,8 @@ public class PsClientReceiverTest {
   private static String content = "hello world";
   private static List<String> validUsers = Arrays.asList(sender, receive);
   private static PsClient psClient;
-  private static KeyAwareAsymmetricCipher cipher = Mockito.mock(KeyAwareAsymmetricCipher.class);
-  private static SimpleBodyExtractor bodyExtractor = new SimpleBodyExtractor(cipher);
+  //  private static KeyAwareAsymmetricCipher cipher = Mockito.mock(KeyAwareAsymmetricCipher.class);
+  private static SimpleBodyExtractor bodyExtractor = new SimpleBodyExtractor();
 
   private static TestRequestHandler testRequestHandler = new TestRequestHandler() {
     @Override
@@ -54,7 +53,7 @@ public class PsClientReceiverTest {
         new PsServer(
             new TestSessionService(),
             new TestRequestService(testRequestHandler),
-            serverPort, serverReadIdleTimeSeconds, true, bodyExtractor);
+            serverPort, serverReadIdleTimeSeconds, bodyExtractor);
     psServer.run();
   }
 

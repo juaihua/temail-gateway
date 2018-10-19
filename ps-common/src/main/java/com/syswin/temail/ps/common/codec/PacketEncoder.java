@@ -3,6 +3,7 @@ package com.syswin.temail.ps.common.codec;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  * </pre>
  */
 @Slf4j
+@Sharable
 public class PacketEncoder extends MessageToByteEncoder<CDTPPacket> {
 
   @Override
