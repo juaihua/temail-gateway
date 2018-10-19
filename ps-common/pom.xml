@@ -10,7 +10,7 @@
   <artifactId>ps-common</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <properties>
-    <vault-keeper.version>1.0.1-SNAPSHOT</vault-keeper.version>
+    <vault-keeper.version>1.0.1</vault-keeper.version>
   </properties>
 
   <dependencies>
