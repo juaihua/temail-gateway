@@ -8,7 +8,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import com.syswin.temail.kms.vault.KeyAwareAsymmetricCipher;
-import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
+import com.syswin.temail.ps.common.codec.decrypt.AutoDecryptBodyExtractor;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.ps.common.entity.DataEncryptType;
@@ -17,9 +17,6 @@ import com.syswin.temail.ps.server.PsServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -29,12 +26,12 @@ import org.mockito.Mockito;
 
 /**
  * @author 姚华成
- * @date 2018-9-17
+ * @date 2018-10-19
  */
 @Slf4j
-public class PsClientTest {
+public class PsClientEncryptTest {
 
-  private static final int serverPort = 8099;
+  private static final int serverPort = 10103;
   private static final int serverReadIdleTimeSeconds = 300;
   private static TestRequestHandler testRequestHandler = Mockito.mock(TestRequestHandler.class);
   private static String sender = "jack@t.email";
@@ -50,7 +47,7 @@ public class PsClientTest {
         new PsServer(
             new TestSessionService(),
             new TestRequestService(testRequestHandler),
-            serverPort, serverReadIdleTimeSeconds, new SimpleBodyExtractor());
+            serverPort, serverReadIdleTimeSeconds, new AutoDecryptBodyExtractor(cipher));
     psServer.run();
   }
 
@@ -66,70 +63,9 @@ public class PsClientTest {
           new PsClientBuilder(deviceId)
               .defaultHost("127.0.0.1")
               .defaultPort(serverPort)
-//              .defaultHost("tmail.msgseal.com")
-//              .defaultHost("msgseal.systoon.com")
-//              .defaultPort(8099)
               .signer(signer);
       psClient = builder.build();
     }
-  }
-
-  @Test
-  public void sendMessage() throws InterruptedException {
-    Message reqMessage = MessageMaker.sendSingleChatMessage(sender, receive, content);
-    CDTPPacket packet = MessageConverter.toCDTPPacket(reqMessage);
-    mockDispatch(packet);
-    Message respMessage = psClient.sendMessage(reqMessage);
-    System.out.println(new String(respMessage.getPayload()));
-    assertThat(respMessage).isEqualTo(reqMessage);
-    Thread.sleep(100);
-  }
-
-  @Test
-  public void sendMessageTimeout() throws InterruptedException {
-    Message reqMessage = MessageMaker.sendSingleChatMessage(sender, receive, content);
-    CDTPPacket packet = MessageConverter.toCDTPPacket(reqMessage);
-    mockDispatch(packet);
-    Message respMessage = psClient.sendMessage(reqMessage, 1, TimeUnit.NANOSECONDS);
-    assertThat(respMessage).isNull();
-    Thread.sleep(100);
-  }
-
-  // 由于发送消息上不需要登录，无效用户发送消息不会抛异常，只能以无法通过验签的方式报错
-  //  @Test
-  //  public void sendMessageInvalidUser() throws InterruptedException {
-  //    Message reqMessage = MessageMaker.sendSingleChatMessage("invalidUser", receive, content);
-  //    CDTPPacket packet = MessageConverter.toCDTPPacket(reqMessage);
-  //    mockDispatch(packet);
-  //    Message respMessage = psClient.sendMessage(reqMessage);
-  //    String data = new String(respMessage.getPayload());
-  //    new Gson().fromJson(data, Response.class);
-  //    Thread.sleep(100000);
-  //  }
-
-  @Test
-  public void sendMessageAsync() throws InterruptedException {
-    Message reqMessage = MessageMaker.sendSingleChatMessage(sender, receive, content);
-    CDTPPacket packet = MessageConverter.toCDTPPacket(reqMessage);
-    mockDispatch(packet);
-
-    CountDownLatch latch = new CountDownLatch(1);
-    AtomicReference<String> errorMsg = new AtomicReference<>();
-    psClient.sendMessage(reqMessage, message -> {
-      System.out.println(new String(message.getPayload()));
-      if (!message.equals(reqMessage)) {
-        errorMsg.set("返回对象不是期望的对象,\n返回值：" + message + "\n期望值：" + reqMessage);
-      }
-      latch.countDown();
-    }, t -> {
-      errorMsg.set("调用错误：" + Arrays.toString(t.getStackTrace()));
-      latch.countDown();
-    });
-    latch.await(3, TimeUnit.SECONDS);
-    if (errorMsg.get() != null) {
-      throw new Error(errorMsg.get());
-    }
-    Thread.sleep(100);
   }
 
   @Test
@@ -151,6 +87,7 @@ public class PsClientTest {
     reqMessage.getHeader().setCommandSpace((short) 2);
     reqMessage.getHeader().setDataEncryptionMethod(DataEncryptType.ECC_RECEIVER_PUB_CODE);
     CDTPPacket packet = MessageConverter.toCDTPPacket(reqMessage);
+    when(cipher.decrypt(receive, content)).thenReturn(content);
     mockDispatch(packet);
     Message respMessage = psClient.sendMessage(reqMessage);
     System.out.println(new String(respMessage.getPayload()));

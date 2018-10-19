@@ -5,14 +5,12 @@ import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf;
 import com.syswin.temail.ps.common.exception.PacketException;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Sharable
 public class PacketDecoder extends ByteToMessageDecoder {
 
   private final BodyExtractor bodyExtractor;

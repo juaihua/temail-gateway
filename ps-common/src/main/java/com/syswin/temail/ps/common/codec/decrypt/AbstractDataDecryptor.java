@@ -13,6 +13,10 @@ public abstract class AbstractDataDecryptor implements DataDecryptor {
 
   protected KeyAwareAsymmetricCipher cipher;
 
+  protected AbstractDataDecryptor(KeyAwareAsymmetricCipher cipher) {
+    this.cipher = cipher;
+  }
+
   protected AbstractDataDecryptor(String vaultRegistryUrl, String tenantId) {
     cipher = VaultKeeper.keyAwareVault(vaultRegistryUrl, tenantId).asymmetricCipher(getCryptAlgorithm());
   }

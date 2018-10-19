@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.ps.server.Constants;
@@ -28,15 +27,13 @@ import org.mockito.Mockito;
  */
 public class PsClientReceiverTest {
 
-  private static final int serverPort = 8099;
+  private static final int serverPort = 10102;
   private static final int serverReadIdleTimeSeconds = 300;
   private static String sender = "jack@t.email";
   private static String receive = "sean@t.email";
   private static String content = "hello world";
   private static List<String> validUsers = Arrays.asList(sender, receive);
   private static PsClient psClient;
-  //  private static KeyAwareAsymmetricCipher cipher = Mockito.mock(KeyAwareAsymmetricCipher.class);
-  private static SimpleBodyExtractor bodyExtractor = new SimpleBodyExtractor();
 
   private static TestRequestHandler testRequestHandler = new TestRequestHandler() {
     @Override
@@ -53,7 +50,7 @@ public class PsClientReceiverTest {
         new PsServer(
             new TestSessionService(),
             new TestRequestService(testRequestHandler),
-            serverPort, serverReadIdleTimeSeconds, bodyExtractor);
+            serverPort, serverReadIdleTimeSeconds);
     psServer.run();
   }
 
