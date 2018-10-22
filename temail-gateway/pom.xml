@@ -74,22 +74,24 @@
     <dependency>
       <groupId>com.baidu.disconf</groupId>
       <artifactId>disconf-client</artifactId>
-     <!--grpc要求依赖基于较高的版本-->
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
-    <!--grpc依赖的高版本-->
     <dependency>
+      <!--grpc要求依赖基于较高的版本-->
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>20.0</version>
     </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>jstl</artifactId>
+    </dependency>
 
     <dependency>
+      <!--主要用于排除log4j的依赖-->
       <groupId>org.apache.zookeeper</groupId>
       <artifactId>zookeeper</artifactId>
       <version>${zookeeper.version}</version>
