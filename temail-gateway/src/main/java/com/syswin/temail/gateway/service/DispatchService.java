@@ -9,9 +9,9 @@ import java.util.function.Consumer;
  * @author 姚华成
  * @date 2018-10-22
  */
-interface DispatchService<T> {
+public interface DispatchService {
 
   void dispatch(CDTPPacketTrans packet,
-      Consumer<? super T> consumer,
+      Consumer<byte[]> consumer,
       Consumer<? super Throwable> errorConsumer);
 }

@@ -3,8 +3,10 @@ package com.syswin.temail.gateway;
 import com.syswin.temail.gateway.channels.ChannelsSyncClient;
 import com.syswin.temail.gateway.channels.clients.grpc.GrpcClientWrapper;
 import com.syswin.temail.gateway.codec.CommandAwareBodyExtractor;
+import com.syswin.temail.gateway.service.DispatchService;
+import com.syswin.temail.gateway.service.DispatchServiceHttpClientAsync;
 import com.syswin.temail.gateway.service.RemoteStatusService;
-import com.syswin.temail.gateway.service.RequestServiceHttpClientAsync;
+import com.syswin.temail.gateway.service.RequestServiceImpl;
 import com.syswin.temail.gateway.service.SessionServiceImpl;
 import com.syswin.temail.gateway.service.SilentResponseErrorHandler;
 import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
@@ -59,15 +61,20 @@ public class TemailGatewayApplication {
   }
 
   @Bean
-  public RequestService requestService(TemailGatewayProperties properties) {
-    // 由于Skywalking不支持WebClient的方式，因此改为HttpClient
-    // return new RequestServiceWebClient(properties.getDispatchUrl());
-    return new RequestServiceHttpClientAsync(properties.getDispatchUrl());
+  ChannelHolder channelHolder(AbstractSessionService sessionService) {
+    return sessionService.getChannelHolder();
   }
 
   @Bean
-  ChannelHolder channelHolder(AbstractSessionService sessionService) {
-    return sessionService.getChannelHolder();
+  public DispatchService dispatchService(TemailGatewayProperties properties) {
+    // 由于Skywalking不支持WebClient的方式，因此改为HttpClient
+    // return new DispatchServiceWebClient(properties.getDispatchUrl());
+    return new DispatchServiceHttpClientAsync(properties.getDispatchUrl());
+  }
+
+  @Bean
+  public RequestService requestService(DispatchService dispatchService) {
+    return new RequestServiceImpl(dispatchService);
   }
 
   @Bean

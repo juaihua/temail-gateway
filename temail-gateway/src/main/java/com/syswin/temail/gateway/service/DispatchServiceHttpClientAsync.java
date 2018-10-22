@@ -4,6 +4,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
 import com.google.gson.Gson;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import org.apache.http.HttpResponse;
@@ -12,12 +13,13 @@ import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.apache.http.util.EntityUtils;
 
 /**
  * @author 姚华成
  * @date 2018-10-22
  */
-class DispatchServiceHttpClientAsync implements DispatchService<HttpResponse> {
+public class DispatchServiceHttpClientAsync implements DispatchService {
 
   private final CloseableHttpAsyncClient asyncClient;
   private final String dispatchUrl;
@@ -35,7 +37,7 @@ class DispatchServiceHttpClientAsync implements DispatchService<HttpResponse> {
   }
 
   @Override
-  public void dispatch(CDTPPacketTrans packet, Consumer<? super HttpResponse> consumer,
+  public void dispatch(CDTPPacketTrans packet, Consumer<byte[]> consumer,
       Consumer<? super Throwable> errorConsumer) {
     StringEntity bodyEntity = new StringEntity(gson.toJson(packet), StandardCharsets.UTF_8);
     bodyEntity.setContentType(APPLICATION_JSON_VALUE);
@@ -45,7 +47,11 @@ class DispatchServiceHttpClientAsync implements DispatchService<HttpResponse> {
     asyncClient.execute(request, new FutureCallback<HttpResponse>() {
       @Override
       public void completed(HttpResponse result) {
-        consumer.accept(result);
+        try {
+          consumer.accept(EntityUtils.toByteArray(result.getEntity()));
+        } catch (IOException e) {
+          errorConsumer.accept(e);
+        }
       }
 
       @Override

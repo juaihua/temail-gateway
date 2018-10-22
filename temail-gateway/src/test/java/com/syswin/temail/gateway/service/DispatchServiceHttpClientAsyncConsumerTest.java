@@ -19,14 +19,10 @@ import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
@@ -105,16 +101,11 @@ public class DispatchServiceHttpClientAsyncConsumerTest extends ConsumerPactTest
     return payload;
   }
 
-  private class ResponseConsumer implements Consumer<HttpResponse> {
+  private class ResponseConsumer implements Consumer<byte[]> {
 
     @Override
-    public void accept(HttpResponse httpResponse) {
-      try {
-        String jsonData = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
-        resultResponse = gson.fromJson(jsonData, Response.class);
-      } catch (IOException e) {
-        new ErrorConsumer().accept(e);
-      }
+    public void accept(byte[] bytes) {
+      resultResponse = gson.fromJson(new String(bytes), Response.class);
     }
   }
 

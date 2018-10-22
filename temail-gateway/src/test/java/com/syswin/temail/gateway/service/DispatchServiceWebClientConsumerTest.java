@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.web.reactive.function.client.ClientResponse;
 
 @Slf4j
 public class DispatchServiceWebClientConsumerTest extends ConsumerPactTestMk2 {
@@ -102,13 +101,11 @@ public class DispatchServiceWebClientConsumerTest extends ConsumerPactTestMk2 {
     return payload;
   }
 
-  private class ResponseConsumer implements Consumer<ClientResponse> {
+  private class ResponseConsumer implements Consumer<byte[]> {
 
     @Override
-    public void accept(ClientResponse clientResponse) {
-      clientResponse.bodyToMono(Response.class)
-          .subscribe(response ->
-              resultResponse = response);
+    public void accept(byte[] bytes) {
+      resultResponse = gson.fromJson(new String(bytes), Response.class);
     }
   }
 
