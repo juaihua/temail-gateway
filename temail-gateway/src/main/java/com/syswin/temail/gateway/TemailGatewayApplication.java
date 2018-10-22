@@ -4,15 +4,16 @@ import com.syswin.temail.gateway.channels.ChannelsSyncClient;
 import com.syswin.temail.gateway.channels.clients.grpc.GrpcClientWrapper;
 import com.syswin.temail.gateway.codec.CommandAwareBodyExtractor;
 import com.syswin.temail.gateway.service.RemoteStatusService;
-import com.syswin.temail.gateway.service.RequestServiceImpl;
+import com.syswin.temail.gateway.service.RequestServiceHttpClientAsync;
 import com.syswin.temail.gateway.service.SessionServiceImpl;
 import com.syswin.temail.gateway.service.SilentResponseErrorHandler;
 import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
 import com.syswin.temail.ps.server.PsServer;
+import com.syswin.temail.ps.server.service.AbstractSessionService;
 import com.syswin.temail.ps.server.service.ChannelHolder;
+import com.syswin.temail.ps.server.service.RequestService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
@@ -45,31 +46,42 @@ public class TemailGatewayApplication {
   }
 
   @Bean(initMethod = "initClient", destroyMethod = "destroyClient")
-  public ChannelsSyncClient initGrpcClient(TemailGatewayProperties properties){
+  public ChannelsSyncClient initGrpcClient(TemailGatewayProperties properties) {
     return new GrpcClientWrapper(properties);
   }
 
   @Bean
-  ChannelHolder channelHolder(
-      TemailGatewayProperties properties,
+  public AbstractSessionService sessionService(TemailGatewayProperties properties,
       RestTemplate restTemplate,
-      WebClient webClient,
       ChannelsSyncClient channelsSyncClient) {
+    return new SessionServiceImpl(restTemplate, properties.getVerifyUrl(),
+        new RemoteStatusService(properties, channelsSyncClient));
+  }
 
-    SessionServiceImpl sessionService =
-        new SessionServiceImpl(restTemplate, properties,
-            new RemoteStatusService(properties, channelsSyncClient));
+  @Bean
+  public RequestService requestService(TemailGatewayProperties properties) {
+    // 由于Skywalking不支持WebClient的方式，因此改为HttpClient
+    // return new RequestServiceWebClient(properties.getDispatchUrl());
+    return new RequestServiceHttpClientAsync(properties.getDispatchUrl());
+  }
 
-    PsServer psServer =
+  @Bean
+  ChannelHolder channelHolder(AbstractSessionService sessionService) {
+    return sessionService.getChannelHolder();
+  }
+
+  @Bean
+  TemailGatewayRunner gatewayRunner(TemailGatewayProperties properties,
+      AbstractSessionService sessionService,
+      RequestService requestService) {
+    return new TemailGatewayRunner(
         new PsServer(
             sessionService,
-            new RequestServiceImpl(webClient, properties),
+            requestService,
             properties.getNetty().getPort(),
             properties.getNetty().getReadIdleTimeSeconds(),
             new CommandAwareBodyExtractor(
-                new SimpleBodyExtractor()));
-    psServer.run();
-
-    return sessionService.getChannelHolder();
+                new SimpleBodyExtractor())));
   }
+
 }

@@ -1,8 +1,9 @@
 package com.syswin.temail.gateway.service;
 
 
+import static com.syswin.temail.ps.common.utils.SignatureUtil.resetSignature;
+
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLogin;
@@ -17,8 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import static com.syswin.temail.ps.common.utils.SignatureUtil.resetSignature;
-
 @Slf4j
 public class SessionServiceImpl extends AbstractSessionService {
 
@@ -29,12 +28,10 @@ public class SessionServiceImpl extends AbstractSessionService {
 
   private final RemoteStatusService remoteStatusService;
 
-  public SessionServiceImpl(RestTemplate restTemplate,
-      TemailGatewayProperties properties,
+  public SessionServiceImpl(RestTemplate restTemplate, String verifyUrl,
       RemoteStatusService remoteStatusService) {
-
+    this.loginService = new LoginService(restTemplate, verifyUrl);
     this.remoteStatusService = remoteStatusService;
-    loginService = new LoginService(restTemplate, properties.getVerifyUrl());
   }
 
   @Override

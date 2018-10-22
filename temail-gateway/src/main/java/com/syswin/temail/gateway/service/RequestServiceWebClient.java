@@ -1,33 +1,28 @@
 package com.syswin.temail.gateway.service;
 
-import static com.syswin.temail.ps.common.utils.SignatureUtil.resetSignature;
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.INTERNAL_ERROR;
+import static com.syswin.temail.ps.common.utils.SignatureUtil.resetSignature;
 
-import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPServerError;
 import com.syswin.temail.ps.server.service.RequestService;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Slf4j
-public class RequestServiceImpl implements RequestService {
+public class RequestServiceWebClient implements RequestService {
 
-  private final DispatchService dispatchService;
-  private final TemailGatewayProperties properties;
+  private final DispatchServiceWebClient dispatchService;
 
-  public RequestServiceImpl(WebClient dispatcherWebClient,
-      TemailGatewayProperties properties) {
-    dispatchService = new DispatchService(dispatcherWebClient);
-    this.properties = properties;
+  public RequestServiceWebClient(String dispatchUrl) {
+    this.dispatchService = new DispatchServiceWebClient(dispatchUrl);
   }
 
   @Override
   public void handleRequest(CDTPPacket reqPacket, Consumer<CDTPPacket> responseHandler) {
-    dispatchService.dispatch(properties.getDispatchUrl(), new CDTPPacketTrans(reqPacket),
+    dispatchService.dispatch(new CDTPPacketTrans(reqPacket),
         clientResponse -> clientResponse
             .bodyToMono(String.class)
             .subscribe(response -> {

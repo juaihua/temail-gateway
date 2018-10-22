@@ -1,31 +1,17 @@
 package com.syswin.temail.gateway.service;
 
-import com.google.gson.Gson;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import java.util.function.Consumer;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClient;
 
-@Slf4j
-class DispatchService {
+/**
+ * 抽取{@code DispatchService}是为了更方便的进行契约测试的测试用例编写，不然完全可以整合到相应的Service层中
+ *
+ * @author 姚华成
+ * @date 2018-10-22
+ */
+interface DispatchService<T> {
 
-  private final WebClient webClient;
-  private Gson gson = new Gson();
-
-  DispatchService(WebClient webClient) {
-    this.webClient = webClient;
-  }
-
-  void dispatch(String dispatchUrl, CDTPPacketTrans packet,
-      Consumer<? super ClientResponse> consumer,
-      Consumer<? super Throwable> errorConsumer) {
-    webClient.post()
-        .uri(dispatchUrl)
-        .contentType(MediaType.APPLICATION_JSON)
-        .syncBody(gson.toJson(packet))
-        .exchange()
-        .subscribe(consumer, errorConsumer);
-  }
+  void dispatch(CDTPPacketTrans packet,
+      Consumer<? super T> consumer,
+      Consumer<? super Throwable> errorConsumer);
 }

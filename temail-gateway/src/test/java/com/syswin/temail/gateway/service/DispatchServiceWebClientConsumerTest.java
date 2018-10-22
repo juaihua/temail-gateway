@@ -25,10 +25,9 @@ import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Slf4j
-public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
+public class DispatchServiceWebClientConsumerTest extends ConsumerPactTestMk2 {
 
   //private static final String ackMessage = uniquify("Sent");
   private static final String ackMessage = "Sent ackMessage";
@@ -66,9 +65,8 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
   @Override
   public void runTest(MockServer mockServer) {
     String url = mockServer.getUrl() + path;
-    WebClient dispatcherWebClient = WebClient.create();
-    DispatchService dispatchService = new DispatchService(dispatcherWebClient);
-    dispatchService.dispatch(url, packet,
+    DispatchServiceWebClient dispatchService = new DispatchServiceWebClient(url);
+    dispatchService.dispatch(packet,
         new ResponseConsumer(), new ErrorConsumer());
 
     waitAtMost(2, SECONDS).until(() -> resultResponse != null);
@@ -76,7 +74,10 @@ public class DispatchServiceConsumerTest extends ConsumerPactTestMk2 {
 
     assertThat(resultResponse.getCode()).isEqualTo(OK.value());
 
-    dispatchService.dispatch("http://localhost:99", packet,
+    String errorUrl = "http://localhost:99";
+    DispatchServiceWebClient errorDispatchService = new DispatchServiceWebClient(errorUrl);
+
+    errorDispatchService.dispatch(packet,
         new ResponseConsumer(), new ErrorConsumer());
     waitAtMost(2, SECONDS).until(() -> exception != null);
   }
