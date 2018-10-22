@@ -7,7 +7,7 @@ import com.syswin.temail.kms.vault.KeyAwareAsymmetricCipher;
  * @author 姚华成
  * @date 2018-10-19
  */
-public abstract class EccDataDecryptor extends AbstractDataDecryptor {
+abstract class EccDataDecryptor extends AbstractDataDecryptor {
 
   public EccDataDecryptor(KeyAwareAsymmetricCipher cipher) {
     super(cipher);

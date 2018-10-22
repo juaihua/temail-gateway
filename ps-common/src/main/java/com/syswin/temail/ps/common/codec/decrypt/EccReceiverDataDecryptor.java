@@ -7,7 +7,7 @@ import com.syswin.temail.ps.common.entity.CDTPPacket;
  * @author 姚华成
  * @date 2018-10-19
  */
-public class EccReceiverDataDecryptor extends EccDataDecryptor {
+class EccReceiverDataDecryptor extends EccDataDecryptor {
 
   public EccReceiverDataDecryptor(KeyAwareAsymmetricCipher cipher) {
     super(cipher);

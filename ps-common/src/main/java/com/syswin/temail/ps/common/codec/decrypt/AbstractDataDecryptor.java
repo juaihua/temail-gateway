@@ -9,7 +9,7 @@ import com.syswin.temail.ps.common.entity.CDTPPacket;
  * @author 姚华成
  * @date 2018-10-19
  */
-public abstract class AbstractDataDecryptor implements DataDecryptor {
+abstract class AbstractDataDecryptor implements DataDecryptor {
 
   protected KeyAwareAsymmetricCipher cipher;
 

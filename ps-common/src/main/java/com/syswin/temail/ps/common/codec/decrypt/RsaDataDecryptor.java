@@ -7,7 +7,7 @@ import com.syswin.temail.kms.vault.KeyAwareAsymmetricCipher;
  * @author 姚华成
  * @date 2018-10-19
  */
-public abstract class RsaDataDecryptor extends AbstractDataDecryptor {
+abstract class RsaDataDecryptor extends AbstractDataDecryptor {
 
   public RsaDataDecryptor(KeyAwareAsymmetricCipher cipher) {
     super(cipher);

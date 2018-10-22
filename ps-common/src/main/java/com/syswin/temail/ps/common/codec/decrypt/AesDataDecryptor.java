@@ -6,7 +6,7 @@ import com.syswin.temail.ps.common.entity.CDTPPacket;
  * @author 姚华成
  * @date 2018-10-19
  */
-public class AesDataDecryptor implements DataDecryptor {
+class AesDataDecryptor implements DataDecryptor {
 
   @Override
   public void decrypt(CDTPPacket packet) {
