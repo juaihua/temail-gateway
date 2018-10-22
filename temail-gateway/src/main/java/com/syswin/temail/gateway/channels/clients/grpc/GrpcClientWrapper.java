@@ -33,15 +33,21 @@ public class GrpcClientWrapper implements GrpcClient, ChannelsSyncClient {
 
   private final GatewayServer curServerInfo;
 
-  private final GrpcClient grpcClient;
+  private GrpcClient grpcClient;
 
   @Autowired
   public GrpcClientWrapper(TemailGatewayProperties temailGatewayProperties) {
     this.temailGatewayProperties = temailGatewayProperties;
     this.grpcReconnectManager = new GrpcReconnectManager(this, temailGatewayProperties);
     this.grpcHeartBeatManager = new GrpcHeartBeatManager(this, temailGatewayProperties);
-    this.grpcClient = new GrpcClientImpl(temailGatewayProperties.getGrpcServerHost(),
-        Integer.valueOf(temailGatewayProperties.getGrpcServerPort()));
+    log.info("channelHost:{}, channelPort:{}", temailGatewayProperties.getGrpcServerHost(),
+        temailGatewayProperties.getGrpcServerPort());
+    try {
+      this.grpcClient = new GrpcClientImpl(temailGatewayProperties.getGrpcServerHost(),
+          Integer.valueOf(temailGatewayProperties.getGrpcServerPort()));
+    } catch (Exception e) {
+      this.grpcClient = new GrpcClientImpl("channel.innermail.com", 9110);
+    }
     this.grpcClientReference = new AtomicReference<>(grpcClient);
     this.curServerInfo = GatewayServer.newBuilder()
         .setProcessId(temailGatewayProperties.getInstance().getProcessId())
