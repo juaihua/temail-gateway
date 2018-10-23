@@ -9,6 +9,7 @@
     <version>1.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>temail-gateway</artifactId>
+  <version>1.0.0</version>
 
   <!--grpc相关-->
   <properties>
