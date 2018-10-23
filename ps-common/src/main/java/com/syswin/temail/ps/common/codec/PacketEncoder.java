@@ -27,7 +27,7 @@ public class PacketEncoder extends MessageToByteEncoder<CDTPPacket> {
     byteBuf.writeBytes(packet.getData());
     if (!packet.isHearbeat()) {
       log.debug("{}通道写入的信息是：CommandSpace={},Command={},CDTPHeader={},"
-              + "Data={}", ctx.channel(), packet.getCommandSpace(), packet.getCommand(), packet.getHeader(),
+              + "Data={}", (ctx == null ? null : ctx.channel()), packet.getCommandSpace(), packet.getCommand(), packet.getHeader(),
           new String(packet.getData()));
     }
   }

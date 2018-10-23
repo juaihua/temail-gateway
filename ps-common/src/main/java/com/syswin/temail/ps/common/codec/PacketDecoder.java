@@ -75,9 +75,10 @@ public class PacketDecoder extends ByteToMessageDecoder {
     bodyExtractor.decrypt(packet);
 
     list.add(packet);
-    if (!packet.isHearbeat()) {
+    if (!packet.isHearbeat() && log.isDebugEnabled()) {
       log.debug("{}通道读取的信息是：CommandSpace={},Command={},CDTPHeader={},"
-              + "Data={}", ctx.channel(), packet.getCommandSpace(), packet.getCommand(), packet.getHeader(),
+              + "Data={}", (ctx == null ? null : ctx.channel()), packet.getCommandSpace(), packet.getCommand(),
+          packet.getHeader(),
           new String(packet.getData()));
     }
   }

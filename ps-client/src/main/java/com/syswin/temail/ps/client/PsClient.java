@@ -1,5 +1,14 @@
 package com.syswin.temail.ps.client;
 
+import static com.syswin.temail.ps.common.Constants.LENGTH_FIELD_LENGTH;
+
+import com.syswin.temail.ps.common.codec.PacketDecoder;
+import com.syswin.temail.ps.common.codec.PacketEncoder;
+import com.syswin.temail.ps.common.entity.CDTPPacket;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -30,14 +39,12 @@ import java.util.function.Consumer;
 public interface PsClient {
 
   /**
-   * 建立与ps-server的连接<br>
-   * 由于登录、发送消息等能够自动建立连接，因此手工建立连接不是必要的
+   * 建立与ps-server的连接<br> 由于登录、发送消息等能够自动建立连接，因此手工建立连接不是必要的
    */
   void connect();
 
   /**
-   * 建立与ps-server的连接<br>
-   * 由于登录、发送消息等能够自动建立连接，因此手工建立连接不是必要的
+   * 建立与ps-server的连接<br> 由于登录、发送消息等能够自动建立连接，因此手工建立连接不是必要的
    *
    * @param targetAddress 指定连接的服务器地址
    */
@@ -77,8 +84,7 @@ public interface PsClient {
   void login(String temail, String temailPK, String targetAddress, Consumer<Message> receiveCallback);
 
   /**
-   * 登出服务器<br>
-   * 不能再接收消息，不影响发送消息
+   * 登出服务器<br> 不能再接收消息，不影响发送消息
    *
    * @param temail 需要登录的账号
    * @param temailPK 账号的公钥
@@ -87,8 +93,7 @@ public interface PsClient {
   void logout(String temail, String temailPK);
 
   /**
-   * 登出服务器<br>
-   * 不能再接收消息，不影响发送消息
+   * 登出服务器<br> 不能再接收消息，不影响发送消息
    *
    * @param temail 需要登录的账号
    * @param temailPK 账号的公钥
@@ -136,4 +141,51 @@ public interface PsClient {
   void sendMessage(Message message, Consumer<Message> responseConsumer, Consumer<Throwable> errorConsumer,
       long timeout, TimeUnit timeUnit);
 
+  /**
+   * 将收到的字节数组的CDTPPacket进行解包，生成Message对象。主要用于单聊、群聊等服务端保留完整Packet的情况
+   *
+   * @param packetData 字节数组形式的CDTPPacket包，包含前导的长度
+   * @return 解包后的Message对象
+   */
+  static Message unpacket(byte[] packetData) {
+    try {
+      if (packetData == null || packetData.length <= LENGTH_FIELD_LENGTH) {
+        return null;
+      }
+      ByteBuf byteBuf = Unpooled.buffer(packetData.length);
+      byteBuf.writeBytes(packetData);
+
+      long length = byteBuf.readUnsignedInt();
+      if (length != packetData.length - LENGTH_FIELD_LENGTH) {
+        throw new PsClientException(
+            "包长度错误：packetData数组的长度(" + packetData.length + ")与packetData头部指定的长度(" + length + ")不一致！");
+      }
+      List<Object> result = new ArrayList<>();
+      PacketDecoder decoder = new PacketDecoder();
+      byteBuf.resetReaderIndex();
+      decoder.decode(null, byteBuf, result);
+      if (result.size() == 0) {
+        return null;
+      }
+      CDTPPacket packet = (CDTPPacket) result.get(0);
+      return MessageConverter.fromCDTPPacket(packet);
+    } catch (Exception e) {
+      throw new PsClientException("解析CDTPPacket包时出错：" + e.getMessage(), e);
+    }
+  }
+
+  static byte[] packet(Message message) {
+    if (message == null) {
+      return null;
+    }
+    CDTPPacket packet = MessageConverter.toCDTPPacket(message);
+    ByteBuf dataBuf = Unpooled.buffer();
+    PacketEncoder encoder = new PacketEncoder();
+    encoder.encode(null, packet, dataBuf);
+    int length = dataBuf.readableBytes();
+    ByteBuf result = Unpooled.buffer(length + 4);
+    result.writeInt(length);
+    result.writeBytes(dataBuf);
+    return result.array();
+  }
 }

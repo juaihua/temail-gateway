@@ -158,6 +158,14 @@ public class PsClientTest {
     Thread.sleep(100);
   }
 
+  @Test
+  public void testPacketAndUnpacket() {
+    Message message = MessageMaker.sendSingleChatMessage(sender, receive, content);
+    byte[] bytes = PsClient.packet(message);
+    Message unpacketMessage = PsClient.unpacket(bytes);
+    assertThat(unpacketMessage).isEqualTo(message);
+  }
+
   private void mockDispatch(CDTPPacket packet) {
     reset(testRequestHandler);
     when(testRequestHandler.dispatch(ArgumentMatchers.argThat(
