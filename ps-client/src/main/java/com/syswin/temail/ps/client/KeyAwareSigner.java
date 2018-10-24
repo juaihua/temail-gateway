@@ -10,7 +10,7 @@ import com.syswin.temail.kms.vault.VaultKeeper;
  * @author 姚华成
  * @date 2018-9-25
  */
-public class KeyAwareSigner implements Signer {
+class KeyAwareSigner implements Signer {
 
   private final KeyAwareAsymmetricCipher cipher;
 

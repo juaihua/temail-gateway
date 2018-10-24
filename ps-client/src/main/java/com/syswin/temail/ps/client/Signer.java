@@ -4,7 +4,7 @@ package com.syswin.temail.ps.client;
  * @author 姚华成
  * @date 2018-9-25
  */
-interface Signer {
+public interface Signer {
 
   /**
    * 根据用户ID获取对应密钥进行签名
