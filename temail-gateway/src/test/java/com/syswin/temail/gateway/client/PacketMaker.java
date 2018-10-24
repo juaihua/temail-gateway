@@ -9,7 +9,7 @@ import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
+import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLogin;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLogin.Builder;
 import com.syswin.temail.ps.common.entity.CommandSpaceType;

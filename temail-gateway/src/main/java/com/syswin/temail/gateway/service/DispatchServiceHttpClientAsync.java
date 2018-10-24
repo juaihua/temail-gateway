@@ -3,7 +3,7 @@ package com.syswin.temail.gateway.service;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
 import com.google.gson.Gson;
-import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
+import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;

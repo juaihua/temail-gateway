@@ -1,7 +1,7 @@
 package com.syswin.temail.gateway.service;
 
 import com.google.gson.Gson;
-import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
+import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;

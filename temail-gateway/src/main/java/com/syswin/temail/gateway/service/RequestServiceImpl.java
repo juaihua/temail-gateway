@@ -5,7 +5,7 @@ import static com.syswin.temail.ps.common.entity.CommandType.INTERNAL_ERROR;
 import static com.syswin.temail.ps.common.utils.SignatureUtil.resetSignature;
 
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
+import com.syswin.temail.gateway.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPServerError;
 import com.syswin.temail.ps.server.service.RequestService;
 import java.util.function.Consumer;
