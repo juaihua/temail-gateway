@@ -1,15 +1,8 @@
 package com.syswin.temail.ps.client;
 
-import static com.syswin.temail.ps.common.Constants.LENGTH_FIELD_LENGTH;
-
-import com.syswin.temail.ps.common.codec.PacketDecoder;
-import com.syswin.temail.ps.common.codec.PacketEncoder;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import java.util.ArrayList;
+import com.syswin.temail.ps.common.utils.PacketUtil;
 import java.util.Base64;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -159,44 +152,12 @@ public interface PsClient {
    * @return 解包后的Message对象
    */
   static Message unpacket(byte[] packetData) {
-    try {
-      if (packetData == null || packetData.length <= LENGTH_FIELD_LENGTH) {
-        return null;
-      }
-      ByteBuf byteBuf = Unpooled.buffer(packetData.length);
-      byteBuf.writeBytes(packetData);
-
-      long length = byteBuf.readUnsignedInt();
-      if (length != packetData.length - LENGTH_FIELD_LENGTH) {
-        throw new PsClientException(
-            "包长度错误：packetData数组的长度(" + packetData.length + ")与packetData头部指定的长度(" + length + ")不一致！");
-      }
-      List<Object> result = new ArrayList<>();
-      PacketDecoder decoder = new PacketDecoder();
-      byteBuf.resetReaderIndex();
-      decoder.decode(null, byteBuf, result);
-      if (result.size() == 0) {
-        return null;
-      }
-      CDTPPacket packet = (CDTPPacket) result.get(0);
-      return MessageConverter.fromCDTPPacket(packet);
-    } catch (Exception e) {
-      throw new PsClientException("解析CDTPPacket包时出错：" + e.getMessage(), e);
-    }
+    CDTPPacket packet = PacketUtil.unpacket(packetData);
+    return MessageConverter.fromCDTPPacket(packet);
   }
 
   static byte[] packet(Message message) {
-    if (message == null) {
-      return null;
-    }
     CDTPPacket packet = MessageConverter.toCDTPPacket(message);
-    ByteBuf dataBuf = Unpooled.buffer();
-    PacketEncoder encoder = new PacketEncoder();
-    encoder.encode(null, packet, dataBuf);
-    int length = dataBuf.readableBytes();
-    ByteBuf result = Unpooled.buffer(length + 4);
-    result.writeInt(length);
-    result.writeBytes(dataBuf);
-    return result.array();
+    return PacketUtil.packet(packet);
   }
 }
