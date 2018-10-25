@@ -208,6 +208,7 @@ class PsClientImpl implements PsClient {
           + dataSha256;
       String temail = header.getSender();
 
+      log.debug("签名的原始数据：temail={}, unsigned={}", temail, unsigned);
       header.setSignatureAlgorithm(signer.getAlgorithm());
       header.setSignature(signer.sign(temail, unsigned));
     }
