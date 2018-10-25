@@ -8,6 +8,7 @@ import com.syswin.temail.ps.common.entity.CDTPPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -140,6 +141,16 @@ public interface PsClient {
    */
   void sendMessage(Message message, Consumer<Message> responseConsumer, Consumer<Throwable> errorConsumer,
       long timeout, TimeUnit timeUnit);
+
+  /**
+   * 将收到的字节数组的CDTPPacket进行解包，生成Message对象。主要用于单聊、群聊等服务端保留完整Packet的情况
+   *
+   * @param packetData Base64UrlSafe形式的CDTPPacket包，包含前导的长度
+   * @return 解包后的Message对象
+   */
+  static Message unpacket(String packetData) {
+    return unpacket(Base64.getUrlDecoder().decode(packetData));
+  }
 
   /**
    * 将收到的字节数组的CDTPPacket进行解包，生成Message对象。主要用于单聊、群聊等服务端保留完整Packet的情况

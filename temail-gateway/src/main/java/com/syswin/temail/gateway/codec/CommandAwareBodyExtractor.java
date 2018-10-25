@@ -3,7 +3,7 @@ package com.syswin.temail.gateway.codec;
 import com.syswin.temail.ps.common.codec.BodyExtractor;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CommandSpaceType;
-import io.netty.buffer.ByteBuf;
+import com.syswin.temail.ps.common.utils.ByteBuf;
 
 public class CommandAwareBodyExtractor implements BodyExtractor {
 

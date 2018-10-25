@@ -2,7 +2,7 @@ package com.syswin.temail.gateway.service;
 
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.INTERNAL_ERROR;
-import static com.syswin.temail.ps.common.utils.SignatureUtil.resetSignature;
+import static com.syswin.temail.ps.server.utils.SignatureUtil.resetSignature;
 
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.gateway.entity.CDTPPacketTrans;

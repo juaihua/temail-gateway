@@ -1,7 +1,7 @@
 package com.syswin.temail.gateway.notify;
 
 
-import static com.syswin.temail.ps.common.utils.SignatureUtil.resetSignature;
+import static com.syswin.temail.ps.server.utils.SignatureUtil.resetSignature;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;

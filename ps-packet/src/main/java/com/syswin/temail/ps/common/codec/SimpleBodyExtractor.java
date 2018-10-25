@@ -1,6 +1,6 @@
 package com.syswin.temail.ps.common.codec;
 
-import io.netty.buffer.ByteBuf;
+import com.syswin.temail.ps.common.utils.ByteBuf;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor

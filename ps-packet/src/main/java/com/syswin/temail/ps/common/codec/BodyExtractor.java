@@ -1,7 +1,7 @@
 package com.syswin.temail.ps.common.codec;
 
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import io.netty.buffer.ByteBuf;
+import com.syswin.temail.ps.common.utils.ByteBuf;
 
 public interface BodyExtractor {
 

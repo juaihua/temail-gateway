@@ -19,6 +19,10 @@
     </dependency>
     <dependency>
       <groupId>com.syswin.temail</groupId>
+      <artifactId>ps-packet</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.syswin.temail</groupId>
       <artifactId>vault-keeper</artifactId>
       <version>${vault-keeper.version}</version>
       <optional>true</optional>

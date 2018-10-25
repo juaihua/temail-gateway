@@ -79,10 +79,10 @@ public class PsClientTest {
     Message reqMessage = MessageMaker.sendSingleChatMessage(sender, receive, content);
     CDTPPacket packet = MessageConverter.toCDTPPacket(reqMessage);
     mockDispatch(packet);
-    Message respMessage = psClient.sendMessage(reqMessage);
+    Message respMessage = psClient.sendMessage(reqMessage,1000,TimeUnit.SECONDS);
     System.out.println(new String(respMessage.getPayload()));
     assertThat(respMessage).isEqualTo(reqMessage);
-    Thread.sleep(100);
+    Thread.sleep(100000);
   }
 
   @Test
