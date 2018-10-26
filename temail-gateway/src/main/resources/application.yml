@@ -1,0 +1,18 @@
+spring:
+  main:
+    web-application-type: none
+  rocketmq:
+    namesrv-addr: n1.rocketmq.innermail.com:9876
+    consumer-group: temail-gateway-consumer
+    mq-topic: temail-gateway-notify
+
+app:
+  gateway:
+    verifyUrl: http://dispatcher.innermail.com:8081/verify
+    dispatchUrl: http://dispatcher.innermail.com:8081/dispatch
+    updateSocketStatusUrl: http://channel.innermail.com:9100/locations
+    grpcServerHost: channel.innermail.com
+    grpcServerPort: 9110
+    netty:
+      port: 8099
+      read-idle-time-seconds: 180
