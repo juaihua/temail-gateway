@@ -4,7 +4,6 @@ import com.syswin.temail.ps.server.utils.LocalMachineUtil;
 import java.util.UUID;
 import javax.annotation.Resource;
 import lombok.Data;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 

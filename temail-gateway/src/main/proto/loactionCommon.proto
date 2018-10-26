@@ -5,26 +5,26 @@ option java_outer_classname = "GrpcLocationBeans";
 option objc_class_prefix = "CRY";
 package channel;
 
-enum GatewayServerState{
-    onLine = 0;
-    offLine = 1;
-    cleaning = 2;
-    history = 3;
+enum GatewayServerState {
+  onLine = 0;
+  offLine = 1;
+  cleaning = 2;
+  history = 3;
 }
 
-message GatewayServer{
+message GatewayServer {
   string ip = 1;
   string processId = 2;
   string curStateBeginTime = 3;
   GatewayServerState gatewayServerState = 4;
 }
 
-message CommonResponse{
+message CommonResponse {
   string msg = 1;
   bool isSuccess = 2;
 }
 
-message ChannelLocation{
+message ChannelLocation {
   string account = 1;
   string devId = 2;
   string hostOf = 3;
@@ -33,10 +33,10 @@ message ChannelLocation{
   string mqTag = 6;
 }
 
-message ChannelLocations{
- repeated ChannelLocation channelLocationList = 1;
+message ChannelLocations {
+  repeated ChannelLocation channelLocationList = 1;
 }
 
-message UserAccount{
+message UserAccount {
   string account = 1;
 }

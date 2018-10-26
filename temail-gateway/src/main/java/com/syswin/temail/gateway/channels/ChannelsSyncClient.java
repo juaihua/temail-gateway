@@ -7,28 +7,24 @@ import com.syswin.temail.gateway.entity.TemailAccoutLocations;
  */
 public interface ChannelsSyncClient {
 
-   /**
+  /**
    * init client
    */
-  public void initClient();
+  void initClient();
 
   /**
    * destroy client
    */
-  public void destroyClient();
+  void destroyClient();
 
   /**
    * add chanel locations
-   * @param channelLocations
-   * @return
    */
-   boolean syncChannelLocations(TemailAccoutLocations channelLocations);
+  boolean syncChannelLocations(TemailAccoutLocations channelLocations);
 
   /**
    * remove channel locations
-   * @param channelLocations
-   * @return
    */
-   boolean removeChannelLocations(TemailAccoutLocations channelLocations);
+  boolean removeChannelLocations(TemailAccoutLocations channelLocations);
 
 }

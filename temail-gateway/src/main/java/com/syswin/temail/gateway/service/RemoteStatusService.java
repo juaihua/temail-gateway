@@ -1,5 +1,7 @@
 package com.syswin.temail.gateway.service;
 
+import static java.util.Collections.singletonList;
+
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.TemailGatewayProperties.Instance;
 import com.syswin.temail.gateway.channels.ChannelsSyncClient;
@@ -12,8 +14,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
-
-import static java.util.Collections.singletonList;
 
 @Slf4j
 public class RemoteStatusService {

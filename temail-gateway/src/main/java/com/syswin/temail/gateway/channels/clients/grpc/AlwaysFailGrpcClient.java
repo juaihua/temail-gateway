@@ -8,7 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 public class AlwaysFailGrpcClient implements GrpcClient {
 
   @Override
-  public void closeConnection() {}
+  public void closeConnection() {
+  }
 
   @Override
   public boolean retryConnection(GatewayServer gatewayServer) {

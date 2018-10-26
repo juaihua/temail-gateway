@@ -41,50 +41,50 @@ public class LoginConsumerTest extends ConsumerPactTestMk2 {
 
     return pactDslWithProvider
         .given("User sean is registered")
-          .uponReceiving("Sean requested to log in")
-          .method("POST")
-          .body("{\n"
-              + "  \"temail\": \"" + sean + "\",\n"
-              + "  \"signature\": \"" + signature + "\",\n"
-              + "  \"unsignedBytes\": \"" + unsignedText + "\",\n"
-              + "  \"algorithm\": \"" + signatureAlgorithm + "\"\n"
-              + "}")
-          .headers(headers)
-          .path(path)
-          .willRespondWith()
-          .status(200)
-          .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-          .body(gson.toJson(Response.ok(OK, "Success")))
+        .uponReceiving("Sean requested to log in")
+        .method("POST")
+        .body("{\n"
+            + "  \"temail\": \"" + sean + "\",\n"
+            + "  \"signature\": \"" + signature + "\",\n"
+            + "  \"unsignedBytes\": \"" + unsignedText + "\",\n"
+            + "  \"algorithm\": \"" + signatureAlgorithm + "\"\n"
+            + "}")
+        .headers(headers)
+        .path(path)
+        .willRespondWith()
+        .status(200)
+        .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+        .body(gson.toJson(Response.ok(OK, "Success")))
         .given("User jack is not registered")
-          .uponReceiving("Jack requested to log in")
-          .method("POST")
-          .body("{\n"
-              + "  \"temail\": \"jack@t.email\",\n"
-              + "  \"signature\": \"" + signature + "\",\n"
-              + "  \"unsignedBytes\": \"" + unsignedText + "\",\n"
-              + "  \"algorithm\": \"" + signatureAlgorithm + "\"\n"
-              + "}")
-          .headers(headers)
-          .path(path)
-          .willRespondWith()
-          .status(403)
-          .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-          .body(gson.toJson(Response.failed(FORBIDDEN)))
+        .uponReceiving("Jack requested to log in")
+        .method("POST")
+        .body("{\n"
+            + "  \"temail\": \"jack@t.email\",\n"
+            + "  \"signature\": \"" + signature + "\",\n"
+            + "  \"unsignedBytes\": \"" + unsignedText + "\",\n"
+            + "  \"algorithm\": \"" + signatureAlgorithm + "\"\n"
+            + "}")
+        .headers(headers)
+        .path(path)
+        .willRespondWith()
+        .status(403)
+        .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+        .body(gson.toJson(Response.failed(FORBIDDEN)))
         .given("User mike is registered, but server is out of work")
-          .uponReceiving("Mike requested to log in")
-          .method("POST")
-          .body("{\n"
-              + "  \"temail\": \"mike@t.email\",\n"
-              + "  \"signature\": \"" + signature + "\",\n"
-              + "  \"unsignedBytes\": \"" + unsignedText + "\",\n"
-              + "  \"algorithm\": \"" + signatureAlgorithm + "\"\n"
-              + "}")
-          .headers(headers)
-          .path(path)
-          .willRespondWith()
-          .status(500)
-          .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
-          .body(gson.toJson(Response.failed(INTERNAL_SERVER_ERROR)))
+        .uponReceiving("Mike requested to log in")
+        .method("POST")
+        .body("{\n"
+            + "  \"temail\": \"mike@t.email\",\n"
+            + "  \"signature\": \"" + signature + "\",\n"
+            + "  \"unsignedBytes\": \"" + unsignedText + "\",\n"
+            + "  \"algorithm\": \"" + signatureAlgorithm + "\"\n"
+            + "}")
+        .headers(headers)
+        .path(path)
+        .willRespondWith()
+        .status(500)
+        .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+        .body(gson.toJson(Response.failed(INTERNAL_SERVER_ERROR)))
         .toPact();
   }
 

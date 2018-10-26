@@ -1,6 +1,8 @@
 package com.syswin.temail.gateway.service;
 
 
+import static org.mockito.Mockito.when;
+
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.channels.ChannelsSyncClient;
 import com.syswin.temail.gateway.entity.TemailAccoutLocation;
@@ -15,8 +17,6 @@ import org.awaitility.Awaitility;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import static org.mockito.Mockito.when;
 
 
 @Slf4j
@@ -84,24 +84,21 @@ public class RemoteStatusServiceTest {
     //for testing addSession
     remoteStatusService.reqUpdSts4Upd(temailAccoutLocationsSingle,
         RemoteStatusService.TemailAcctUptOptType.add, results::add);
-    Awaitility.waitAtMost(1, TimeUnit.SECONDS).until(()->{
+    Awaitility.waitAtMost(1, TimeUnit.SECONDS).until(() -> {
       return results.remove(0);
     });
-
 
     //for testing removeSession
     remoteStatusService.reqUpdSts4Upd(temailAccoutLocationsBatch,
         RemoteStatusService.TemailAcctUptOptType.del, results::add);
-    Awaitility.waitAtMost(1, TimeUnit.SECONDS).until(()->{
+    Awaitility.waitAtMost(1, TimeUnit.SECONDS).until(() -> {
       return results.remove(0);
     });
 
     //for testing removeSessions
     remoteStatusService.reqUpdSts4Upd(temailAccoutLocationsBatch,
         RemoteStatusService.TemailAcctUptOptType.del, results::add);
-    Awaitility.waitAtMost(1, TimeUnit.SECONDS).until(()->{
-      return results.remove(0);
-    });
+    Awaitility.waitAtMost(1, TimeUnit.SECONDS).until(() -> results.remove(0));
 
   }
 

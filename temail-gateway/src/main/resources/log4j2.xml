@@ -1,5 +1,5 @@
 <!-- monitorInterval="1800" 指log4j2每隔1800秒（半小时），自动监控该配置文件是否有变化，如果变化，则自动根据文件内容重新配置 -->
-<configuration status="INFO" monitorInterval="1800">
+<configuration monitorInterval="1800" status="INFO">
   <appenders>
     <!--控制台打印 -->
     <Console name="CONSOLE" target="SYSTEM_OUT">
@@ -7,8 +7,8 @@
         pattern="[@project.artifactId@] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %highlight{%-5p} => %cyan{%c.%M(%F:%L)} - %m%n"/>
     </Console>
     <!--当日志内容达到指定范围后，以某种定义规则打包日志文件 -->
-    <RollingFile name="RollingFile" fileName="/opt/logs/@project.artifactId@.log"
-      filePattern="/opt/logs/@project.artifactId@-logs-%d{yyyy-MM-dd}-%i.log">
+    <RollingFile fileName="/opt/logs/@project.artifactId@.log" filePattern="/opt/logs/@project.artifactId@-logs-%d{yyyy-MM-dd}-%i.log"
+      name="RollingFile">
       <PatternLayout pattern="[@project.artifactId@] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p => %c - %m%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
@@ -26,6 +26,6 @@
       <appender-ref ref="CONSOLE"/>
       <appender-ref ref="Async"/>
     </root>
-    <logger name="com.syswin.temail.ps.common.codec" level="debug"/>
+    <logger level="debug" name="com.syswin.temail.ps.common.codec"/>
   </loggers>
 </configuration>

@@ -64,7 +64,7 @@ public class YHCNettyClient {
   }
 
   public CDTPPacket syncExecute(CDTPPacket reqPacket) {
-    return syncExecute(reqPacket, 30,TimeUnit.SECONDS);
+    return syncExecute(reqPacket, 30, TimeUnit.SECONDS);
   }
 
   public CDTPPacket syncExecute(CDTPPacket reqPacket, long timeout, TimeUnit timeUnit) {
@@ -80,7 +80,7 @@ public class YHCNettyClient {
   }
 
   public CDTPPacket getNewResult() {
-    return getNewResult(30,TimeUnit.SECONDS);
+    return getNewResult(30, TimeUnit.SECONDS);
   }
 
   public CDTPPacket getNewResult(long timeout, TimeUnit timeUnit) {

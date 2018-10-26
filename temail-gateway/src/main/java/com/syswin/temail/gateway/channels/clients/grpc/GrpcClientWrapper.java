@@ -171,12 +171,11 @@ public class GrpcClientWrapper implements GrpcClient, ChannelsSyncClient {
 
   private void extractGrpcLocations(TemailAccoutLocations channelLocations,
       ChannelLocations.Builder builder) {
-    channelLocations.getStatuses().forEach(lc -> {
-      builder.addChannelLocationList(
-          ChannelLocation.newBuilder().setAccount(lc.getAccount())
-              .setDevId(lc.getDevId()).setHostOf(lc.getHostOf())
-              .setProcessId(lc.getProcessId()).setMqTopic(lc.getMqTopic())
-              .setMqTag(lc.getMqTag()).build());
-    });
+    channelLocations.getStatuses().forEach(lc ->
+        builder.addChannelLocationList(
+            ChannelLocation.newBuilder().setAccount(lc.getAccount())
+                .setDevId(lc.getDevId()).setHostOf(lc.getHostOf())
+                .setProcessId(lc.getProcessId()).setMqTopic(lc.getMqTopic())
+                .setMqTag(lc.getMqTag()).build()));
   }
 }

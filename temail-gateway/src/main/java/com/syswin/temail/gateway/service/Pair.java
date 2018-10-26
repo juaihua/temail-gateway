@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 class Pair {
+
   private final TemailAcctUptOptType temailAcctUptOptType;
   private final TemailAccoutLocations temailAccoutLocations;
 }

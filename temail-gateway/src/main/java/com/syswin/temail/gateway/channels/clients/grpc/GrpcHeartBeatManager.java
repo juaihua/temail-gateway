@@ -41,7 +41,6 @@ class GrpcHeartBeatManager {
 
   /**
    * heart beat logic
-   *
    */
   void heartBeat() {
     // so the heart beat task will be submitted for only one time;
@@ -50,12 +49,12 @@ class GrpcHeartBeatManager {
       executorService.scheduleWithFixedDelay(() -> {
         try {
           if (grpcClient.serverHeartBeat(gatewayServer)) {
-            log.info("heart beat success : {}-{}",gatewayServer.getIp(), gatewayServer.getProcessId());
+            log.info("heart beat success : {}-{}", gatewayServer.getIp(), gatewayServer.getProcessId());
           } else {
             log.error("heart beat fail, try again after {} seconds .", heartBeatDelay);
           }
         } catch (Exception e) {
-          log.error("exception happened in heart beat." , e);
+          log.error("exception happened in heart beat.", e);
         }
       }, heartBeatDelay, heartBeatDelay, TimeUnit.SECONDS);
     } else {

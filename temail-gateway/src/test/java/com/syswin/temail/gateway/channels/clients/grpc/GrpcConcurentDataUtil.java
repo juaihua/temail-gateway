@@ -30,11 +30,11 @@ public class GrpcConcurentDataUtil {
       Integer lcCountPerServer, Integer lcCountPerLocations) {
     this.gateServerCount = Optional.ofNullable(gateServerCount).orElse(10);
     this.lcCountPerServer = Optional.ofNullable(lcCountPerServer).orElse(200);
-    this.lcCountPerLocations = Optional.ofNullable(lcCountPerLocations).orElse(1+random.nextInt(4));
+    this.lcCountPerLocations = Optional.ofNullable(lcCountPerLocations).orElse(1 + random.nextInt(4));
     this.grpcTestUnits = this.geneData();
   }
 
-  public List<GrpcConcurrentData> geneData(){
+  public List<GrpcConcurrentData> geneData() {
     grpcTestUnits = new ArrayList<>();
     for (Integer i = 0; i < gateServerCount; i++) {
       GrpcConcurrentData grpcTestUnit = new GrpcConcurrentData();
@@ -66,9 +66,9 @@ public class GrpcConcurentDataUtil {
     }
     return grpcTestUnits;
   }
-  
-  public TemailAccoutLocations transfrom(ChannelLocations channelLocations){
-    List<TemailAccoutLocation> accoutLocations = new ArrayList<TemailAccoutLocation>();
+
+  public TemailAccoutLocations transfrom(ChannelLocations channelLocations) {
+    List<TemailAccoutLocation> accoutLocations = new ArrayList<>();
     TemailAccoutLocations temailAccoutLocations = new TemailAccoutLocations(accoutLocations);
     for (ChannelLocation channelLocation : channelLocations.getChannelLocationListList()) {
       TemailAccoutLocation temailAccoutLocation = new TemailAccoutLocation();

@@ -14,24 +14,19 @@ import org.junit.Test;
 public class GrpcClientWrapperTest {
 
   private final Random rand = new Random(2);
-
+  private final int gateServes = 8;
+  List<GrpcConcurrentData> grpcTestUnits;
   private ExecutorService executorService;
 
-  List<GrpcConcurrentData> grpcTestUnits;
-
-  private final int gateServes = 8;
-
   /**
-   * in this method, 8 threads will keep calling grpc servers by calling different
-   * methods(removeChannelLocations, asysnChannelLocations, heartBear, etc.)
-   * , and in a single thread we will keep disconnect the grpClients of the 8 threads.
+   * in this method, 8 threads will keep calling grpc servers by calling different methods(removeChannelLocations,
+   * asysnChannelLocations, heartBear, etc.) , and in a single thread we will keep disconnect the grpClients of the 8
+   * threads.
    * <p>
-   * in this condition, the behavior of the grpcClient wo hoped is :
-   * 1、at the same time, there will be only one reconnect logic being executed, and other calls will fail fast.
-   * 2、when grpcClient reconnect suffessfully, the callers will at once konw this, and executing biz call again .
-   * 3、no thread lock competition or thread block will happen even when the grpc client is trying to reconnect server .
-   *
-   * @throws InterruptedException
+   * in this condition, the behavior of the grpcClient wo hoped is : 1、at the same time, there will be only one
+   * reconnect logic being executed, and other calls will fail fast. 2、when grpcClient reconnect suffessfully, the
+   * callers will at once konw this, and executing biz call again . 3、no thread lock competition or thread block will
+   * happen even when the grpc client is trying to reconnect server .
    */
   @Test
   public void testConnectionRecovery() throws InterruptedException {

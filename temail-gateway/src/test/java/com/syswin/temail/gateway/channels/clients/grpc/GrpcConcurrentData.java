@@ -30,7 +30,7 @@ public class GrpcConcurrentData {
     this.grpcClientWrapper = new GrpcClientWrapper(temailGatewayProperties);
   }
 
-  public void changeClientStatusUnavailible(){
+  public void changeClientStatusUnavailible() {
     grpcClientWrapper.reconnect();
   }
 

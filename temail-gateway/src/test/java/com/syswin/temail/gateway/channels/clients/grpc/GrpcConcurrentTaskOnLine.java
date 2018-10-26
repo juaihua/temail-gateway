@@ -33,7 +33,7 @@ public class GrpcConcurrentTaskOnLine implements Runnable {
           grpcConcrData.grpcClientWrapper.removeChannelLocations(grpcConcrData.temailAccoutLocations.get(i));
           TimeUnit.MILLISECONDS.sleep(RANDOM.nextInt(20));
         }
-        TimeUnit.MILLISECONDS.sleep(100+RANDOM.nextInt(100));
+        TimeUnit.MILLISECONDS.sleep(100 + RANDOM.nextInt(100));
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
