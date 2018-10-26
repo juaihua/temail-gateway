@@ -5,10 +5,12 @@ import static com.syswin.temail.ps.common.utils.SignatureUtil.resetSignature;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.server.service.ChannelHolder;
 import io.netty.channel.Channel;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -26,8 +28,11 @@ class MessageHandler {
     try {
       log.debug("从MQ接受到消息: {}", message);
       CDTPPacket packet = gson.fromJson(message, CDTPPacketTrans.class).toCDTPPacket();
+      CDTPHeader header = packet.getHeader();
+      // 对于通知消息，重新生成packetId，避免跟请求的返回消息重复而产生错误
+      header.setPacketId(UUID.randomUUID().toString());
 
-      String receiver = packet.getHeader().getReceiver();
+      String receiver = header.getReceiver();
       Iterable<Channel> channels = channelHolder.getChannels(receiver);
       for (Channel channel : channels) {
         resetSignature(packet);
