@@ -1,8 +1,5 @@
-package com.syswin.temail.gateway.entity;
+package com.syswin.temail.ps.common.entity;
 
-import com.syswin.temail.ps.common.entity.CDTPHeader;
-import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.ps.common.entity.CommandSpaceType;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import lombok.AllArgsConstructor;
