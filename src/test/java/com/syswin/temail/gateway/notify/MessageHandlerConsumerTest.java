@@ -14,7 +14,7 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.google.gson.Gson;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.CDTPPacketTrans;
+import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.server.service.ChannelHolder;
 import io.netty.channel.Channel;
 import java.util.HashMap;

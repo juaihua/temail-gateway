@@ -31,7 +31,7 @@ import com.syswin.temail.gateway.containers.RocketMqBrokerContainer;
 import com.syswin.temail.gateway.containers.RocketMqNameServerContainer;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.CDTPPacketTrans;
+import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

@@ -1,11 +1,10 @@
 package com.syswin.temail.gateway.codec;
 
-import static com.syswin.temail.gateway.codec.PacketDecode.isSendGroupMsg;
-import static com.syswin.temail.gateway.codec.PacketDecode.isSendSingleMsg;
+import static com.syswin.temail.ps.common.utils.PacketUtil.isSendGroupMsg;
+import static com.syswin.temail.ps.common.utils.PacketUtil.isSendSingleMsg;
 
 import com.syswin.temail.ps.common.codec.BodyExtractor;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.ps.common.entity.CommandSpaceType;
 import com.syswin.temail.ps.common.utils.ByteBuf;
 
 public class CommandAwareBodyExtractor implements BodyExtractor {
@@ -34,9 +33,5 @@ public class CommandAwareBodyExtractor implements BodyExtractor {
     if (!isSendSingleMsg(packet.getCommandSpace(), packet.getCommand())) {
       bodyExtractor.decrypt(packet);
     }
-  }
-
-  private boolean isSendSingleMsg(short commandSpace, short command) {
-    return commandSpace == CommandSpaceType.SINGLE_MESSAGE_CODE && command == 1;
   }
 }

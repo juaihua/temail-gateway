@@ -2,7 +2,7 @@ package com.syswin.temail.gateway.service;
 
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.CDTPPacketTrans;
+import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;

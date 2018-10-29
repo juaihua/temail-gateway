@@ -18,7 +18,7 @@ import au.com.dius.pact.model.RequestResponsePact;
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.gateway.entity.CDTPPacketTrans;
+import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
