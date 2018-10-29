@@ -95,7 +95,7 @@ public class LoginConsumerTest extends ConsumerPactTestMk2 {
     LoginService loginService = new LoginService(restTemplate, url);
 
     // TODO 这个测试需要重写
-//    CDTPPacket packet = new CDTPPacket();
+//    CDTPPacket pack = new CDTPPacket();
 //
 //    // login success scenario
 //    ResponseEntity<Response> responseEntity = loginService.validSignature(sean, signature, unsignedText,signatureAlgorithm);

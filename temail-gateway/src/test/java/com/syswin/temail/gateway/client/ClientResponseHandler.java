@@ -33,7 +33,7 @@ public class ClientResponseHandler extends SimpleChannelInboundHandler<CDTPPacke
   @Override
   public void channelActive(ChannelHandlerContext ctx) {
     CDTPPacket packet = loginSupplier.get();
-    log.debug("Channel active, sending login packet {}", packet);
+    log.debug("Channel active, sending login pack {}", packet);
     ctx.writeAndFlush(packet);
   }
 

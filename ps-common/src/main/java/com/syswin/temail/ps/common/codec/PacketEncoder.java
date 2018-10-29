@@ -13,7 +13,7 @@ public class PacketEncoder extends MessageToByteEncoder<CDTPPacket> {
   @Override
   public void encode(ChannelHandlerContext ctx,
       CDTPPacket packet, ByteBuf byteBuf) {
-    byteBuf.writeBytes(PacketUtil.packet(packet));
+    byteBuf.writeBytes(PacketUtil.pack(packet));
     if (!packet.isHearbeat()) {
       log.debug("{}通道写入的信息是：CommandSpace={},Command={},CDTPHeader={},"
               + "Data={}", (ctx == null ? null : ctx.channel()), packet.getCommandSpace(), packet.getCommand(),

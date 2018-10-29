@@ -99,8 +99,8 @@ public class PsClientTest {
   //  @Test
   //  public void sendMessageInvalidUser() throws InterruptedException {
   //    Message reqMessage = MessageMaker.sendSingleChatMessage("invalidUser", receive, content);
-  //    CDTPPacket packet = MessageConverter.toCDTPPacket(reqMessage);
-  //    mockDispatch(packet);
+  //    CDTPPacket pack = MessageConverter.toCDTPPacket(reqMessage);
+  //    mockDispatch(pack);
   //    Message respMessage = psClient.sendMessage(reqMessage);
   //    String data = new String(respMessage.getPayload());
   //    new Gson().fromJson(data, Response.class);
@@ -161,9 +161,9 @@ public class PsClientTest {
   @Test
   public void testPacketAndUnpacket() {
     Message message = MessageMaker.sendSingleChatMessage(sender, receive, content);
-    byte[] bytes = PsClient.packet(message);
-    Message unpacketMessage = PsClient.unpacket(bytes);
-    assertThat(unpacketMessage).isEqualTo(message);
+    byte[] bytes = PsClient.pack(message);
+    Message unpackMessage = PsClient.unpack(bytes);
+    assertThat(unpackMessage).isEqualTo(message);
   }
 
   private void mockDispatch(CDTPPacket packet) {

@@ -26,7 +26,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
       List<Object> list) {
     byte[] bytes = new byte[byteBuf.readableBytes()];
     byteBuf.readBytes(bytes);
-    CDTPPacket packet = PacketUtil.unpacket(bytes, bodyExtractor);
+    CDTPPacket packet = PacketUtil.unpack(bytes, bodyExtractor);
 
     list.add(packet);
     if (!packet.isHearbeat() && log.isDebugEnabled()) {

@@ -141,8 +141,8 @@ public interface PsClient {
    * @param packetData Base64UrlSafe形式的CDTPPacket包，包含前导的长度
    * @return 解包后的Message对象
    */
-  static Message unpacket(String packetData) {
-    return unpacket(Base64.getUrlDecoder().decode(packetData));
+  static Message unpack(String packetData) {
+    return unpack(Base64.getUrlDecoder().decode(packetData));
   }
 
   /**
@@ -151,13 +151,13 @@ public interface PsClient {
    * @param packetData 字节数组形式的CDTPPacket包，包含前导的长度
    * @return 解包后的Message对象
    */
-  static Message unpacket(byte[] packetData) {
-    CDTPPacket packet = PacketUtil.unpacket(packetData);
+  static Message unpack(byte[] packetData) {
+    CDTPPacket packet = PacketUtil.unpack(packetData);
     return MessageConverter.fromCDTPPacket(packet);
   }
 
-  static byte[] packet(Message message) {
+  static byte[] pack(Message message) {
     CDTPPacket packet = MessageConverter.toCDTPPacket(message);
-    return PacketUtil.packet(packet);
+    return PacketUtil.pack(packet);
   }
 }
