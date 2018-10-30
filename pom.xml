@@ -53,6 +53,11 @@
       <artifactId>disconf-spring-boot-starter</artifactId>
       <version>${disconf-spring-boot-starter.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.9.9-RC1</version>
+    </dependency>
 
     <dependency>
       <groupId>io.netty</groupId>
@@ -365,6 +370,9 @@
               <mainClass>com.syswin.temail.gateway.TemailGatewayApplication</mainClass>
             </manifest>
           </archive>
+          <excludes>
+            <exclude>**/application.properties</exclude>
+          </excludes>
         </configuration>
       </plugin>
       <plugin>
