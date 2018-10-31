@@ -367,6 +367,7 @@
             <manifest>
               <addClasspath>true</addClasspath>
               <classpathPrefix>libs/</classpathPrefix>
+              <useUniqueVersions>false</useUniqueVersions>
               <mainClass>com.syswin.temail.gateway.TemailGatewayApplication</mainClass>
             </manifest>
           </archive>
