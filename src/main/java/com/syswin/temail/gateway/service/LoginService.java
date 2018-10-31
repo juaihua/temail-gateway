@@ -1,5 +1,6 @@
 package com.syswin.temail.gateway.service;
 
+import com.syswin.temail.gateway.codec.CDTPPacketConverter;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
@@ -21,7 +22,7 @@ class LoginService {
   }
 
   public ResponseEntity<Response> validSignature(CDTPPacket cdtpPacket) {
-    CDTPPacketTrans packetTrans = new CDTPPacketTrans(cdtpPacket);
+    CDTPPacketTrans packetTrans = CDTPPacketConverter.toTrans(cdtpPacket);
     HttpEntity<CDTPPacketTrans> requestEntity = new HttpEntity<>(packetTrans);
     return restTemplate.postForEntity(authUrl, requestEntity, Response.class);
   }

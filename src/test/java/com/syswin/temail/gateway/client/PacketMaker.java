@@ -6,6 +6,7 @@ import static com.syswin.temail.ps.common.entity.CommandSpaceType.SYNC_STATUS_CO
 import static com.syswin.temail.ps.server.Constants.NOTIFY_COMMAND;
 
 import com.google.gson.Gson;
+import com.syswin.temail.gateway.codec.CDTPPacketConverter;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
@@ -110,7 +111,7 @@ public class PacketMaker {
     header.setReceiver(recipient);
     payload.setHeader(header);
     payload.setData(gson.toJson(body).getBytes());
-    return new CDTPPacketTrans(payload);
+    return CDTPPacketConverter.toTrans(payload);
   }
 
 }

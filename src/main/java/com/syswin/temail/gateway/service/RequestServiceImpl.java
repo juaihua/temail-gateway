@@ -4,8 +4,8 @@ import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
 import static com.syswin.temail.ps.common.entity.CommandType.INTERNAL_ERROR;
 import static com.syswin.temail.ps.server.utils.SignatureUtil.resetSignature;
 
+import com.syswin.temail.gateway.codec.CDTPPacketConverter;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPServerError;
 import com.syswin.temail.ps.server.service.RequestService;
 import java.util.function.Consumer;
@@ -22,7 +22,7 @@ public class RequestServiceImpl implements RequestService {
 
   @Override
   public void handleRequest(CDTPPacket reqPacket, Consumer<CDTPPacket> responseHandler) {
-    dispatchService.dispatch(new CDTPPacketTrans(reqPacket),
+    dispatchService.dispatch(CDTPPacketConverter.toTrans(reqPacket),
         bytes -> {
           // 后台正常返回
           reqPacket.setData(bytes);

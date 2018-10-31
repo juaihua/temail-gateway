@@ -13,6 +13,7 @@ import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.google.gson.Gson;
+import com.syswin.temail.gateway.codec.CDTPPacketConverter;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.server.service.ChannelHolder;
@@ -75,7 +76,7 @@ public class MessageHandlerConsumerTest {
     return packet -> {
 
       String payloadJson = gson.toJson(payload);
-      String paramJson = gson.toJson(new CDTPPacketTrans(packet));
+      String paramJson = gson.toJson(CDTPPacketConverter.toTrans(packet));
       return payloadJson.equals(paramJson);
     };
   }
