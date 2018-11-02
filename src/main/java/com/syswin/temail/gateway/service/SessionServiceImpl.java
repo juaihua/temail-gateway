@@ -14,56 +14,53 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 public class SessionServiceImpl extends AbstractSessionService {
 
-  private final LoginService loginService;
+  private final AuthService authService;
 
   private final Consumer<Boolean> responseConsumer = ignored -> {
   };
 
   private final RemoteStatusService remoteStatusService;
 
-  public SessionServiceImpl(RestTemplate restTemplate, String verifyUrl,
-      RemoteStatusService remoteStatusService) {
-    this.loginService = new LoginService(restTemplate, verifyUrl);
+  public SessionServiceImpl(AuthService authService, RemoteStatusService remoteStatusService) {
+    this.authService = authService;
     this.remoteStatusService = remoteStatusService;
   }
 
   @Override
-  protected boolean loginExt(CDTPPacket reqPacket, CDTPPacket respPacket) {
+  protected void loginExtAsync(CDTPPacket reqPacket, Consumer<CDTPPacket> successHandler,
+      Consumer<CDTPPacket> failedHandler) {
     String temail = reqPacket.getHeader().getSender();
     String deviceId = reqPacket.getHeader().getDeviceId();
-    try {
-      if (!StringUtils.hasText(temail) || !StringUtils.hasText(deviceId)) {
-        loginFailure(reqPacket, respPacket,
-            Response.failed(HttpStatus.BAD_REQUEST, "temail或者deviceId为空！"));
-        return false;
-      }
-      try {
-        CDTPLogin cdtpLogin = CDTPLogin.parseFrom(reqPacket.getData());
-        log.debug("暂没有用的调试信息", cdtpLogin);
-      } catch (InvalidProtocolBufferException e) {
-        loginFailure(reqPacket, respPacket,
-            Response.failed(HttpStatus.BAD_REQUEST, e.getMessage()));
-        return false;
-      }
-      ResponseEntity<Response> responseEntity = loginService.validSignature(reqPacket);
-      Response response = responseEntity.getBody();
-      if (responseEntity.getStatusCode().is2xxSuccessful()) {
-        loginSuccess(reqPacket, respPacket, response);
-        return true;
-      } else {
-        loginFailure(reqPacket, respPacket, response);
-        return false;
-      }
-    } finally {
-      resetSignature(respPacket);
+    if (!StringUtils.hasText(temail) || !StringUtils.hasText(deviceId)) {
+      CDTPPacket respPacket = loginFailure(reqPacket,
+          Response.failed(HttpStatus.BAD_REQUEST, "temail或者deviceId为空！"));
+      failedHandler.accept(respPacket);
+      return;
     }
+    try {
+      CDTPLogin cdtpLogin = CDTPLogin.parseFrom(reqPacket.getData());
+      log.debug("暂没有用的调试信息", cdtpLogin);
+    } catch (InvalidProtocolBufferException e) {
+      CDTPPacket respPacket = loginFailure(reqPacket,
+          Response.failed(HttpStatus.BAD_REQUEST, e.getMessage()));
+      failedHandler.accept(respPacket);
+      return;
+    }
+    authService.validSignature(reqPacket,
+        response -> {
+          CDTPPacket respPacket = loginSuccess(reqPacket, response);
+          successHandler.accept(respPacket);
+        },
+        response -> {
+          CDTPPacket respPacket = loginFailure(reqPacket, response);
+          resetSignature(respPacket);
+          failedHandler.accept(respPacket);
+        });
   }
 
   @Override
@@ -85,8 +82,8 @@ public class SessionServiceImpl extends AbstractSessionService {
     remoteStatusService.removeSessions(sessions, responseConsumer);
   }
 
-
-  private void loginSuccess(CDTPPacket reqPacket, CDTPPacket respPacket, Response response) {
+  private CDTPPacket loginSuccess(CDTPPacket reqPacket, Response response) {
+    CDTPPacket respPacket = new CDTPPacket(reqPacket);
     String temail = reqPacket.getHeader().getSender();
     String deviceId = reqPacket.getHeader().getDeviceId();
     remoteStatusService.addSession(temail, deviceId, responseConsumer);
@@ -97,11 +94,13 @@ public class SessionServiceImpl extends AbstractSessionService {
       builder.setDesc(response.getMessage());
     }
     respPacket.setData(builder.build().toByteArray());
+    resetSignature(respPacket);
+    return respPacket;
   }
 
-
-  private void loginFailure(CDTPPacket reqPacket, CDTPPacket respPacket, Response response) {
-    // 登录失败返回错误消息，然后检查当前通道是否有登录用户，没有则关闭
+  private CDTPPacket loginFailure(CDTPPacket reqPacket, Response response) {
+    CDTPPacket respPacket = new CDTPPacket(reqPacket);
+    // 登录失败返回错误消息
     CDTPLoginResp.Builder builder = CDTPLoginResp.newBuilder();
     if (response != null) {
       if (response.getCode() != null) {
@@ -116,5 +115,7 @@ public class SessionServiceImpl extends AbstractSessionService {
       builder.setCode(HttpStatus.FORBIDDEN.value());
     }
     respPacket.setData(builder.build().toByteArray());
+    resetSignature(respPacket);
+    return respPacket;
   }
 }

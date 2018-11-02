@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.Gson;
@@ -107,7 +106,7 @@ public class YHCIntegrationTest {
     stubFor(post(urlEqualTo("/verify"))
         .willReturn(
             aResponse()
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
                 .withStatus(OK.value())
                 .withBody(gson.toJson(Response.ok())))
     );
@@ -115,7 +114,7 @@ public class YHCIntegrationTest {
     stubFor(any(urlEqualTo("/dispatch"))
         .willReturn(
             aResponse()
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
                 .withStatus(OK.value())
                 .withBody(gson.toJson(ackPayload()))));
 

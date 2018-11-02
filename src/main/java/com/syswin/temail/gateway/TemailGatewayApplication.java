@@ -5,10 +5,11 @@ import com.syswin.temail.gateway.channels.clients.grpc.GrpcClientWrapper;
 import com.syswin.temail.gateway.codec.CommandAwareBodyExtractor;
 import com.syswin.temail.gateway.service.DispatchService;
 import com.syswin.temail.gateway.service.DispatchServiceHttpClientAsync;
+import com.syswin.temail.gateway.service.AuthService;
+import com.syswin.temail.gateway.service.AuthServiceHttpClientAsync;
 import com.syswin.temail.gateway.service.RemoteStatusService;
 import com.syswin.temail.gateway.service.RequestServiceImpl;
 import com.syswin.temail.gateway.service.SessionServiceImpl;
-import com.syswin.temail.gateway.service.SilentResponseErrorHandler;
 import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
 import com.syswin.temail.ps.server.PsServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
@@ -16,9 +17,7 @@ import com.syswin.temail.ps.server.service.ChannelHolder;
 import com.syswin.temail.ps.server.service.RequestService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
@@ -34,15 +33,6 @@ public class TemailGatewayApplication {
   }
 
   @Bean
-  public RestTemplate restTemplate(RestTemplateBuilder builder) {
-    return builder
-        .setConnectTimeout(3000)
-        .setReadTimeout(3000)
-        .errorHandler(new SilentResponseErrorHandler())
-        .build();
-  }
-
-  @Bean
   public WebClient webClient() {
     return WebClient.create();
   }
@@ -53,10 +43,14 @@ public class TemailGatewayApplication {
   }
 
   @Bean
-  public AbstractSessionService sessionService(TemailGatewayProperties properties,
-      RestTemplate restTemplate,
+  public AuthService loginService(TemailGatewayProperties properties) {
+    return new AuthServiceHttpClientAsync(properties.getVerifyUrl());
+  }
+
+  @Bean
+  public AbstractSessionService sessionService(TemailGatewayProperties properties, AuthService authService,
       ChannelsSyncClient channelsSyncClient) {
-    return new SessionServiceImpl(restTemplate, properties.getVerifyUrl(),
+    return new SessionServiceImpl(authService,
         new RemoteStatusService(properties, channelsSyncClient));
   }
 

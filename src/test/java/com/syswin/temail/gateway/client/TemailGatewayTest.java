@@ -20,7 +20,6 @@ import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.Gson;
@@ -105,7 +104,7 @@ public class TemailGatewayTest {
     stubFor(post(urlEqualTo("/verify"))
         .willReturn(
             aResponse()
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
                 .withStatus(SC_OK)
                 .withBody(GSON.toJson(Response.ok())))
     );
@@ -113,7 +112,7 @@ public class TemailGatewayTest {
     stubFor(post(urlEqualTo("/dispatch"))
         .willReturn(
             aResponse()
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
                 .withStatus(SC_OK)
                 .withBody(GSON.toJson(Response.ok(ackPayload())))));
 

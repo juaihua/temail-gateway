@@ -1,6 +1,6 @@
 package com.syswin.temail.gateway.service;
 
-import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 import com.google.gson.Gson;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
@@ -40,7 +40,7 @@ public class DispatchServiceHttpClientAsync implements DispatchService {
   public void dispatch(CDTPPacketTrans packet, Consumer<byte[]> consumer,
       Consumer<? super Throwable> errorConsumer) {
     StringEntity bodyEntity = new StringEntity(gson.toJson(packet), StandardCharsets.UTF_8);
-    bodyEntity.setContentType(APPLICATION_JSON_VALUE);
+    bodyEntity.setContentType(APPLICATION_JSON_UTF8_VALUE);
     HttpPost request = new HttpPost(dispatchUrl);
     request.setEntity(bodyEntity);
 

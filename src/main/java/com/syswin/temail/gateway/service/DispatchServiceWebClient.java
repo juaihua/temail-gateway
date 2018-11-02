@@ -30,7 +30,7 @@ public class DispatchServiceWebClient implements DispatchService {
       Consumer<? super Throwable> errorConsumer) {
     webClient.post()
         .uri(dispatchUrl)
-        .contentType(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON_UTF8)
         // 此处使用gson进行对象转换，是因为WebClient默认使用jackson进行json转换，与服务端的json转换不一致。jackson与gson处理字节数组行为不一致。
         .syncBody(gson.toJson(packet))
         .exchange()

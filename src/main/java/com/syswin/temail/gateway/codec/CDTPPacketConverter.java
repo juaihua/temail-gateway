@@ -3,8 +3,8 @@ package com.syswin.temail.gateway.codec;
 import static com.syswin.temail.gateway.codec.CommandAwarePacketUtil.decodeData;
 import static com.syswin.temail.gateway.codec.CommandAwarePacketUtil.encodeData;
 
-import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
+import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 
 /**
  * @author 姚华成
