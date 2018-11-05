@@ -2,6 +2,7 @@ package com.syswin.temail.gateway.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.codec.CommandAwareBodyExtractor;
 import com.syswin.temail.ps.common.codec.PacketDecoder;
 import com.syswin.temail.ps.common.codec.PacketEncoder;
@@ -22,11 +23,12 @@ public class PacketDecoderTest {
   private final String deviceId = "deviceId";
 
   private final List<Object> packets = new ArrayList<>();
-  private final PacketDecoder decoder = new PacketDecoder(new CommandAwareBodyExtractor(new SimpleBodyExtractor()));
+  private final PacketDecoder decoder = new PacketDecoder(new CommandAwareBodyExtractor(new SimpleBodyExtractor(),
+      new TemailGatewayProperties()));
   private final PacketEncoder encoder = new PacketEncoder();
 
   @Test
-  public void shouldDecodeNormalPacketBytes() throws Exception {
+  public void shouldDecodeNormalPacketBytes() {
     CDTPPacket packet = PacketMaker.loginPacket(sender, deviceId);
     ByteBuf buffer = Unpooled.buffer();
     ByteBuf bufferIncludeLength = Unpooled.buffer();
@@ -42,7 +44,7 @@ public class PacketDecoderTest {
   }
 
   @Test
-  public void shouldDecodeSpecialPacketBytes() throws Exception {
+  public void shouldDecodeSpecialPacketBytes() {
     String message = "hello world";
     CDTPPacket packet = PacketMaker.singleChatPacket(sender, "recipient", message, deviceId);
     ByteBuf buffer = Unpooled.buffer();

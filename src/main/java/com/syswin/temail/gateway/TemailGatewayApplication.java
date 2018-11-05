@@ -82,7 +82,7 @@ public class TemailGatewayApplication {
             properties.getNetty().getPort(),
             properties.getNetty().getReadIdleTimeSeconds(),
             new CommandAwareBodyExtractor(
-                new SimpleBodyExtractor())));
+                new SimpleBodyExtractor(), properties)));
   }
 
 }
