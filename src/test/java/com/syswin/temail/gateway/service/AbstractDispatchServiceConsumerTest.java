@@ -16,10 +16,10 @@ import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.RequestResponsePact;
 import com.google.gson.Gson;
-import com.syswin.temail.gateway.codec.CDTPPacketConverter;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
+import com.syswin.temail.ps.common.packet.SimplePacketUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -40,7 +40,7 @@ public abstract class AbstractDispatchServiceConsumerTest extends ConsumerPactTe
   private final String receiver = "sean@t.email";
   private final String message = "hello world";
   private final String deviceId = "deviceId_5514";
-  private final CDTPPacketTrans packet = CDTPPacketConverter
+  private final CDTPPacketTrans packet = SimplePacketUtil.INSTANCE
       .toTrans(singleChatPacket(sender, receiver, message, deviceId));
   private volatile Response resultResponse = null;
   private Throwable exception;

@@ -1,10 +1,11 @@
 package com.syswin.temail.gateway.service;
 
 import com.google.gson.Gson;
-import com.syswin.temail.gateway.codec.CDTPPacketConverter;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
+import com.syswin.temail.ps.common.packet.PacketUtil;
+import com.syswin.temail.ps.common.packet.SimplePacketUtil;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
@@ -26,23 +27,31 @@ public class AuthServiceHttpClientAsync implements AuthService {
 
   private final CloseableHttpAsyncClient asyncClient;
   private final String authUrl;
+  private final PacketUtil packetUtil;
   private final Gson gson = new Gson();
 
-  public AuthServiceHttpClientAsync(CloseableHttpAsyncClient asyncClient, String authUrl) {
-    this.asyncClient = asyncClient;
-    this.authUrl = authUrl;
+  public AuthServiceHttpClientAsync(String authUrl) {
+    this(authUrl, SimplePacketUtil.INSTANCE);
   }
 
-  public AuthServiceHttpClientAsync(String authUrl) {
+  public AuthServiceHttpClientAsync(String authUrl, PacketUtil packetUtil) {
     this.asyncClient = HttpAsyncClientBuilder.create().build();
     this.asyncClient.start();
     this.authUrl = authUrl;
+    this.packetUtil = packetUtil;
+  }
+
+  public AuthServiceHttpClientAsync(CloseableHttpAsyncClient asyncClient, String authUrl,
+      PacketUtil packetUtil) {
+    this.asyncClient = asyncClient;
+    this.authUrl = authUrl;
+    this.packetUtil = packetUtil;
   }
 
   @Override
   public void validSignature(CDTPPacket reqPacket, Consumer<Response> sucessConsumer,
       Consumer<Response> failedConsumer) {
-    CDTPPacketTrans packetTrans = CDTPPacketConverter.toTrans(reqPacket);
+    CDTPPacketTrans packetTrans = packetUtil.toTrans(reqPacket);
 
     StringEntity bodyEntity = new StringEntity(gson.toJson(packetTrans), StandardCharsets.UTF_8);
     bodyEntity.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);

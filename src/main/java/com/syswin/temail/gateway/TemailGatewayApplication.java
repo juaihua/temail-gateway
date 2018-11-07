@@ -2,11 +2,12 @@ package com.syswin.temail.gateway;
 
 import com.syswin.temail.gateway.channels.ChannelsSyncClient;
 import com.syswin.temail.gateway.channels.clients.grpc.GrpcClientWrapper;
-import com.syswin.temail.gateway.codec.CommandAwareBodyExtractor;
-import com.syswin.temail.gateway.service.DispatchService;
-import com.syswin.temail.gateway.service.DispatchServiceHttpClientAsync;
+import com.syswin.temail.gateway.codec.CommandAwarePacketUtil;
+import com.syswin.temail.gateway.notify.RocketMqRunner;
 import com.syswin.temail.gateway.service.AuthService;
 import com.syswin.temail.gateway.service.AuthServiceHttpClientAsync;
+import com.syswin.temail.gateway.service.DispatchService;
+import com.syswin.temail.gateway.service.DispatchServiceHttpClientAsync;
 import com.syswin.temail.gateway.service.RemoteStatusService;
 import com.syswin.temail.gateway.service.RequestServiceImpl;
 import com.syswin.temail.gateway.service.SessionServiceImpl;
@@ -75,14 +76,23 @@ public class TemailGatewayApplication {
   TemailGatewayRunner gatewayRunner(TemailGatewayProperties properties,
       AbstractSessionService sessionService,
       RequestService requestService) {
+//    KeyAwareVault vault = VaultKeeper.keyAwareVault("", "");
     return new TemailGatewayRunner(
         new PsServer(
             sessionService,
             requestService,
             properties.getNetty().getPort(),
             properties.getNetty().getReadIdleTimeSeconds(),
-            new CommandAwareBodyExtractor(
-                new SimpleBodyExtractor(), properties)));
+            new CommandAwarePacketUtil(properties, SimpleBodyExtractor.INSTANCE)
+//            ,
+//            new KeyAwareEccPacketSigner(vault),
+//            new KeyAwarePacketVerifier(vault),
+//            new KeyAwareEccPacketEncryptor(vault)
+        ));
   }
 
+  @Bean
+  public RocketMqRunner rocketMqRunner(TemailGatewayProperties properties, ChannelHolder channelHolder) {
+    return new RocketMqRunner(properties, channelHolder);
+  }
 }

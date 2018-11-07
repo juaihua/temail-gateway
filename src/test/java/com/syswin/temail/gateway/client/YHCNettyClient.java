@@ -4,7 +4,6 @@ import static com.syswin.temail.ps.common.Constants.LENGTH_FIELD_LENGTH;
 
 import com.syswin.temail.ps.common.codec.PacketDecoder;
 import com.syswin.temail.ps.common.codec.PacketEncoder;
-import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -53,7 +52,7 @@ public class YHCNettyClient {
                     new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH, 0, 0))
                 .addLast("lengthFieldPrepender",
                     new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false))
-                .addLast(new PacketDecoder(new SimpleBodyExtractor()))
+                .addLast(new PacketDecoder())
                 .addLast(new PacketEncoder())
                 .addLast(responseHandler);
           }

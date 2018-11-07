@@ -3,11 +3,12 @@ package com.syswin.temail.gateway.client;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.syswin.temail.gateway.TemailGatewayProperties;
-import com.syswin.temail.gateway.codec.CommandAwareBodyExtractor;
+import com.syswin.temail.gateway.codec.CommandAwarePacketUtil;
 import com.syswin.temail.ps.common.codec.PacketDecoder;
 import com.syswin.temail.ps.common.codec.PacketEncoder;
 import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
+import com.syswin.temail.ps.common.packet.PacketVerifier;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -23,8 +24,9 @@ public class PacketDecoderTest {
   private final String deviceId = "deviceId";
 
   private final List<Object> packets = new ArrayList<>();
-  private final PacketDecoder decoder = new PacketDecoder(new CommandAwareBodyExtractor(new SimpleBodyExtractor(),
-      new TemailGatewayProperties()));
+  private final PacketDecoder decoder = new PacketDecoder(
+      new CommandAwarePacketUtil(new TemailGatewayProperties(), SimpleBodyExtractor.INSTANCE),
+      PacketVerifier.NoOp);
   private final PacketEncoder encoder = new PacketEncoder();
 
   @Test

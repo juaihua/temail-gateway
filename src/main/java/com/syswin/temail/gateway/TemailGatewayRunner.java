@@ -3,12 +3,13 @@ package com.syswin.temail.gateway;
 import com.syswin.temail.ps.server.PsServer;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.Ordered;
 
 /**
  * @author 姚华成
  * @date 2018-10-22
  */
-public class TemailGatewayRunner implements ApplicationRunner {
+public class TemailGatewayRunner implements ApplicationRunner, Ordered {
 
   private PsServer psServer;
 
@@ -17,7 +18,12 @@ public class TemailGatewayRunner implements ApplicationRunner {
   }
 
   @Override
-  public void run(ApplicationArguments args) throws Exception {
+  public void run(ApplicationArguments args) {
     psServer.run();
+  }
+
+  @Override
+  public int getOrder() {
+    return 1;
   }
 }

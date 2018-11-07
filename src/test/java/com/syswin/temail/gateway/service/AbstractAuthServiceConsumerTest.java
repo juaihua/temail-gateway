@@ -16,10 +16,10 @@ import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.RequestResponsePact;
 import com.google.gson.Gson;
-import com.syswin.temail.gateway.codec.CDTPPacketConverter;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
+import com.syswin.temail.ps.common.packet.SimplePacketUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -60,7 +60,7 @@ public abstract class AbstractAuthServiceConsumerTest extends ConsumerPactTestMk
         .path(path)
         .method("POST")
         .headers(headers)
-        .body(gson.toJson(CDTPPacketConverter.toTrans(normalPacket)))
+        .body(gson.toJson(SimplePacketUtil.INSTANCE.toTrans(normalPacket)))
         .willRespondWith()
         .status(OK.value())
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
@@ -70,7 +70,7 @@ public abstract class AbstractAuthServiceConsumerTest extends ConsumerPactTestMk
         .path(path)
         .method("POST")
         .headers(headers)
-        .body(gson.toJson(CDTPPacketConverter.toTrans(notRegPacket)))
+        .body(gson.toJson(SimplePacketUtil.INSTANCE.toTrans(notRegPacket)))
         .willRespondWith()
         .status(NOT_FOUND.value())
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
@@ -80,7 +80,7 @@ public abstract class AbstractAuthServiceConsumerTest extends ConsumerPactTestMk
         .path(path)
         .method("POST")
         .headers(headers)
-        .body(gson.toJson(CDTPPacketConverter.toTrans(signErrorPacket)))
+        .body(gson.toJson(SimplePacketUtil.INSTANCE.toTrans(signErrorPacket)))
         .willRespondWith()
         .status(BAD_REQUEST.value())
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
