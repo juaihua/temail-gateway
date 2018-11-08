@@ -21,9 +21,18 @@ import java.util.Base64;
 public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor {
 
   private final TemailGatewayProperties properties;
+  private final BodyExtractor defaultBodyExtractor;
+  private final PacketUtil defaultPacketUtil;
 
   public CommandAwarePacketUtil(TemailGatewayProperties properties) {
+    this(properties, SimpleBodyExtractor.INSTANCE, SimplePacketUtil.INSTANCE);
+  }
+
+  public CommandAwarePacketUtil(TemailGatewayProperties properties, BodyExtractor defaultBodyExtractor,
+      PacketUtil defaultPacketUtil) {
     this.properties = properties;
+    this.defaultBodyExtractor = defaultBodyExtractor;
+    this.defaultPacketUtil = defaultPacketUtil;
   }
 
   @Override
@@ -48,7 +57,7 @@ public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor 
         return dataBytes;
       }
     } else {
-      return SimplePacketUtil.INSTANCE.decodeData(packet);
+      return defaultPacketUtil.decodeData(packet);
     }
   }
 
@@ -78,7 +87,7 @@ public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor 
       byteBuf.resetReaderIndex();
       remaining += byteBuf.readableBytes() - readableBytes;
     }
-    return SimpleBodyExtractor.INSTANCE.fromBuffer(commandSpace, command, byteBuf, remaining);
+    return defaultBodyExtractor.fromBuffer(commandSpace, command, byteBuf, remaining);
   }
 
   public void decrypt(CDTPPacket packet) {
@@ -87,7 +96,7 @@ public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor 
     short command = packet.getCommand();
     if (!isSendSingleMsg(commandSpace, command) &&
         (!isSendGroupMsg(commandSpace, command))) {
-      SimpleBodyExtractor.INSTANCE.decrypt(packet);
+      defaultBodyExtractor.decrypt(packet);
     }
   }
 
