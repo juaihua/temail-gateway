@@ -11,11 +11,6 @@ import com.syswin.temail.gateway.service.DispatchServiceHttpClientAsync;
 import com.syswin.temail.gateway.service.RemoteStatusService;
 import com.syswin.temail.gateway.service.RequestServiceImpl;
 import com.syswin.temail.gateway.service.SessionServiceImpl;
-import com.syswin.temail.kms.vault.KeyAwareVault;
-import com.syswin.temail.kms.vault.VaultKeeper;
-import com.syswin.temail.ps.common.packet.KeyAwarePacketEncryptor;
-import com.syswin.temail.ps.common.packet.KeyAwarePacketSigner;
-import com.syswin.temail.ps.common.packet.KeyAwarePacketVerifier;
 import com.syswin.temail.ps.server.PsServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
 import com.syswin.temail.ps.server.service.ChannelHolder;
@@ -86,23 +81,18 @@ public class TemailGatewayApplication {
       AbstractSessionService sessionService,
       RequestService requestService,
       CommandAwarePacketUtil packetUtil) {
-    KeyAwareVault vault = VaultKeeper.keyAwareVault("http://kms.innermail.com:8081", "syswin");
     return new TemailGatewayRunner(
         new PsServer(
             sessionService,
             requestService,
             properties.getNetty().getPort(),
             properties.getNetty().getReadIdleTimeSeconds(),
-            packetUtil
-            ,
-            new KeyAwarePacketSigner(vault),
-            new KeyAwarePacketVerifier(vault),
-            new KeyAwarePacketEncryptor(vault)
-        ));
+            packetUtil));
   }
 
   @Bean
-  public RocketMqRunner rocketMqRunner(TemailGatewayProperties properties, ChannelHolder channelHolder) {
-    return new RocketMqRunner(properties, channelHolder);
+  public RocketMqRunner rocketMqRunner(TemailGatewayProperties properties, ChannelHolder channelHolder,
+      CommandAwarePacketUtil packetUtil) {
+    return new RocketMqRunner(properties, channelHolder, packetUtil);
   }
 }

@@ -14,20 +14,17 @@ import org.springframework.core.Ordered;
  */
 public class RocketMqRunner implements ApplicationRunner, Ordered {
 
-  private TemailGatewayProperties properties;
-  private ChannelHolder channelHolder;
+  private final RocketMqConsumer consumer;
 
-  public RocketMqRunner(TemailGatewayProperties properties, ChannelHolder channelHolder) {
-    this.properties = properties;
-    this.channelHolder = channelHolder;
+  public RocketMqRunner(TemailGatewayProperties properties, ChannelHolder channelHolder,
+      CommandAwarePacketUtil packetUtil) {
+    consumer = new RocketMqConsumer(properties,
+        new TemailServerMqListener(
+            new MessageHandler(channelHolder, packetUtil)));
   }
 
   @Override
   public void run(ApplicationArguments args) throws MQClientException {
-    RocketMqConsumer consumer = new RocketMqConsumer(properties,
-        new TemailServerMqListener(
-            new MessageHandler(channelHolder, new CommandAwarePacketUtil(properties))));
-
     consumer.start();
     Runtime.getRuntime().addShutdownHook(new Thread(consumer::stop));
   }
