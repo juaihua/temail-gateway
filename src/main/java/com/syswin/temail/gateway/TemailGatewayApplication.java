@@ -86,7 +86,7 @@ public class TemailGatewayApplication {
       AbstractSessionService sessionService,
       RequestService requestService,
       CommandAwarePacketUtil packetUtil) {
-    KeyAwareVault vault = VaultKeeper.keyAwareVault("kms.innermail.com:8081", "syswin");
+    KeyAwareVault vault = VaultKeeper.keyAwareVault("http://kms.innermail.com:8081", "syswin");
     return new TemailGatewayRunner(
         new PsServer(
             sessionService,
