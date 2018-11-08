@@ -1,11 +1,10 @@
 package com.syswin.temail.gateway.service;
 
 import com.google.gson.Gson;
+import com.syswin.temail.gateway.codec.CommandAwarePacketUtil;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
-import com.syswin.temail.ps.common.packet.PacketUtil;
-import com.syswin.temail.ps.common.packet.SimplePacketUtil;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
@@ -27,14 +26,10 @@ public class AuthServiceHttpClientAsync implements AuthService {
 
   private final CloseableHttpAsyncClient asyncClient;
   private final String authUrl;
-  private final PacketUtil packetUtil;
+  private final CommandAwarePacketUtil packetUtil;
   private final Gson gson = new Gson();
 
-  public AuthServiceHttpClientAsync(String authUrl) {
-    this(authUrl, SimplePacketUtil.INSTANCE);
-  }
-
-  public AuthServiceHttpClientAsync(String authUrl, PacketUtil packetUtil) {
+  public AuthServiceHttpClientAsync(String authUrl, CommandAwarePacketUtil packetUtil) {
     this.asyncClient = HttpAsyncClientBuilder.create().build();
     this.asyncClient.start();
     this.authUrl = authUrl;
@@ -42,7 +37,7 @@ public class AuthServiceHttpClientAsync implements AuthService {
   }
 
   public AuthServiceHttpClientAsync(CloseableHttpAsyncClient asyncClient, String authUrl,
-      PacketUtil packetUtil) {
+      CommandAwarePacketUtil packetUtil) {
     this.asyncClient = asyncClient;
     this.authUrl = authUrl;
     this.packetUtil = packetUtil;

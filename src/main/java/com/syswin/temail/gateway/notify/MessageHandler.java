@@ -5,11 +5,10 @@ import static com.syswin.temail.ps.server.utils.SignatureUtil.resetSignature;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.syswin.temail.gateway.codec.CommandAwarePacketUtil;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
-import com.syswin.temail.ps.common.packet.PacketUtil;
-import com.syswin.temail.ps.common.packet.SimplePacketUtil;
 import com.syswin.temail.ps.server.service.ChannelHolder;
 import io.netty.channel.Channel;
 import java.util.UUID;
@@ -20,10 +19,11 @@ class MessageHandler {
 
   private final ChannelHolder channelHolder;
   private final Gson gson = new Gson();
-  private final PacketUtil packetUtil=SimplePacketUtil.INSTANCE;
+  private final CommandAwarePacketUtil packetUtil;
 
-  MessageHandler(ChannelHolder channelHolder) {
+  MessageHandler(ChannelHolder channelHolder, CommandAwarePacketUtil packetUtil) {
     this.channelHolder = channelHolder;
+    this.packetUtil = packetUtil;
   }
 
   void onMessageReceived(String message) {

@@ -3,11 +3,10 @@ package com.syswin.temail.gateway.service;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
 import com.google.gson.Gson;
+import com.syswin.temail.gateway.codec.CommandAwarePacketUtil;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
-import com.syswin.temail.ps.common.packet.PacketUtil;
-import com.syswin.temail.ps.common.packet.SimplePacketUtil;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,14 +17,14 @@ public class AuthServiceWebClient implements AuthService {
 
   private final WebClient webClient;
   private final String authUrl;
-  private final PacketUtil packetUtil;
+  private final CommandAwarePacketUtil packetUtil;
   private final Gson gson = new Gson();
 
-  public AuthServiceWebClient(String url) {
-    this(WebClient.create(), url, SimplePacketUtil.INSTANCE);
+  public AuthServiceWebClient(String url, CommandAwarePacketUtil packetUtil) {
+    this(WebClient.create(), url, packetUtil);
   }
 
-  public AuthServiceWebClient(WebClient webClient, String authUrl, PacketUtil packetUtil) {
+  public AuthServiceWebClient(WebClient webClient, String authUrl, CommandAwarePacketUtil packetUtil) {
     this.webClient = webClient;
     this.authUrl = authUrl;
     this.packetUtil = packetUtil;

@@ -11,7 +11,11 @@ import com.syswin.temail.gateway.service.DispatchServiceHttpClientAsync;
 import com.syswin.temail.gateway.service.RemoteStatusService;
 import com.syswin.temail.gateway.service.RequestServiceImpl;
 import com.syswin.temail.gateway.service.SessionServiceImpl;
-import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
+import com.syswin.temail.kms.vault.KeyAwareVault;
+import com.syswin.temail.kms.vault.VaultKeeper;
+import com.syswin.temail.ps.common.packet.KeyAwarePacketEncryptor;
+import com.syswin.temail.ps.common.packet.KeyAwarePacketSigner;
+import com.syswin.temail.ps.common.packet.KeyAwarePacketVerifier;
 import com.syswin.temail.ps.server.PsServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
 import com.syswin.temail.ps.server.service.ChannelHolder;
@@ -44,8 +48,13 @@ public class TemailGatewayApplication {
   }
 
   @Bean
-  public AuthService loginService(TemailGatewayProperties properties) {
-    return new AuthServiceHttpClientAsync(properties.getVerifyUrl());
+  public CommandAwarePacketUtil packetUtil(TemailGatewayProperties properties) {
+    return new CommandAwarePacketUtil(properties);
+  }
+
+  @Bean
+  public AuthService loginService(TemailGatewayProperties properties, CommandAwarePacketUtil packetUtil) {
+    return new AuthServiceHttpClientAsync(properties.getVerifyUrl(), packetUtil);
   }
 
   @Bean
@@ -68,26 +77,27 @@ public class TemailGatewayApplication {
   }
 
   @Bean
-  public RequestService requestService(DispatchService dispatchService) {
-    return new RequestServiceImpl(dispatchService);
+  public RequestService requestService(DispatchService dispatchService, CommandAwarePacketUtil packetUtil) {
+    return new RequestServiceImpl(dispatchService, packetUtil);
   }
 
   @Bean
   TemailGatewayRunner gatewayRunner(TemailGatewayProperties properties,
       AbstractSessionService sessionService,
-      RequestService requestService) {
-//    KeyAwareVault vault = VaultKeeper.keyAwareVault("", "");
+      RequestService requestService,
+      CommandAwarePacketUtil packetUtil) {
+    KeyAwareVault vault = VaultKeeper.keyAwareVault("kms.innermail.com:8081", "syswin");
     return new TemailGatewayRunner(
         new PsServer(
             sessionService,
             requestService,
             properties.getNetty().getPort(),
             properties.getNetty().getReadIdleTimeSeconds(),
-            new CommandAwarePacketUtil(properties, SimpleBodyExtractor.INSTANCE)
-//            ,
-//            new KeyAwareEccPacketSigner(vault),
-//            new KeyAwarePacketVerifier(vault),
-//            new KeyAwareEccPacketEncryptor(vault)
+            packetUtil
+            ,
+            new KeyAwarePacketSigner(vault),
+            new KeyAwarePacketVerifier(vault),
+            new KeyAwarePacketEncryptor(vault)
         ));
   }
 

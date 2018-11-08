@@ -13,6 +13,8 @@ import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.google.gson.Gson;
+import com.syswin.temail.gateway.TemailGatewayProperties;
+import com.syswin.temail.gateway.codec.CommandAwarePacketUtil;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.common.packet.SimplePacketUtil;
@@ -35,6 +37,7 @@ public class MessageHandlerConsumerTest {
 
   private final Channel channel = Mockito.mock(Channel.class);
   private final ChannelHolder channelHolder = Mockito.mock(ChannelHolder.class);
+  private final CommandAwarePacketUtil packetUtil = new CommandAwarePacketUtil(new TemailGatewayProperties());
 
   private final String recipient = "sean@t.email";
   private final Gson gson = new Gson();
@@ -60,7 +63,7 @@ public class MessageHandlerConsumerTest {
   public void test() {
     when(channelHolder.getChannels(recipient)).thenReturn(singletonList(channel));
 
-    MessageHandler messageHandler = new MessageHandler(channelHolder);
+    MessageHandler messageHandler = new MessageHandler(channelHolder, packetUtil);
 
     String msg = new String(currentMessage);
     messageHandler.onMessageReceived(msg);

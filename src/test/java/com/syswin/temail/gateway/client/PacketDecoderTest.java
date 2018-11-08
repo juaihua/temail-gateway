@@ -6,7 +6,6 @@ import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.codec.CommandAwarePacketUtil;
 import com.syswin.temail.ps.common.codec.PacketDecoder;
 import com.syswin.temail.ps.common.codec.PacketEncoder;
-import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.packet.PacketVerifier;
 import io.netty.buffer.ByteBuf;
@@ -25,7 +24,7 @@ public class PacketDecoderTest {
 
   private final List<Object> packets = new ArrayList<>();
   private final PacketDecoder decoder = new PacketDecoder(
-      new CommandAwarePacketUtil(new TemailGatewayProperties(), SimpleBodyExtractor.INSTANCE),
+      new CommandAwarePacketUtil(new TemailGatewayProperties()),
       PacketVerifier.NoOp);
   private final PacketEncoder encoder = new PacketEncoder();
 

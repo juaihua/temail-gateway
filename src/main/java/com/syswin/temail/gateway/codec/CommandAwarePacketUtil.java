@@ -5,6 +5,7 @@ import static com.syswin.temail.ps.common.entity.CommandSpaceType.SINGLE_MESSAGE
 
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.ps.common.codec.BodyExtractor;
+import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.common.packet.ByteBuf;
@@ -20,23 +21,13 @@ import java.util.Base64;
 public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor {
 
   private final TemailGatewayProperties properties;
-  private final BodyExtractor defaultBodyExtractor;
-  private final PacketUtil defaultPacketUtil;
 
-  public CommandAwarePacketUtil(TemailGatewayProperties properties,
-      BodyExtractor defaultBodyExtractor) {
-    this(properties, defaultBodyExtractor, SimplePacketUtil.INSTANCE);
-  }
-
-  public CommandAwarePacketUtil(TemailGatewayProperties properties,
-      BodyExtractor defaultBodyExtractor, PacketUtil defaultPacketUtil) {
+  public CommandAwarePacketUtil(TemailGatewayProperties properties) {
     this.properties = properties;
-    this.defaultBodyExtractor = defaultBodyExtractor;
-    this.defaultPacketUtil = defaultPacketUtil;
   }
 
   @Override
-  public BodyExtractor getBodyExtractor() {
+  protected BodyExtractor getBodyExtractor() {
     return this;
   }
 
@@ -57,7 +48,7 @@ public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor 
         return dataBytes;
       }
     } else {
-      return defaultPacketUtil.decodeData(packet);
+      return SimplePacketUtil.INSTANCE.decodeData(packet);
     }
   }
 
@@ -87,7 +78,7 @@ public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor 
       byteBuf.resetReaderIndex();
       remaining += byteBuf.readableBytes() - readableBytes;
     }
-    return defaultBodyExtractor.fromBuffer(commandSpace, command, byteBuf, remaining);
+    return SimpleBodyExtractor.INSTANCE.fromBuffer(commandSpace, command, byteBuf, remaining);
   }
 
   public void decrypt(CDTPPacket packet) {
@@ -96,7 +87,7 @@ public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor 
     short command = packet.getCommand();
     if (!isSendSingleMsg(commandSpace, command) &&
         (!isSendGroupMsg(commandSpace, command))) {
-      defaultBodyExtractor.decrypt(packet);
+      SimpleBodyExtractor.INSTANCE.decrypt(packet);
     }
   }
 
