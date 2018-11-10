@@ -17,6 +17,7 @@ import com.syswin.temail.ps.common.entity.CommandType;
 import com.syswin.temail.ps.common.packet.SimplePacketUtil;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class PacketMaker {
 
@@ -53,10 +54,6 @@ public class PacketMaker {
     packet.setData(message.getBytes());
 
     return packet;
-  }
-
-  public static CDTPPacket groupChatPacket() {
-    return null;
   }
 
   public static CDTPPacket loginPacket(String sender, String deviceId) {
@@ -109,6 +106,7 @@ public class PacketMaker {
     payload.setVersion(CDTP_VERSION);
     CDTPHeader header = new CDTPHeader();
     header.setReceiver(recipient);
+    header.setSignature(UUID.randomUUID().toString());
     payload.setHeader(header);
     payload.setData(gson.toJson(body).getBytes());
     return SimplePacketUtil.INSTANCE.toTrans(payload);

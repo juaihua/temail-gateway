@@ -33,11 +33,11 @@ class MessageHandler {
       CDTPHeader header = packet.getHeader();
       // 对于通知消息，重新生成packetId，避免跟请求的返回消息重复而产生错误
       header.setPacketId(UUID.randomUUID().toString());
+      resetSignature(packet);
 
       String receiver = header.getReceiver();
       Iterable<Channel> channels = channelHolder.getChannels(receiver);
       for (Channel channel : channels) {
-        resetSignature(packet);
         log.debug("当前推送的通道信息：{}，推送的内容信息：{}", channel, packet);
         channel.writeAndFlush(packet);
       }

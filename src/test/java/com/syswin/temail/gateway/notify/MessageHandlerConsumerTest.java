@@ -2,6 +2,7 @@ package com.syswin.temail.gateway.notify;
 
 import static com.syswin.temail.gateway.client.PacketMaker.mqMsgPayload;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -80,9 +81,12 @@ public class MessageHandlerConsumerTest {
   private ArgumentMatcher<CDTPPacket> matchesPayload(CDTPPacketTrans payload) {
     return packet -> {
 
-      String payloadJson = gson.toJson(payload);
-      String paramJson = gson.toJson(SimplePacketUtil.INSTANCE.toTrans(packet));
-      return payloadJson.equals(paramJson);
+      CDTPPacketTrans actual = SimplePacketUtil.INSTANCE.toTrans(packet);
+      assertThat(actual).isEqualToIgnoringGivenFields(payload, "header");
+      assertThat(actual.getHeader()).isEqualToIgnoringGivenFields(payload.getHeader(), "packetId", "signature");
+      assertThat(actual.getHeader().getSignature()).isNull();
+      assertThat(actual.getHeader().getPacketId()).isNotEmpty();
+      return true;
     };
   }
 

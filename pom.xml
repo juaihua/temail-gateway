@@ -12,7 +12,7 @@
   <version>1.0.2-SNAPSHOT</version>
 
   <properties>
-    <ps.version>1.1.1</ps.version>
+    <ps.version>1.1.0-SNAPSHOT</ps.version>
     <disconf-spring-boot-starter.version>1.0.0</disconf-spring-boot-starter.version>
 
     <netty.version>4.1.27.Final</netty.version>
@@ -46,6 +46,11 @@
     <dependency>
       <groupId>com.syswin.temail</groupId>
       <artifactId>ps-server</artifactId>
+      <version>${ps.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.syswin.temail</groupId>
+      <artifactId>ps-protocol</artifactId>
       <version>${ps.version}</version>
     </dependency>
     <dependency>

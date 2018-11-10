@@ -34,7 +34,8 @@ public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor 
     return this;
   }
 
-  public byte[] decodeData(CDTPPacketTrans packet, boolean original) {
+  @Override
+  public byte[] decodeData(CDTPPacketTrans packet) {
     String data;
     if (packet == null || (data = packet.getData()) == null) {
       return new byte[0];
@@ -42,21 +43,9 @@ public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor 
     short commandSpace = packet.getCommandSpace();
     short command = packet.getCommand();
     if (commandAwarePredicate.check(commandSpace, command)) {
-      byte[] dataBytes = Base64.getUrlDecoder().decode(data);
-      if (original) {
-        CDTPPacket originalPacket = unpack(dataBytes);
-        return originalPacket.getData();
-      } else {
-        return dataBytes;
-      }
-    } else {
-      return defaultPacketUtil.decodeData(packet);
+      return Base64.getUrlDecoder().decode(data);
     }
-  }
-
-  @Override
-  public byte[] decodeData(CDTPPacketTrans packet) {
-    return decodeData(packet, false);
+    return defaultPacketUtil.decodeData(packet);
   }
 
   public String encodeData(CDTPPacket packet) {
