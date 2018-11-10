@@ -20,18 +20,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.awaitility.Awaitility;
 
-/**
- * @author 姚华成
- * @date 2018-8-29
- */
-public class YHCNettyClient {
+class MockNettyClient {
 
   private YHCClientResponseHandler responseHandler;
-  private String host;
-  private int port;
+  private final String host;
+  private final int port;
   private Channel channel;
 
-  public YHCNettyClient(String host, int port) {
+  public MockNettyClient(String host, int port) {
     this.host = host;
     this.port = port;
   }

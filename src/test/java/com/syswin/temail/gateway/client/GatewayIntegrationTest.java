@@ -6,17 +6,20 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
+import static com.syswin.temail.gateway.client.GatewayIntegrationTest.SERVICE_PORT;
+import static com.syswin.temail.gateway.client.GatewayIntegrationTest.MQ_SERVER_PORT;
+import static com.syswin.temail.gateway.client.GatewayIntegrationTest.NAMESRV;
+import static com.syswin.temail.gateway.client.GatewayIntegrationTest.GATEWAY_PORT;
 import static com.syswin.temail.gateway.client.PacketMaker.ackPayload;
 import static com.syswin.temail.gateway.client.PacketMaker.loginPacket;
 import static com.syswin.temail.gateway.client.PacketMaker.mqMsgPayload;
 import static com.syswin.temail.gateway.client.PacketMaker.singleChatPacket;
 import static com.syswin.temail.gateway.client.SingleCommandType.SEND_MESSAGE;
-import static com.syswin.temail.gateway.client.YHCIntegrationTest.MQ_SERVER_PORT;
-import static com.syswin.temail.gateway.client.YHCIntegrationTest.NAMESRV;
-import static com.syswin.temail.gateway.client.YHCIntegrationTest.PORT;
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.SINGLE_MESSAGE_CODE;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.waitAtMost;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
@@ -41,68 +44,64 @@ import org.apache.rocketmq.common.message.Message;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.Network;
 
-/**
- * @author 姚华成
- * @date 2018-8-27
- */
 @Slf4j
 @SpringBootTest(classes = TemailGatewayApplication.class,
     properties = {
-        "temail.gateway.verifyUrl=http://localhost:8090/verify",
-        "temail.gateway.dispatchUrl=http://localhost:8090/dispatch",
-        "temail.gateway.updateSocketStatusUrl=http://localhost:8090/updateStatus",
-        "temail.gateway.allIdleTimeSeconds=3",
-        "temail.gateway.netty.port=" + PORT,
-        "temail.gateway.rocketmq.namesrv-addr=" + NAMESRV + ":" + MQ_SERVER_PORT,
-        "temail.gateway.rocketmq.mq-topic=temail-gateway",
+        "app.gateway.verifyUrl=http://localhost:" + SERVICE_PORT + "/verify",
+        "app.gateway.dispatchUrl=http://localhost:" + SERVICE_PORT + "/dispatch",
+        "app.gateway.updateSocketStatusUrl=http://localhost:" + SERVICE_PORT + "/updateStatus",
+        "app.gateway.allIdleTimeSeconds=3",
+        "app.gateway.netty.port=" + GATEWAY_PORT,
+        "spring.rocketmq.namesrv-addr=" + NAMESRV + ":" + MQ_SERVER_PORT,
     })
 @RunWith(SpringRunner.class)
-@Ignore
-public class YHCIntegrationTest {
+@ActiveProfiles("dev")
+public class GatewayIntegrationTest {
 
-  static final int MQ_SERVER_PORT = 9875;
-  static final int PORT = 8095;
+  static final int MQ_SERVER_PORT = 9876;
+  static final int GATEWAY_PORT = 8099;
+  static final int SERVICE_PORT = 8090;
   static final String NAMESRV = "namesrv";
-  @ClassRule
-  public static RuleChain rules;
-  @ClassRule
-  public static WireMockRule wireMockRule = new WireMockRule(8090);
-  private static RocketMqNameServerContainer rocketMqNameSrv;
-  private static Gson gson = new Gson();
-  private static DefaultMQProducer mqProducer = new DefaultMQProducer(uniquify("test-producer-group"));
 
-  static {
-    Network NETWORK = Network.newNetwork();
-    rocketMqNameSrv = new RocketMqNameServerContainer()
+  @ClassRule
+  public static WireMockRule wireMockRule = new WireMockRule(SERVICE_PORT);
+  private static final Gson gson = new Gson();
+  private static final DefaultMQProducer mqProducer = new DefaultMQProducer(uniquify("test-producer-group"));
+
+  private static final Network NETWORK = Network.newNetwork();
+  private static final RocketMqNameServerContainer rocketMqNameSrv = new RocketMqNameServerContainer()
         .withNetwork(NETWORK)
         .withNetworkAliases(NAMESRV)
-        .withFixedExposedPort(MQ_SERVER_PORT, 9876);
-    RocketMqBrokerContainer rocketMqBroker = new RocketMqBrokerContainer()
+        .withFixedExposedPort(MQ_SERVER_PORT, MQ_SERVER_PORT);
+
+  private static final RocketMqBrokerContainer rocketMqBroker = new RocketMqBrokerContainer()
         .withNetwork(NETWORK)
         .withEnv("NAMESRV_ADDR", "namesrv:" + MQ_SERVER_PORT)
         .withFixedExposedPort(10909, 10909)
         .withFixedExposedPort(10911, 10911);
-    rules = RuleChain.outerRule(rocketMqNameSrv).around(rocketMqBroker);
-  }
+
+  @ClassRule
+  public static RuleChain rules = RuleChain.outerRule(rocketMqNameSrv).around(rocketMqBroker);
 
   private String sender = "jack@t.email";
   private String receive = "sean@t.email";
   private String deviceId = "deviceId";
   private String message = "hello world";
-  private YHCNettyClient client;
+  private MockNettyClient client;
+
   @Resource
   private TemailGatewayProperties properties;
 
   @BeforeClass
-  public static void beforeClass() throws MQClientException, InterruptedException {
+  public static void beforeClass() throws MQClientException {
     stubFor(post(urlEqualTo("/verify"))
         .willReturn(
             aResponse()
@@ -128,24 +127,26 @@ public class YHCIntegrationTest {
     createMqTopic();
   }
 
-  private static void createMqTopic() throws MQClientException, InterruptedException {
-    Thread.sleep(5000);
+  private static void createMqTopic() throws MQClientException {
     mqProducer.setNamesrvAddr(rocketMqNameSrv.getContainerIpAddress() + ":" + MQ_SERVER_PORT);
     mqProducer.start();
+
     // ensure topic exists before consumer connects, or no message will be received
-    try {
-      mqProducer.createTopic(mqProducer.getCreateTopicKey(), "temail-gateway", 1);
-    } catch (MQClientException e) {
-      //
-    }
+    waitAtMost(10, SECONDS).until(() -> {
+      try {
+        mqProducer.createTopic(mqProducer.getCreateTopicKey(), "temail-gateway-notify", 1);
+        return true;
+      } catch (MQClientException e) {
+        e.printStackTrace();
+        return false;
+      }
+    });
   }
 
   @Before
   public void init() {
-    if (client == null) {
-      client = new YHCNettyClient("127.0.0.1", PORT);
-      client.start();
-    }
+    client = new MockNettyClient("127.0.0.1", GATEWAY_PORT);
+    client.start();
   }
 
   public void login() throws InvalidProtocolBufferException {

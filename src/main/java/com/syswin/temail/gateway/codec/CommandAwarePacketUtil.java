@@ -1,8 +1,5 @@
 package com.syswin.temail.gateway.codec;
 
-import static com.syswin.temail.ps.common.entity.CommandSpaceType.GROUP_MESSAGE_CODE;
-import static com.syswin.temail.ps.common.entity.CommandSpaceType.SINGLE_MESSAGE_CODE;
-
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.ps.common.codec.BodyExtractor;
 import com.syswin.temail.ps.common.codec.SimpleBodyExtractor;
@@ -14,23 +11,20 @@ import com.syswin.temail.ps.common.packet.SimplePacketUtil;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-/**
- * @author 姚华成
- * @date 2018-10-30
- */
 public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor {
 
-  private final TemailGatewayProperties properties;
   private final BodyExtractor defaultBodyExtractor;
   private final PacketUtil defaultPacketUtil;
+  private final CommandAwarePredicate commandAwarePredicate;
 
   public CommandAwarePacketUtil(TemailGatewayProperties properties) {
-    this(properties, SimpleBodyExtractor.INSTANCE, SimplePacketUtil.INSTANCE);
+    this(SimpleBodyExtractor.INSTANCE, SimplePacketUtil.INSTANCE, new CommandAwarePredicate(properties));
   }
 
-  public CommandAwarePacketUtil(TemailGatewayProperties properties, BodyExtractor defaultBodyExtractor,
-      PacketUtil defaultPacketUtil) {
-    this.properties = properties;
+  public CommandAwarePacketUtil(BodyExtractor defaultBodyExtractor,
+      PacketUtil defaultPacketUtil,
+      CommandAwarePredicate commandAwarePredicate) {
+    this.commandAwarePredicate = commandAwarePredicate;
     this.defaultBodyExtractor = defaultBodyExtractor;
     this.defaultPacketUtil = defaultPacketUtil;
   }
@@ -47,8 +41,7 @@ public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor 
     }
     short commandSpace = packet.getCommandSpace();
     short command = packet.getCommand();
-    if (isSendSingleMsg(commandSpace, command) ||
-        isSendGroupMsg(commandSpace, command)) {
+    if (commandAwarePredicate.check(commandSpace, command)) {
       byte[] dataBytes = Base64.getUrlDecoder().decode(data);
       if (original) {
         CDTPPacket originalPacket = unpack(dataBytes);
@@ -69,19 +62,16 @@ public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor 
   public String encodeData(CDTPPacket packet) {
     short commandSpace = packet.getCommandSpace();
     short command = packet.getCommand();
-    if (isSendSingleMsg(commandSpace, command) ||
-        isSendGroupMsg(commandSpace, command)) {
+    if (commandAwarePredicate.check(commandSpace, command)) {
       return Base64.getUrlEncoder().encodeToString(packet.getData());
-    } else {
-      return new String(packet.getData(), StandardCharsets.UTF_8);
     }
+    return new String(packet.getData(), StandardCharsets.UTF_8);
   }
 
   @Override
   public byte[] fromBuffer(short commandSpace, short command, ByteBuf byteBuf, int remainingBytes) {
     int remaining = remainingBytes;
-    if (isSendSingleMsg(commandSpace, command) ||
-        (isSendGroupMsg(commandSpace, command))) {
+    if (commandAwarePredicate.check(commandSpace, command)) {
       // 单聊和群聊的消息比较特殊，把CDTP协议的整个数据打包编码后，放到Packet的Data里。
       int readableBytes = byteBuf.readableBytes();
       byteBuf.resetReaderIndex();
@@ -94,23 +84,8 @@ public class CommandAwarePacketUtil extends PacketUtil implements BodyExtractor 
     // 单聊消息无法也不需要解密
     short commandSpace = packet.getCommandSpace();
     short command = packet.getCommand();
-    if (!isSendSingleMsg(commandSpace, command) &&
-        (!isSendGroupMsg(commandSpace, command))) {
+    if (!commandAwarePredicate.check(commandSpace, command)) {
       defaultBodyExtractor.decrypt(packet);
     }
   }
-
-  public boolean isSendSingleMsg(short commandSpace, short command) {
-    return commandSpace == SINGLE_MESSAGE_CODE && command == 1;
-  }
-
-  public boolean isSendGroupMsg(short commandSpace, short command) {
-    return (commandSpace == GROUP_MESSAGE_CODE && command == 1) &&
-        properties.isGroupPacketEnabled();
-  }
-
-  public boolean isGroupJoin(short commandSpace, short command) {
-    return commandSpace == 2 && command == 0x0107;
-  }
-
 }

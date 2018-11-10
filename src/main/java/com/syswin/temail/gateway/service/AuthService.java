@@ -10,6 +10,6 @@ import java.util.function.Consumer;
  */
 public interface AuthService {
 
-  void validSignature(CDTPPacket reqPacket, Consumer<Response> sucessConsumer,
+  void validSignature(CDTPPacket reqPacket, Consumer<Response> successConsumer,
       Consumer<Response> failedConsumer);
 }
