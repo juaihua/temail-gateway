@@ -81,7 +81,7 @@ public class MessageHandlerConsumerTest {
   private ArgumentMatcher<CDTPPacket> matchesPayload(CDTPPacketTrans payload) {
     return packet -> {
 
-      CDTPPacketTrans actual = SimplePacketUtil.INSTANCE.toTrans(packet);
+      CDTPPacketTrans actual = new CommandAwarePacketUtil(new TemailGatewayProperties()).toTrans(packet);
       assertThat(actual).isEqualToIgnoringGivenFields(payload, "header");
       assertThat(actual.getHeader()).isEqualToIgnoringGivenFields(payload.getHeader(), "packetId", "signature");
       assertThat(actual.getHeader().getSignature()).isNull();

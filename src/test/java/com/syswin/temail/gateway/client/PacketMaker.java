@@ -2,8 +2,7 @@ package com.syswin.temail.gateway.client;
 
 import static com.syswin.temail.ps.common.Constants.CDTP_VERSION;
 import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
-import static com.syswin.temail.ps.common.entity.CommandSpaceType.SYNC_STATUS_CODE;
-import static com.syswin.temail.ps.server.Constants.NOTIFY_COMMAND;
+import static com.syswin.temail.ps.common.entity.CommandSpaceType.SINGLE_MESSAGE_CODE;
 
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.Response;
@@ -15,6 +14,7 @@ import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLogin.Builder;
 import com.syswin.temail.ps.common.entity.CommandSpaceType;
 import com.syswin.temail.ps.common.entity.CommandType;
 import com.syswin.temail.ps.common.packet.SimplePacketUtil;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -101,14 +101,14 @@ public class PacketMaker {
   public static CDTPPacketTrans mqMsgPayload(String recipient, String message) {
     Response<String> body = Response.ok(message);
     CDTPPacket payload = new CDTPPacket();
-    payload.setCommandSpace(SYNC_STATUS_CODE);
-    payload.setCommand(NOTIFY_COMMAND);
+    payload.setCommandSpace(SINGLE_MESSAGE_CODE);
+    payload.setCommand(SINGLE_MESSAGE_CODE);
     payload.setVersion(CDTP_VERSION);
     CDTPHeader header = new CDTPHeader();
     header.setReceiver(recipient);
     header.setSignature(UUID.randomUUID().toString());
     payload.setHeader(header);
-    payload.setData(gson.toJson(body).getBytes());
+    payload.setData(Base64.getUrlEncoder().encode(gson.toJson(body).getBytes()));
     return SimplePacketUtil.INSTANCE.toTrans(payload);
   }
 

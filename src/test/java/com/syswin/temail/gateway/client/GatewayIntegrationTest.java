@@ -91,10 +91,10 @@ public class GatewayIntegrationTest {
   @ClassRule
   public static RuleChain rules = RuleChain.outerRule(rocketMqNameSrv).around(rocketMqBroker);
 
-  private String sender = "jack@t.email";
-  private String receive = "sean@t.email";
-  private String deviceId = "deviceId";
-  private String message = "hello world";
+  private static final String sender = "jack@t.email";
+  private static final String receive = "sean@t.email";
+  private static final String deviceId = "deviceId";
+  private static final String message = "hello world";
   private MockNettyClient client;
 
   @Resource
@@ -147,22 +147,6 @@ public class GatewayIntegrationTest {
   public void init() {
     client = new MockNettyClient("127.0.0.1", GATEWAY_PORT);
     client.start();
-  }
-
-  public void login() throws InvalidProtocolBufferException {
-    CDTPPacket packet = loginPacket(sender, deviceId);
-    CDTPPacket result = client.syncExecute(packet);
-    CDTPLoginResp loginResp = CDTPLoginResp.parseFrom(result.getData());
-    assertThat(loginResp.getCode()).isEqualTo(200);
-  }
-
-  //  @Test
-  public void singleChar() {
-    CDTPPacket packet = loginPacket(sender, deviceId);
-    client.syncExecute(packet);
-    packet = singleChatPacket(sender, receive, message, deviceId);
-    CDTPPacket result = client.syncExecute(packet);
-    System.out.println(result);
   }
 
   @Test

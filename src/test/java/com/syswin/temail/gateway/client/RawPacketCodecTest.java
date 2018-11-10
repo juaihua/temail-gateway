@@ -4,8 +4,8 @@ import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import com.syswin.temail.ps.common.codec.PacketEncoder;
 import com.syswin.temail.ps.common.codec.RawPacketDecoder;
+import com.syswin.temail.ps.common.codec.RawPacketEncoder;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.exception.PacketException;
 import io.netty.buffer.ByteBuf;
@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class RawPacketDecoderTest {
+public class RawPacketCodecTest {
 
   private final ChannelId channelId = Mockito.mock(ChannelId.class);
   private final Channel channel = Mockito.mock(Channel.class);
@@ -29,7 +29,7 @@ public class RawPacketDecoderTest {
 
   private final List<Object> packets = new ArrayList<>();
   private final RawPacketDecoder decoder = new RawPacketDecoder();
-  private final PacketEncoder encoder = new PacketEncoder();
+  private final RawPacketEncoder encoder = new RawPacketEncoder();
   private final CDTPPacket packet = PacketMaker.singleChatPacket(sender, "recipient", "hello world", deviceId);
   private final ByteBuf buffer = Unpooled.buffer();
 
@@ -65,6 +65,21 @@ public class RawPacketDecoderTest {
 
     assertThat(packets).isNotEmpty();
     assertThat(packets.get(0)).isEqualToIgnoringGivenFields(packet, "data");
+  }
+
+  @Test
+  public void shouldDecodeChannelPacketBytes() {
+    CDTPPacket packet = PacketMaker.loginPacket(sender, deviceId);
+    ByteBuf bufferIncludeLength = Unpooled.buffer();
+
+    encoder.encode(context, packet, buffer);
+    bufferIncludeLength.writeInt(buffer.readableBytes());
+    bufferIncludeLength.writeBytes(buffer.retain());
+
+    decoder.decode(context, bufferIncludeLength, packets);
+
+    assertThat(packets).isNotEmpty();
+    assertThat(packets.get(0)).isEqualTo(packet);
   }
 
   @Test(expected = PacketException.class)

@@ -6,6 +6,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf;
+import com.syswin.temail.ps.common.entity.CommandSpaceType;
 import com.syswin.temail.ps.common.exception.PacketException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -35,18 +36,18 @@ public class RawPacketDecoder extends ByteToMessageDecoder {
     readCommandSpace(byteBuf, packet);
     readCommand(byteBuf, packet);
     readVersion(byteBuf, packet);
-    readHeader(byteBuf, packet);
+    short headerLength = readHeader(byteBuf, packet);
 
-    byteBuf.resetReaderIndex();
-    readFullPacket(byteBuf, packet, packetLength);
+    readData(byteBuf, packet, packetLength, headerLength);
 
     list.add(packet);
-    if (!packet.isHeartbeat()) {
-      log.debug("从通道{}读取的信息是：CommandSpace={},Command={},CDTPHeader={}",
+    if (!packet.isHeartbeat() && log.isDebugEnabled()) {
+      log.debug("从通道{}读取的信息是：CommandSpace={},Command={},CDTPHeader={},Data={}",
           ctx.channel().id(),
           packet.getCommandSpace(),
           packet.getCommand(),
-          packet.getHeader());
+          packet.getHeader(),
+          new String(packet.getData()));
     }
   }
 
@@ -80,7 +81,7 @@ public class RawPacketDecoder extends ByteToMessageDecoder {
     packet.setVersion(version);
   }
 
-  private void readHeader(ByteBuf byteBuf, CDTPPacket packet) {
+  private short readHeader(ByteBuf byteBuf, CDTPPacket packet) {
     short headerLength = byteBuf.readShort();
     CDTPProtoBuf.CDTPHeader cdtpHeader;
     if (headerLength < 0) {
@@ -102,12 +103,18 @@ public class RawPacketDecoder extends ByteToMessageDecoder {
       }
       packet.setHeader(new CDTPHeader(cdtpHeader));
     }
+    return headerLength;
   }
 
-  private void readFullPacket(ByteBuf byteBuf, CDTPPacket packet, int packetLength) {
-    byte[] data = new byte[packetLength + LENGTH_FIELD_LENGTH];
+  private void readData(ByteBuf byteBuf, CDTPPacket packet, int packetLength, short headerLength) {
+    byte[] data;
+    if (packet.getCommandSpace() == CommandSpaceType.CHANNEL_CODE) {
+      data = new byte[packetLength - headerLength - 8];
+    } else {
+      byteBuf.resetReaderIndex();
+      data = new byte[packetLength + LENGTH_FIELD_LENGTH];
+    }
     byteBuf.readBytes(data);
-
     packet.setData(data);
   }
 }

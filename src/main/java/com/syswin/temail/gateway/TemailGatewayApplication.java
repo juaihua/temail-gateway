@@ -11,6 +11,8 @@ import com.syswin.temail.gateway.service.DispatchServiceHttpClientAsync;
 import com.syswin.temail.gateway.service.RemoteStatusService;
 import com.syswin.temail.gateway.service.RequestServiceImpl;
 import com.syswin.temail.gateway.service.SessionServiceImpl;
+import com.syswin.temail.ps.common.codec.RawPacketDecoder;
+import com.syswin.temail.ps.common.codec.RawPacketEncoder;
 import com.syswin.temail.ps.server.PsServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
 import com.syswin.temail.ps.server.service.ChannelHolder;
@@ -21,10 +23,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
-/**
- * @author 姚华成
- * @date 2018/8/7
- */
 @SpringBootApplication
 public class TemailGatewayApplication {
 
@@ -87,7 +85,8 @@ public class TemailGatewayApplication {
             requestService,
             properties.getNetty().getPort(),
             properties.getNetty().getReadIdleTimeSeconds(),
-            packetUtil));
+            new RawPacketEncoder(),
+            new RawPacketDecoder()));
   }
 
   @Bean
