@@ -7,45 +7,45 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.waitAtMost;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
-import au.com.dius.pact.consumer.ConsumerPactTestMk2;
-import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.consumer.PactProviderRuleMk2;
+import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.RequestResponsePact;
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.ps.common.packet.SimplePacketUtil;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Consumer;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
 
-/**
- * @author 姚华成
- * @date 2018-11-02
- */
-public abstract class AbstractAuthServiceConsumerTest extends ConsumerPactTestMk2 {
+public abstract class AbstractAuthServiceConsumerTest {
+  @Rule
+  public final PactProviderRuleMk2 mockTestProvider = new PactProviderRuleMk2("temail-dispatcher", this);
 
   protected final String path = "/verify";
   protected final Gson gson = new Gson();
-  protected CDTPPacket normalPacket;
-  protected CDTPPacket notRegPacket;
-  protected CDTPPacket signErrorPacket;
+  protected static CDTPPacket normalPacket;
+  protected static CDTPPacket notRegPacket;
+  protected static CDTPPacket signErrorPacket;
 
-  protected volatile Response resultResponse = null;
-  protected volatile Response errorResponse = null;
+  protected final Queue<Response> resultResponses = new ArrayBlockingQueue<>(1);
+  protected final Queue<Response> errorResponses = new ArrayBlockingQueue<>(1);
 
-  @Override
-  public RequestResponsePact createPact(PactDslWithProvider pactDslWithProvider) {
-    Map<String, String> headers = new HashMap<>();
-    headers.put(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE);
-
-    String deviceId = "deviceId";
-    CDTPPacket packet = loginPacket("", deviceId);
+  @BeforeClass
+  public static void setUp() {
+    CDTPPacket packet = loginPacket("", "deviceId");
     CDTPHeader header = packet.getHeader();
     header.setSender("sean@t.email");
     normalPacket = new CDTPPacket(packet);
@@ -53,6 +53,12 @@ public abstract class AbstractAuthServiceConsumerTest extends ConsumerPactTestMk
     notRegPacket = new CDTPPacket(packet);
     header.setSender("mike@t.email");
     signErrorPacket = new CDTPPacket(packet);
+  }
+
+  @Pact(consumer = "temail-gateway", provider = "temail-dispatcher")
+  public RequestResponsePact successFragment(PactDslWithProvider pactDslWithProvider) {
+    Map<String, String> headers = new HashMap<>();
+    headers.put(CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE);
 
     return pactDslWithProvider
         .given("User sean is registered")
@@ -60,27 +66,45 @@ public abstract class AbstractAuthServiceConsumerTest extends ConsumerPactTestMk
         .path(path)
         .method("POST")
         .headers(headers)
-        .body(gson.toJson(SimplePacketUtil.INSTANCE.toTrans(normalPacket)))
+        .body(new String(normalPacket.getData()))
         .willRespondWith()
         .status(OK.value())
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
         .body(gson.toJson(Response.ok(OK, "Success")))
+        .toPact();
+  }
+
+  @Pact(consumer = "temail-gateway", provider = "temail-dispatcher")
+  public RequestResponsePact unregisteredFragment(PactDslWithProvider pactDslWithProvider) {
+    Map<String, String> headers = new HashMap<>();
+    headers.put(CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE);
+
+    return pactDslWithProvider
         .given("User jack is not registered")
         .uponReceiving("Jack requested to log in")
         .path(path)
         .method("POST")
         .headers(headers)
-        .body(gson.toJson(SimplePacketUtil.INSTANCE.toTrans(notRegPacket)))
+        .body(new String(notRegPacket.getData()))
         .willRespondWith()
-        .status(NOT_FOUND.value())
+        .status(FORBIDDEN.value())
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
-        .body(gson.toJson(Response.failed(NOT_FOUND)))
+        .body(gson.toJson(Response.failed(FORBIDDEN)))
+        .toPact();
+  }
+
+  @Pact(consumer = "temail-gateway", provider = "temail-dispatcher")
+  public RequestResponsePact failedFragment(PactDslWithProvider pactDslWithProvider) {
+    Map<String, String> headers = new HashMap<>();
+    headers.put(CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE);
+
+    return pactDslWithProvider
         .given("User mike is registered, but server is out of work")
         .uponReceiving("Mike requested to log in")
         .path(path)
         .method("POST")
         .headers(headers)
-        .body(gson.toJson(SimplePacketUtil.INSTANCE.toTrans(signErrorPacket)))
+        .body(new String(signErrorPacket.getData()))
         .willRespondWith()
         .status(BAD_REQUEST.value())
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
@@ -88,46 +112,59 @@ public abstract class AbstractAuthServiceConsumerTest extends ConsumerPactTestMk
         .toPact();
   }
 
-  @Override
-  public void runTest(MockServer mockServer) {
-    String url = mockServer.getUrl() + path;
+  @Test
+  @PactVerification(value = "temail-dispatcher", fragment = "successFragment")
+  public void runTest() {
+    String url = mockTestProvider.getUrl() + path;
 
     SuccessConsumer successConsumer = new SuccessConsumer();
     FailedConsumer failedConsumer = new FailedConsumer();
 
     AuthService authService = getAuthService(url);
     authService.validSignature(normalPacket, successConsumer, failedConsumer);
-    waitAtMost(3, SECONDS).until(() -> resultResponse != null);
-    assertThat(resultResponse.getCode()).isEqualTo(OK.value());
+    waitAtMost(3, SECONDS).until(() -> !resultResponses.isEmpty());
+    assertThat(resultResponses.poll().getCode()).isEqualTo(OK.value());
+    assertThat(errorResponses).isEmpty();
+  }
 
+  @Test
+  @PactVerification(value = "temail-dispatcher", fragment = "unregisteredFragment")
+  public void rejectUnregisteredUser() {
+    String url = mockTestProvider.getUrl() + path;
+
+    SuccessConsumer successConsumer = new SuccessConsumer();
+    FailedConsumer failedConsumer = new FailedConsumer();
+
+    AuthService authService = getAuthService(url);
     authService.validSignature(notRegPacket, successConsumer, failedConsumer);
-    waitAtMost(3, SECONDS).until(() -> errorResponse != null);
-    assertThat(errorResponse.getCode()).isEqualTo(NOT_FOUND.value());
+    waitAtMost(3, SECONDS).until(() -> !errorResponses.isEmpty());
+    assertThat(errorResponses.poll().getCode()).isEqualTo(FORBIDDEN.value());
+    assertThat(resultResponses).isEmpty();
+  }
+
+  @Test
+  @PactVerification(value = "temail-dispatcher", fragment = "failedFragment")
+  public void serverOutOfWork() {
+    String url = mockTestProvider.getUrl() + path;
+
+    SuccessConsumer successConsumer = new SuccessConsumer();
+    FailedConsumer failedConsumer = new FailedConsumer();
+
+    AuthService authService = getAuthService(url);
 
     authService.validSignature(signErrorPacket, successConsumer, failedConsumer);
-    waitAtMost(3, SECONDS).until(() -> errorResponse != null);
-    assertThat(errorResponse.getCode()).isEqualTo(BAD_REQUEST.value());
+    waitAtMost(3, SECONDS).until(() -> !errorResponses.isEmpty());
+    assertThat(errorResponses.poll().getCode()).isEqualTo(BAD_REQUEST.value());
+    assertThat(resultResponses).isEmpty();
   }
 
   protected abstract AuthService getAuthService(String url);
-
-  @Override
-  protected String providerName() {
-    return "temail-dispatcher";
-  }
-
-  @Override
-  protected String consumerName() {
-    return "temail-gateway";
-  }
-
 
   protected class SuccessConsumer implements Consumer<Response> {
 
     @Override
     public void accept(Response response) {
-      resultResponse = response;
-      errorResponse = null;
+      resultResponses.offer(response);
     }
   }
 
@@ -135,8 +172,7 @@ public abstract class AbstractAuthServiceConsumerTest extends ConsumerPactTestMk
 
     @Override
     public void accept(Response response) {
-      resultResponse = null;
-      errorResponse = response;
+      errorResponses.offer(response);
     }
   }
 }

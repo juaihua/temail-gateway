@@ -46,8 +46,8 @@ public class TemailGatewayApplication {
   }
 
   @Bean
-  public AuthService loginService(TemailGatewayProperties properties, CommandAwarePacketUtil packetUtil) {
-    return new AuthServiceHttpClientAsync(properties.getVerifyUrl(), packetUtil);
+  public AuthService loginService(TemailGatewayProperties properties) {
+    return new AuthServiceHttpClientAsync(properties.getVerifyUrl());
   }
 
   @Bean
@@ -77,8 +77,7 @@ public class TemailGatewayApplication {
   @Bean
   TemailGatewayRunner gatewayRunner(TemailGatewayProperties properties,
       AbstractSessionService sessionService,
-      RequestService requestService,
-      CommandAwarePacketUtil packetUtil) {
+      RequestService requestService) {
     return new TemailGatewayRunner(
         new PsServer(
             sessionService,
