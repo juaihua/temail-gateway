@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.waitAtMost;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 import au.com.dius.pact.consumer.ConsumerPactTestMk2;
 import au.com.dius.pact.consumer.MockServer;
@@ -18,18 +18,12 @@ import au.com.dius.pact.model.RequestResponsePact;
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
-import com.syswin.temail.ps.common.packet.SimplePacketUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * @author 姚华成
- * @date 2018-11-02
- */
 @Slf4j
 public abstract class AbstractDispatchServiceConsumerTest extends ConsumerPactTestMk2 {
 
@@ -40,26 +34,25 @@ public abstract class AbstractDispatchServiceConsumerTest extends ConsumerPactTe
   private final String receiver = "sean@t.email";
   private final String message = "hello world";
   private final String deviceId = "deviceId_5514";
-  private final CDTPPacketTrans packet = SimplePacketUtil.INSTANCE
-      .toTrans(singleChatPacket(sender, receiver, message, deviceId));
+  private final CDTPPacket packet = singleChatPacket(sender, receiver, message, deviceId);
   private volatile Response resultResponse = null;
   private Throwable exception;
 
   @Override
   public RequestResponsePact createPact(PactDslWithProvider pactDslWithProvider) {
     Map<String, String> headers = new HashMap<>();
-    headers.put(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE);
+    headers.put(CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE);
 
     return pactDslWithProvider
         .given("dispatch user request")
         .uponReceiving("dispatch user request for response")
         .method("POST")
-        .body(gson.toJson(packet))
+        .body(new String(packet.getData()))
         .headers(headers)
         .path(path)
         .willRespondWith()
         .status(200)
-        .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
+        .headers(singletonMap(CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE))
         .body(gson.toJson(Response.ok(OK, ackPayload())))
         .toPact();
   }

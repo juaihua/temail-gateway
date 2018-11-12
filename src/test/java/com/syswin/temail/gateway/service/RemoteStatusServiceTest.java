@@ -4,6 +4,7 @@ package com.syswin.temail.gateway.service;
 import static org.mockito.Mockito.when;
 
 import com.syswin.temail.gateway.TemailGatewayProperties;
+import com.syswin.temail.gateway.TemailGatewayProperties.Rocketmq;
 import com.syswin.temail.gateway.channels.ChannelsSyncClient;
 import com.syswin.temail.gateway.entity.TemailAccoutLocation;
 import com.syswin.temail.gateway.entity.TemailAccoutLocations;
@@ -50,6 +51,10 @@ public class RemoteStatusServiceTest {
 
     properties.setGrpcServerHost("192.168.10.10");
     properties.setGrpcServerPort("9110");
+
+    Rocketmq rocketmq = new Rocketmq();
+    rocketmq.setMqTopic("gateway-notification");
+    properties.setRocketmq(rocketmq);
 
     sessions.add(new Session("sean@temail.com", "123"));
     temailAccoutLocationsSingle = buildTemailAccoutLocations(sessions);

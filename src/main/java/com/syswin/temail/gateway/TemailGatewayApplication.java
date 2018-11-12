@@ -70,8 +70,8 @@ public class TemailGatewayApplication {
   }
 
   @Bean
-  public RequestService requestService(DispatchService dispatchService, CommandAwarePacketUtil packetUtil) {
-    return new RequestServiceImpl(dispatchService, packetUtil);
+  public RequestService requestService(DispatchService dispatchService) {
+    return new RequestServiceImpl(dispatchService);
   }
 
   @Bean
