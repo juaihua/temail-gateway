@@ -30,7 +30,7 @@ public class AuthServiceHttpClientAsync implements AuthService {
     this.asyncClient.start();
   }
 
-  public AuthServiceHttpClientAsync(String authUrl,
+  AuthServiceHttpClientAsync(String authUrl,
       CloseableHttpAsyncClient asyncClient,
       Function<byte[], HttpEntity> httpEntitySupplier) {
     this.asyncClient = asyncClient;

@@ -89,8 +89,7 @@ public class TemailGatewayApplication {
   }
 
   @Bean
-  public RocketMqRunner rocketMqRunner(TemailGatewayProperties properties, ChannelHolder channelHolder,
-      CommandAwarePacketUtil packetUtil) {
-    return new RocketMqRunner(properties, channelHolder, packetUtil);
+  public RocketMqRunner rocketMqRunner(TemailGatewayProperties properties, ChannelHolder channelHolder) {
+    return new RocketMqRunner(properties, channelHolder);
   }
 }

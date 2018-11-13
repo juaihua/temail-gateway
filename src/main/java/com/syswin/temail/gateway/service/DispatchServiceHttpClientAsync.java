@@ -20,7 +20,7 @@ public class DispatchServiceHttpClientAsync implements DispatchService {
   private final String dispatchUrl;
   private final Function<byte[], HttpEntity> httpEntitySupplier;
 
-  public DispatchServiceHttpClientAsync(String dispatchUrl,
+  DispatchServiceHttpClientAsync(String dispatchUrl,
       CloseableHttpAsyncClient asyncClient,
       Function<byte[], HttpEntity> httpEntitySupplier) {
 

@@ -13,12 +13,8 @@ import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
-import com.google.gson.Gson;
-import com.syswin.temail.gateway.TemailGatewayProperties;
-import com.syswin.temail.gateway.codec.CommandAwarePacketUtil;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
-import com.syswin.temail.ps.common.packet.SimplePacketUtil;
 import com.syswin.temail.ps.server.service.ChannelHolder;
 import io.netty.channel.Channel;
 import java.util.HashMap;
@@ -40,10 +36,8 @@ public class MessageHandlerConsumerTest {
 
   private final Channel channel = Mockito.mock(Channel.class);
   private final ChannelHolder channelHolder = Mockito.mock(ChannelHolder.class);
-  private final CommandAwarePacketUtil packetUtil = new CommandAwarePacketUtil(new TemailGatewayProperties());
 
   private final String recipient = "sean@t.email";
-  private final Gson gson = new Gson();
   private final CDTPPacketTrans payload = mqMsgPayload(recipient, "bonjour");
   private byte[] currentMessage;
 
@@ -66,7 +60,7 @@ public class MessageHandlerConsumerTest {
   public void test() {
     when(channelHolder.getChannels(recipient)).thenReturn(singletonList(channel));
 
-    MessageHandler messageHandler = new MessageHandler(channelHolder, packetUtil);
+    MessageHandler messageHandler = new MessageHandler(channelHolder);
 
     String msg = new String(currentMessage);
     messageHandler.onMessageReceived(msg);
@@ -81,11 +75,11 @@ public class MessageHandlerConsumerTest {
   private ArgumentMatcher<CDTPPacket> matchesPayload(CDTPPacketTrans payload) {
     return packet -> {
 
-      CDTPPacketTrans actual = new CommandAwarePacketUtil(new TemailGatewayProperties()).toTrans(packet);
-      assertThat(actual).isEqualToIgnoringGivenFields(payload, "header");
-      assertThat(actual.getHeader()).isEqualToIgnoringGivenFields(payload.getHeader(), "packetId", "signature");
-      assertThat(actual.getHeader().getSignature()).isNull();
-      assertThat(actual.getHeader().getPacketId()).isNotEmpty();
+      assertThat(packet).isEqualToIgnoringGivenFields(payload, "header", "data");
+      assertThat(new String(packet.getData())).isEqualTo(payload.getData());
+      assertThat(packet.getHeader()).isEqualToIgnoringGivenFields(payload.getHeader(), "packetId", "signature");
+      assertThat(packet.getHeader().getSignature()).isNull();
+      assertThat(packet.getHeader().getPacketId()).isNotEmpty();
       return true;
     };
   }
