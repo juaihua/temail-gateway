@@ -2,7 +2,6 @@ package com.syswin.temail.gateway;
 
 import com.syswin.temail.gateway.channels.ChannelsSyncClient;
 import com.syswin.temail.gateway.channels.clients.grpc.GrpcClientWrapper;
-import com.syswin.temail.gateway.codec.CommandAwarePacketUtil;
 import com.syswin.temail.gateway.notify.RocketMqRunner;
 import com.syswin.temail.gateway.service.AuthService;
 import com.syswin.temail.gateway.service.AuthServiceHttpClientAsync;
@@ -11,8 +10,8 @@ import com.syswin.temail.gateway.service.DispatchServiceHttpClientAsync;
 import com.syswin.temail.gateway.service.RemoteStatusService;
 import com.syswin.temail.gateway.service.RequestServiceImpl;
 import com.syswin.temail.gateway.service.SessionServiceImpl;
-import com.syswin.temail.ps.common.codec.RawPacketDecoder;
-import com.syswin.temail.ps.common.codec.RawPacketEncoder;
+import com.syswin.temail.gateway.codec.RawPacketDecoder;
+import com.syswin.temail.gateway.codec.RawPacketEncoder;
 import com.syswin.temail.ps.server.PsServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
 import com.syswin.temail.ps.server.service.ChannelHolder;
@@ -38,11 +37,6 @@ public class TemailGatewayApplication {
   @Bean(initMethod = "initClient", destroyMethod = "destroyClient")
   public ChannelsSyncClient initGrpcClient(TemailGatewayProperties properties) {
     return new GrpcClientWrapper(properties);
-  }
-
-  @Bean
-  public CommandAwarePacketUtil packetUtil(TemailGatewayProperties properties) {
-    return new CommandAwarePacketUtil(properties);
   }
 
   @Bean

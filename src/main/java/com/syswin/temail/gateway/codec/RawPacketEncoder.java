@@ -1,4 +1,4 @@
-package com.syswin.temail.ps.common.codec;
+package com.syswin.temail.gateway.codec;
 
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;

@@ -1,4 +1,4 @@
-package com.syswin.temail.ps.common.codec;
+package com.syswin.temail.gateway.codec;
 
 import static com.syswin.temail.ps.common.Constants.LENGTH_FIELD_LENGTH;
 

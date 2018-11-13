@@ -26,6 +26,6 @@
       <appender-ref ref="CONSOLE"/>
       <appender-ref ref="Async"/>
     </root>
-    <logger level="debug" name="com.syswin.temail.ps.common.codec"/>
+    <logger level="debug" name="com.syswin.temail.gateway.codec"/>
   </loggers>
 </configuration>

@@ -4,8 +4,8 @@ import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import com.syswin.temail.ps.common.codec.RawPacketDecoder;
-import com.syswin.temail.ps.common.codec.RawPacketEncoder;
+import com.syswin.temail.gateway.codec.RawPacketDecoder;
+import com.syswin.temail.gateway.codec.RawPacketEncoder;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.exception.PacketException;
 import io.netty.buffer.ByteBuf;
