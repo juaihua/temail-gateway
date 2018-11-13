@@ -21,7 +21,7 @@ public class RequestServiceImpl implements RequestService {
 
   @Override
   public void handleRequest(CDTPPacket reqPacket, Consumer<CDTPPacket> responseHandler) {
-    dispatchService.dispatch(reqPacket,
+    dispatchService.dispatch(reqPacket.getData(),
         bytes -> {
           // 后台正常返回
           reqPacket.setData(bytes);

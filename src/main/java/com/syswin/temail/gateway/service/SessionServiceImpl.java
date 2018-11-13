@@ -51,7 +51,7 @@ public class SessionServiceImpl extends AbstractSessionService {
       failedHandler.accept(respPacket);
       return;
     }
-    authService.validSignature(reqPacket,
+    authService.validSignature(reqPacket.getData(),
         response -> {
           CDTPPacket respPacket = loginSuccess(reqPacket, response);
           successHandler.accept(respPacket);

@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.waitAtMost;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 import au.com.dius.pact.consumer.ConsumerPactTestMk2;
@@ -18,6 +19,7 @@ import au.com.dius.pact.model.RequestResponsePact;
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -35,6 +37,7 @@ public abstract class AbstractDispatchServiceConsumerTest extends ConsumerPactTe
   private final String message = "hello world";
   private final String deviceId = "deviceId_5514";
   private final CDTPPacket packet = singleChatPacket(sender, receiver, message, deviceId);
+  private final PacketEncoder packetEncoder = new PacketEncoder();
   private volatile Response resultResponse = null;
   private Throwable exception;
 
@@ -47,12 +50,12 @@ public abstract class AbstractDispatchServiceConsumerTest extends ConsumerPactTe
         .given("dispatch user request")
         .uponReceiving("dispatch user request for response")
         .method("POST")
-        .body(new String(packet.getData()))
+        .body(Base64.getUrlEncoder().encodeToString(packetEncoder.encode(packet)))
         .headers(headers)
         .path(path)
         .willRespondWith()
         .status(200)
-        .headers(singletonMap(CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE))
+        .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
         .body(gson.toJson(Response.ok(OK, ackPayload())))
         .toPact();
   }
@@ -61,8 +64,7 @@ public abstract class AbstractDispatchServiceConsumerTest extends ConsumerPactTe
   public void runTest(MockServer mockServer) {
     String url = mockServer.getUrl() + path;
     DispatchService dispatchService = getDispatchService(url);
-    dispatchService.dispatch(packet,
-        new ResponseConsumer(), new ErrorConsumer());
+    dispatchService.dispatch(packetEncoder.encode(packet), new ResponseConsumer(), new ErrorConsumer());
 
     waitAtMost(2, SECONDS).until(() -> resultResponse != null);
     log.info("result code is {},  msg  is {}", resultResponse.getCode(), resultResponse.getMessage());
@@ -71,8 +73,7 @@ public abstract class AbstractDispatchServiceConsumerTest extends ConsumerPactTe
 
     String errorUrl = "http://localhost:99";
     DispatchService errorDispatchService = getDispatchService(errorUrl);
-    errorDispatchService.dispatch(packet,
-        new ResponseConsumer(), new ErrorConsumer());
+    errorDispatchService.dispatch(packetEncoder.encode(packet), new ResponseConsumer(), new ErrorConsumer());
 
     waitAtMost(2, SECONDS).until(() -> exception != null);
   }

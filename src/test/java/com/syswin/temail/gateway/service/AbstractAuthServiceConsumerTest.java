@@ -6,8 +6,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.waitAtMost;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -31,8 +32,10 @@ import org.junit.Rule;
 import org.junit.Test;
 
 public abstract class AbstractAuthServiceConsumerTest {
+
   @Rule
   public final PactProviderRuleMk2 mockTestProvider = new PactProviderRuleMk2("temail-dispatcher", this);
+  private final PacketEncoder packetEncoder = new PacketEncoder();
 
   protected final String path = "/verify";
   protected final Gson gson = new Gson();
@@ -66,7 +69,7 @@ public abstract class AbstractAuthServiceConsumerTest {
         .path(path)
         .method("POST")
         .headers(headers)
-        .body(new String(normalPacket.getData()))
+        .body(Base64.getUrlEncoder().encodeToString(packetEncoder.encode(normalPacket)))
         .willRespondWith()
         .status(OK.value())
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
@@ -85,7 +88,7 @@ public abstract class AbstractAuthServiceConsumerTest {
         .path(path)
         .method("POST")
         .headers(headers)
-        .body(new String(notRegPacket.getData()))
+        .body(Base64.getUrlEncoder().encodeToString(packetEncoder.encode(notRegPacket)))
         .willRespondWith()
         .status(FORBIDDEN.value())
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
@@ -104,11 +107,11 @@ public abstract class AbstractAuthServiceConsumerTest {
         .path(path)
         .method("POST")
         .headers(headers)
-        .body(new String(signErrorPacket.getData()))
+        .body(Base64.getUrlEncoder().encodeToString(packetEncoder.encode(signErrorPacket)))
         .willRespondWith()
-        .status(BAD_REQUEST.value())
+        .status(INTERNAL_SERVER_ERROR.value())
         .headers(singletonMap(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
-        .body(gson.toJson(Response.failed(BAD_REQUEST)))
+        .body(gson.toJson(Response.failed(INTERNAL_SERVER_ERROR)))
         .toPact();
   }
 
@@ -121,7 +124,7 @@ public abstract class AbstractAuthServiceConsumerTest {
     FailedConsumer failedConsumer = new FailedConsumer();
 
     AuthService authService = getAuthService(url);
-    authService.validSignature(normalPacket, successConsumer, failedConsumer);
+    authService.validSignature(packetEncoder.encode(normalPacket), successConsumer, failedConsumer);
     waitAtMost(3, SECONDS).until(() -> !resultResponses.isEmpty());
     assertThat(resultResponses.poll().getCode()).isEqualTo(OK.value());
     assertThat(errorResponses).isEmpty();
@@ -136,7 +139,7 @@ public abstract class AbstractAuthServiceConsumerTest {
     FailedConsumer failedConsumer = new FailedConsumer();
 
     AuthService authService = getAuthService(url);
-    authService.validSignature(notRegPacket, successConsumer, failedConsumer);
+    authService.validSignature(packetEncoder.encode(notRegPacket), successConsumer, failedConsumer);
     waitAtMost(3, SECONDS).until(() -> !errorResponses.isEmpty());
     assertThat(errorResponses.poll().getCode()).isEqualTo(FORBIDDEN.value());
     assertThat(resultResponses).isEmpty();
@@ -152,9 +155,9 @@ public abstract class AbstractAuthServiceConsumerTest {
 
     AuthService authService = getAuthService(url);
 
-    authService.validSignature(signErrorPacket, successConsumer, failedConsumer);
+    authService.validSignature(packetEncoder.encode(signErrorPacket), successConsumer, failedConsumer);
     waitAtMost(3, SECONDS).until(() -> !errorResponses.isEmpty());
-    assertThat(errorResponses.poll().getCode()).isEqualTo(BAD_REQUEST.value());
+    assertThat(errorResponses.poll().getCode()).isEqualTo(INTERNAL_SERVER_ERROR.value());
     assertThat(resultResponses).isEmpty();
   }
 

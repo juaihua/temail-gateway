@@ -4,10 +4,11 @@ import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
 
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.entity.Response;
-import com.syswin.temail.ps.common.entity.CDTPPacket;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.concurrent.FutureCallback;
@@ -21,19 +22,27 @@ public class AuthServiceHttpClientAsync implements AuthService {
 
   private final CloseableHttpAsyncClient asyncClient;
   private final String authUrl;
+  private final Function<byte[], HttpEntity> httpEntitySupplier;
   private final Gson gson = new Gson();
 
   public AuthServiceHttpClientAsync(String authUrl) {
-    this.asyncClient = HttpAsyncClientBuilder.create().build();
+    this(authUrl, HttpAsyncClientBuilder.create().build(), bytes -> new ByteArrayEntity(bytes, APPLICATION_OCTET_STREAM));
     this.asyncClient.start();
+  }
+
+  public AuthServiceHttpClientAsync(String authUrl,
+      CloseableHttpAsyncClient asyncClient,
+      Function<byte[], HttpEntity> httpEntitySupplier) {
+    this.asyncClient = asyncClient;
     this.authUrl = authUrl;
+    this.httpEntitySupplier = httpEntitySupplier;
   }
 
   @Override
-  public void validSignature(CDTPPacket reqPacket, Consumer<Response> successConsumer,
+  public void validSignature(byte[] payload, Consumer<Response> successConsumer,
       Consumer<Response> failedConsumer) {
 
-    ByteArrayEntity bodyEntity = new ByteArrayEntity(reqPacket.getData(), APPLICATION_OCTET_STREAM);
+    HttpEntity bodyEntity = httpEntitySupplier.apply(payload);
     HttpPost request = new HttpPost(authUrl);
     request.setEntity(bodyEntity);
 

@@ -2,9 +2,10 @@ package com.syswin.temail.gateway.service;
 
 import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
 
-import com.syswin.temail.ps.common.entity.CDTPPacket;
 import java.io.IOException;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.concurrent.FutureCallback;
@@ -17,22 +18,26 @@ public class DispatchServiceHttpClientAsync implements DispatchService {
 
   private final CloseableHttpAsyncClient asyncClient;
   private final String dispatchUrl;
+  private final Function<byte[], HttpEntity> httpEntitySupplier;
 
-  public DispatchServiceHttpClientAsync(CloseableHttpAsyncClient asyncClient, String dispatchUrl) {
+  public DispatchServiceHttpClientAsync(String dispatchUrl,
+      CloseableHttpAsyncClient asyncClient,
+      Function<byte[], HttpEntity> httpEntitySupplier) {
+
     this.asyncClient = asyncClient;
     this.dispatchUrl = dispatchUrl;
+    this.httpEntitySupplier = httpEntitySupplier;
   }
 
   public DispatchServiceHttpClientAsync(String dispatchUrl) {
-    this.asyncClient = HttpAsyncClientBuilder.create().build();
+    this(dispatchUrl, HttpAsyncClientBuilder.create().build(), bytes -> new ByteArrayEntity(bytes, APPLICATION_OCTET_STREAM));
     this.asyncClient.start();
-    this.dispatchUrl = dispatchUrl;
   }
 
   @Override
-  public void dispatch(CDTPPacket packet, Consumer<byte[]> consumer,
+  public void dispatch(byte[] payload, Consumer<byte[]> consumer,
       Consumer<? super Throwable> errorConsumer) {
-    ByteArrayEntity bodyEntity = new ByteArrayEntity(packet.getData(), APPLICATION_OCTET_STREAM);
+    HttpEntity bodyEntity = httpEntitySupplier.apply(payload);
     HttpPost request = new HttpPost(dispatchUrl);
     request.setEntity(bodyEntity);
 

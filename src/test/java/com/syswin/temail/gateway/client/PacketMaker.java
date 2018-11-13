@@ -61,7 +61,7 @@ public class PacketMaker {
     CDTPHeader header = new CDTPHeader();
     header.setDeviceId(deviceId);
     header.setSignatureAlgorithm(1);
-    header.setTimestamp(System.currentTimeMillis());
+    header.setTimestamp(1535713173935L);
     header.setDataEncryptionMethod(0);
     header.setPacketId("PacketId12345");
     header.setSender(sender);
