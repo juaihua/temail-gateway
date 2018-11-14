@@ -1,158 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>2.0.5.RELEASE</version>
   </parent>
-
-  <groupId>com.syswin.temail</groupId>
-  <artifactId>temail-gateway-parent</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-  <modules>
-    <module>ps-common</module>
-    <module>ps-client</module>
-    <module>ps-server</module>
-    <module>ps-all</module>
-    <module>temail-gateway</module>
-  </modules>
-  <packaging>pom</packaging>
+  <artifactId>temail-gateway</artifactId>
+  <version>1.0.2-SNAPSHOT</version>
 
   <properties>
-    <protobuf-java.version>3.6.1</protobuf-java.version>
+    <ps.version>1.1.1</ps.version>
+    <disconf-spring-boot-starter.version>1.0.0</disconf-spring-boot-starter.version>
+
+    <netty.version>4.1.27.Final</netty.version>
+    <disconf-client.version>2.6.36</disconf-client.version>
     <rocketmq-client.version>4.3.0</rocketmq-client.version>
-    <pact.version>3.5.20</pact.version>
     <zookeeper.version>3.3.6</zookeeper.version>
-    <temail-channel-registry-client.version>1.0.0-SNAPSHOT</temail-channel-registry-client.version>
-    <spring.boot.version>2.0.4.RELEASE</spring.boot.version>
-    <ps.version>1.0.0-SNAPSHOT</ps.version>
+    <protobuf-java.version>3.6.1</protobuf-java.version>
+
+    <pact.version>3.5.20</pact.version>
     <awaitility.version>3.0.0</awaitility.version>
     <unit-scaffolding.version>1.0.0</unit-scaffolding.version>
-    <netty.version>4.1.27.Final</netty.version>
+
+    <!--grpc相关-->
+    <grpc.version>1.15.0</grpc.version>
+    <protobuf.version>3.5.1</protobuf.version>
+    <protoc.version>3.5.1-1</protoc.version>
+    <wiremock-standalone.version>2.6.0</wiremock-standalone.version>
+    <testcontainers.version>1.7.3</testcontainers.version>
+    <protobuf-java-format.version>1.2</protobuf-java-format.version>
+    <proto-google-common-protos.version>1.0.0</proto-google-common-protos.version>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.syswin.temail</groupId>
-        <artifactId>ps-common</artifactId>
-        <version>${ps.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.syswin.temail</groupId>
-        <artifactId>ps-server</artifactId>
-        <version>${ps.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.syswin.temail</groupId>
-        <artifactId>ps-client</artifactId>
-        <version>${ps.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.syswin.temail</groupId>
-        <artifactId>temail-channel-registry-client</artifactId>
-        <version>${temail-channel-registry-client.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.systoon.integration</groupId>
-        <artifactId>disconf-spring-boot-starter</artifactId>
-        <version>1.0.0</version>
-      </dependency>
-      <dependency>
-        <groupId>com.baidu.disconf</groupId>
-        <artifactId>disconf-client</artifactId>
-        <version>2.6.36</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-all</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.google.protobuf</groupId>
-        <artifactId>protobuf-java</artifactId>
-        <version>${protobuf-java.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.rocketmq</groupId>
-        <artifactId>rocketmq-client</artifactId>
-        <version>${rocketmq-client.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.github.tomakehurst</groupId>
-        <artifactId>wiremock-standalone</artifactId>
-        <version>2.6.0</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>testcontainers</artifactId>
-        <version>1.7.3</version>
-        <scope>test</scope>
-        <exclusions>
-          <exclusion>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>com.github.seanyinx</groupId>
-        <artifactId>unit-scaffolding</artifactId>
-        <version>${unit-scaffolding.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>au.com.dius</groupId>
-        <artifactId>pact-jvm-consumer_2.11</artifactId>
-        <version>${pact.version}</version>
-        <scope>test</scope>
-        <exclusions>
-          <exclusion>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>au.com.dius</groupId>
-        <artifactId>pact-jvm-consumer-junit_2.11</artifactId>
-        <version>${pact.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>au.com.dius</groupId>
-        <artifactId>pact-jvm-provider_2.11</artifactId>
-        <version>${pact.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>au.com.dius</groupId>
-        <artifactId>pact-jvm-provider-junit_2.11</artifactId>
-        <version>${pact.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.awaitility</groupId>
-        <artifactId>awaitility</artifactId>
-        <version>${awaitility.version}</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  <scm>
+    <url>http://git.systoon.com/ZJC_Java/temail-gateway</url>
+    <connection>scm:git:git@172.28.4.12:ZJC_Java/temail-gateway.git</connection>
+    <developerConnection>scm:git:git@172.28.4.12:ZJC_Java/temail-gateway.git</developerConnection>
+    <tag>${project.version}</tag>
+  </scm>
 
   <dependencies>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
+      <groupId>com.syswin.temail</groupId>
+      <artifactId>ps-server</artifactId>
+      <version>${ps.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.systoon.integration</groupId>
+      <artifactId>disconf-spring-boot-starter</artifactId>
+      <version>${disconf-spring-boot-starter.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.9.9-RC1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>${netty.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>${protobuf-java.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.rocketmq</groupId>
+      <artifactId>rocketmq-client</artifactId>
+      <version>${rocketmq-client.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -164,6 +87,121 @@
       <optional>true</optional>
     </dependency>
 
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-log4j2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+    </dependency>
+
+    <dependency>
+      <!--主要用于排除log4j的依赖-->
+      <groupId>org.apache.zookeeper</groupId>
+      <artifactId>zookeeper</artifactId>
+      <version>${zookeeper.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <!--grpc要求依赖基于较高的版本-->
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>20.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpasyncclient</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>jstl</artifactId>
+    </dependency>
+
+    <!--grpc依赖-->
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-netty-shaded</artifactId>
+      <version>${grpc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-protobuf</artifactId>
+      <version>${grpc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-stub</artifactId>
+      <version>${grpc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-alts</artifactId>
+      <version>${grpc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-netty</artifactId>
+      <version>${grpc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.api.grpc</groupId>
+      <artifactId>proto-google-common-protos</artifactId>
+      <version>${proto-google-common-protos.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java-util</artifactId>
+      <version>${protobuf.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.protobuf-java-format</groupId>
+      <artifactId>protobuf-java-format</artifactId>
+      <version>${protobuf-java-format.version}</version>
+    </dependency>
+    <!--grpc依赖-->
+
+    <!-- 以下是测试类库 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.vaadin.external.google</groupId>
+          <artifactId>android-json</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -179,6 +217,75 @@
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.github.tomakehurst</groupId>
+      <artifactId>wiremock-standalone</artifactId>
+      <version>${wiremock-standalone.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>${testcontainers.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.github.seanyinx</groupId>
+      <artifactId>unit-scaffolding</artifactId>
+      <version>${unit-scaffolding.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>au.com.dius</groupId>
+      <artifactId>pact-jvm-consumer_2.11</artifactId>
+      <version>${pact.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.codehaus.groovy</groupId>
+          <artifactId>groovy-all</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>au.com.dius</groupId>
+      <artifactId>pact-jvm-consumer-junit_2.11</artifactId>
+      <version>${pact.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>au.com.dius</groupId>
+      <artifactId>pact-jvm-provider_2.11</artifactId>
+      <version>${pact.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>au.com.dius</groupId>
+      <artifactId>pact-jvm-provider-junit_2.11</artifactId>
+      <version>${pact.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <version>${awaitility.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-testing</artifactId>
+      <version>${grpc.version}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -226,6 +333,96 @@
         </excludes>
       </testResource>
     </testResources>
+    <extensions>
+      <extension>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>1.5.0.Final</version>
+      </extension>
+    </extensions>
+    <plugins>
+      <plugin>
+        <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+        <version>0.5.1</version>
+        <configuration>
+          <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>
+          <pluginId>grpc-java</pluginId>
+          <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+              <goal>compile-custom</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>libs/</classpathPrefix>
+              <useUniqueVersions>false</useUniqueVersions>
+              <mainClass>com.syswin.temail.gateway.TemailGatewayApplication</mainClass>
+            </manifest>
+          </archive>
+          <excludes>
+            <exclude>**/application.properties</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/libs</outputDirectory>
+              <includeScope>compile</includeScope>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <additionalOptions>
+            <additionalOption>-Xdoclint:none</additionalOption>
+          </additionalOptions>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-javadoc</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>javadoc-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.scm</groupId>
+            <artifactId>maven-scm-provider-gitexe</artifactId>
+            <version>1.8.1</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
   </build>
 
   <repositories>
@@ -235,6 +432,7 @@
       <url>http://maven.systoon.com/repository/public/</url>
     </repository>
   </repositories>
+
   <distributionManagement>
     <repository>
       <id>nexus-releases</id>
@@ -247,4 +445,5 @@
       <url>http://maven.systoon.com/repository/snapshots/</url>
     </snapshotRepository>
   </distributionManagement>
+
 </project>

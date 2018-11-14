@@ -1,0 +1,51 @@
+package com.syswin.temail.gateway.service;
+
+import static com.syswin.temail.ps.common.entity.CommandSpaceType.CHANNEL_CODE;
+import static com.syswin.temail.ps.common.entity.CommandType.INTERNAL_ERROR;
+import static com.syswin.temail.ps.server.utils.SignatureUtil.resetSignature;
+
+import com.syswin.temail.gateway.codec.CommandAwarePacketUtil;
+import com.syswin.temail.ps.common.entity.CDTPPacket;
+import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPServerError;
+import com.syswin.temail.ps.server.service.RequestService;
+import java.util.function.Consumer;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class RequestServiceImpl implements RequestService {
+
+  private final DispatchService dispatchService;
+  private final CommandAwarePacketUtil packetUtil;
+
+  public RequestServiceImpl(DispatchService dispatchService, CommandAwarePacketUtil packetUtil) {
+    this.dispatchService = dispatchService;
+    this.packetUtil = packetUtil;
+  }
+
+  @Override
+  public void handleRequest(CDTPPacket reqPacket, Consumer<CDTPPacket> responseHandler) {
+    dispatchService.dispatch(packetUtil.toTrans(reqPacket),
+        bytes -> {
+          // 后台正常返回
+          reqPacket.setData(bytes);
+          resetSignature(reqPacket);
+          responseHandler.accept(reqPacket);
+        },
+        t -> {
+          log.error("调用dispatcher请求出错", t);
+          errorPacket(reqPacket, INTERNAL_ERROR.getCode(), t.getMessage());
+          resetSignature(reqPacket);
+          responseHandler.accept(reqPacket);
+        });
+  }
+
+  private void errorPacket(CDTPPacket packet, int code, String message) {
+    packet.setCommandSpace(CHANNEL_CODE);
+    packet.setCommand(INTERNAL_ERROR.getCode());
+
+    CDTPServerError.Builder builder = CDTPServerError.newBuilder();
+    builder.setCode(code);
+    builder.setDesc(message);
+    packet.setData(builder.build().toByteArray());
+  }
+}
