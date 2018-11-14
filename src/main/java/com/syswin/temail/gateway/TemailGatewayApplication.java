@@ -2,6 +2,8 @@ package com.syswin.temail.gateway;
 
 import com.syswin.temail.gateway.channels.ChannelsSyncClient;
 import com.syswin.temail.gateway.channels.clients.grpc.GrpcClientWrapper;
+import com.syswin.temail.gateway.codec.RawPacketDecoder;
+import com.syswin.temail.gateway.codec.RawPacketEncoder;
 import com.syswin.temail.gateway.notify.RocketMqRunner;
 import com.syswin.temail.gateway.service.AuthService;
 import com.syswin.temail.gateway.service.AuthServiceHttpClientAsync;
@@ -10,8 +12,6 @@ import com.syswin.temail.gateway.service.DispatchServiceHttpClientAsync;
 import com.syswin.temail.gateway.service.RemoteStatusService;
 import com.syswin.temail.gateway.service.RequestServiceImpl;
 import com.syswin.temail.gateway.service.SessionServiceImpl;
-import com.syswin.temail.gateway.codec.RawPacketDecoder;
-import com.syswin.temail.gateway.codec.RawPacketEncoder;
 import com.syswin.temail.ps.server.PsServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
 import com.syswin.temail.ps.server.service.ChannelHolder;
@@ -19,7 +19,6 @@ import com.syswin.temail.ps.server.service.RequestService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.reactive.function.client.WebClient;
 
 
 @SpringBootApplication
@@ -27,11 +26,6 @@ public class TemailGatewayApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(TemailGatewayApplication.class, args);
-  }
-
-  @Bean
-  public WebClient webClient() {
-    return WebClient.create();
   }
 
   @Bean(initMethod = "initClient", destroyMethod = "destroyClient")
