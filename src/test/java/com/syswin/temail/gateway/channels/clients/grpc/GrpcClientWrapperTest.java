@@ -7,9 +7,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.AssertionsForClassTypes;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
+@Ignore
 @Slf4j
 public class GrpcClientWrapperTest {
 
