@@ -12,7 +12,7 @@ import com.syswin.temail.gateway.service.DispatchServiceHttpClientAsync;
 import com.syswin.temail.gateway.service.RemoteStatusService;
 import com.syswin.temail.gateway.service.RequestServiceImpl;
 import com.syswin.temail.gateway.service.SessionServiceImpl;
-import com.syswin.temail.ps.server.PsServer;
+import com.syswin.temail.ps.server.GatewayServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
 import com.syswin.temail.ps.server.service.ChannelHolder;
 import com.syswin.temail.ps.server.service.RequestService;
@@ -67,13 +67,13 @@ public class TemailGatewayApplication {
       AbstractSessionService sessionService,
       RequestService requestService) {
     return new TemailGatewayRunner(
-        new PsServer(
+        new GatewayServer(
             sessionService,
             requestService,
-            properties.getNetty().getPort(),
-            properties.getNetty().getReadIdleTimeSeconds(),
             new RawPacketEncoder(),
-            new RawPacketDecoder()));
+            new RawPacketDecoder(),
+            properties.getNetty().getPort(),
+            properties.getNetty().getReadIdleTimeSeconds()));
   }
 
   @Bean

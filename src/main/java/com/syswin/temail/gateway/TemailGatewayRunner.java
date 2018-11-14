@@ -1,25 +1,23 @@
 package com.syswin.temail.gateway;
 
-import com.syswin.temail.ps.server.PsServer;
+import com.syswin.temail.ps.server.GatewayServer;
+import com.syswin.temail.ps.server.Stoppable;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.Ordered;
 
-/**
- * @author 姚华成
- * @date 2018-10-22
- */
 public class TemailGatewayRunner implements ApplicationRunner, Ordered {
 
-  private PsServer psServer;
+  private final GatewayServer gatewayServer;
 
-  public TemailGatewayRunner(PsServer psServer) {
-    this.psServer = psServer;
+  public TemailGatewayRunner(GatewayServer gatewayServer) {
+    this.gatewayServer = gatewayServer;
   }
 
   @Override
   public void run(ApplicationArguments args) {
-    psServer.start();
+    final Stoppable stoppable = gatewayServer.run();
+    Runtime.getRuntime().addShutdownHook(new Thread(stoppable::stop));
   }
 
   @Override
