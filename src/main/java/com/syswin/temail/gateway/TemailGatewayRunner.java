@@ -19,7 +19,7 @@ public class TemailGatewayRunner implements ApplicationRunner, Ordered {
 
   @Override
   public void run(ApplicationArguments args) {
-    psServer.run();
+    psServer.start();
   }
 
   @Override
