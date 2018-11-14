@@ -52,8 +52,6 @@ public class TemailGatewayProperties {
   @Data
   public static class Instance {
 
-    private static final String INSTANCE_UNIQUE_TAG_4_HEARTBEAT = "_instance_unique_tag_4_heart_beat_$";
-
     /**
      * 持有客户端链句柄的服务实例宿主机地址
      */
@@ -70,7 +68,6 @@ public class TemailGatewayProperties {
     public Instance() {
       hostOf = LocalMachineUtil.getLocalIp();
       processId = UUID.randomUUID().toString().replace("-", "").toLowerCase();
-      System.setProperty(INSTANCE_UNIQUE_TAG_4_HEARTBEAT, processId);
       mqTag = "temail-server-" + hostOf + "-" + processId;
     }
 
