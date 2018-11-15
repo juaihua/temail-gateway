@@ -20,14 +20,12 @@ import io.netty.channel.Channel;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
 
-@Ignore
 @Slf4j
 public class MessageHandlerConsumerTest {
 

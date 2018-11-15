@@ -16,12 +16,10 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.awaitility.Awaitility;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 
-@Ignore
 @Slf4j
 public class RemoteStatusServiceTest {
 
@@ -49,7 +47,7 @@ public class RemoteStatusServiceTest {
     instance.setProcessId("2e0wd0d2e2ie0iwhfoqie92h2u");
     properties.setInstance(instance);
 
-    properties.setGrpcServerHost("192.168.10.10");
+    properties.setGrpcServerHost("localhost");
     properties.setGrpcServerPort("9110");
 
     Rocketmq rocketmq = new Rocketmq();
