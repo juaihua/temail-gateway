@@ -2,14 +2,16 @@ package com.syswin.temail.gateway.client;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.any;
+import static com.github.tomakehurst.wiremock.client.WireMock.binaryEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
-import static com.syswin.temail.gateway.client.GatewayIntegrationTest.SERVICE_PORT;
+import static com.syswin.temail.gateway.client.GatewayIntegrationTest.GATEWAY_PORT;
 import static com.syswin.temail.gateway.client.GatewayIntegrationTest.MQ_SERVER_PORT;
 import static com.syswin.temail.gateway.client.GatewayIntegrationTest.NAMESRV;
-import static com.syswin.temail.gateway.client.GatewayIntegrationTest.GATEWAY_PORT;
+import static com.syswin.temail.gateway.client.GatewayIntegrationTest.SERVICE_PORT;
 import static com.syswin.temail.gateway.client.PacketMaker.ackPayload;
 import static com.syswin.temail.gateway.client.PacketMaker.loginPacket;
 import static com.syswin.temail.gateway.client.PacketMaker.mqMsgPayload;
@@ -23,15 +25,16 @@ import static org.awaitility.Awaitility.waitAtMost;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.Gson;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.gateway.TemailGatewayApplication;
 import com.syswin.temail.gateway.TemailGatewayProperties;
 import com.syswin.temail.gateway.containers.RocketMqBrokerContainer;
 import com.syswin.temail.gateway.containers.RocketMqNameServerContainer;
 import com.syswin.temail.gateway.entity.Response;
+import com.syswin.temail.gateway.service.PacketEncoder;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
@@ -95,6 +98,10 @@ public class GatewayIntegrationTest {
   private static final String receive = "sean@t.email";
   private static final String deviceId = "deviceId";
   private static final String message = "hello world";
+  private static final PacketEncoder encoder = new PacketEncoder();
+  private static final CDTPPacket loginReqPacket = loginPacket(sender, deviceId);
+  private static final CDTPPacket reqPacket = singleChatPacket(sender, receive, message, deviceId);
+
   private MockNettyClient client;
 
   @Resource
@@ -103,6 +110,8 @@ public class GatewayIntegrationTest {
   @BeforeClass
   public static void beforeClass() throws MQClientException {
     stubFor(post(urlEqualTo("/verify"))
+        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_OCTET_STREAM_VALUE))
+        .withRequestBody(binaryEqualTo(encoder.encode(loginReqPacket)))
         .willReturn(
             aResponse()
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
@@ -111,6 +120,8 @@ public class GatewayIntegrationTest {
     );
 
     stubFor(any(urlEqualTo("/dispatch"))
+        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_OCTET_STREAM_VALUE))
+        .withRequestBody(binaryEqualTo(encoder.encode(reqPacket)))
         .willReturn(
             aResponse()
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
@@ -152,13 +163,11 @@ public class GatewayIntegrationTest {
   @Test
   public void fullCycle() throws Exception {
     // 登录
-    CDTPPacket loginReqPacket = loginPacket(sender, deviceId);
     CDTPPacket loginRespPacket = client.syncExecute(loginReqPacket);
     CDTPLoginResp cdtpLoginResp = CDTPLoginResp.parseFrom(loginRespPacket.getData());
     assertIs2xxSuccessful(cdtpLoginResp.getCode());
 
     // 单聊
-    CDTPPacket reqPacket = singleChatPacket(sender, receive, message, deviceId);
     CDTPPacket respPacket = client.syncExecute(reqPacket);
     assertThat(respPacket.getCommandSpace()).isEqualTo(SINGLE_MESSAGE_CODE);
     assertThat(respPacket.getCommandSpace()).isEqualTo(SEND_MESSAGE.getCode());

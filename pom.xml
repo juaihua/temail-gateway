@@ -12,7 +12,7 @@
   <version>1.0.2-SNAPSHOT</version>
 
   <properties>
-    <ps.version>1.1.0-SNAPSHOT</ps.version>
+    <ps.version>1.2.0-SNAPSHOT</ps.version>
     <disconf-spring-boot-starter.version>1.0.0</disconf-spring-boot-starter.version>
 
     <netty.version>4.1.27.Final</netty.version>
@@ -29,7 +29,7 @@
     <grpc.version>1.15.0</grpc.version>
     <protobuf.version>3.5.1</protobuf.version>
     <protoc.version>3.5.1-1</protoc.version>
-    <wiremock-standalone.version>2.6.0</wiremock-standalone.version>
+    <wiremock-standalone.version>2.19.0</wiremock-standalone.version>
     <testcontainers.version>1.7.3</testcontainers.version>
     <protobuf-java-format.version>1.2</protobuf-java-format.version>
     <proto-google-common-protos.version>1.0.0</proto-google-common-protos.version>

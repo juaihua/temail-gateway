@@ -3,10 +3,8 @@ package com.syswin.temail.gateway.service;
 
 import static com.syswin.temail.ps.server.utils.SignatureUtil.resetSignature;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.gateway.entity.Response;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLogin;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLoginResp;
 import com.syswin.temail.ps.server.entity.Session;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
@@ -39,15 +37,6 @@ public class SessionServiceImpl extends AbstractSessionService {
     if (!StringUtils.hasText(temail) || !StringUtils.hasText(deviceId)) {
       CDTPPacket respPacket = loginFailure(reqPacket,
           Response.failed(HttpStatus.BAD_REQUEST, "temail或者deviceId为空！"));
-      failedHandler.accept(respPacket);
-      return;
-    }
-    try {
-      CDTPLogin cdtpLogin = CDTPLogin.parseFrom(reqPacket.getData());
-      log.debug("暂没有用的调试信息", cdtpLogin);
-    } catch (InvalidProtocolBufferException e) {
-      CDTPPacket respPacket = loginFailure(reqPacket,
-          Response.failed(HttpStatus.BAD_REQUEST, e.getMessage()));
       failedHandler.accept(respPacket);
       return;
     }

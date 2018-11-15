@@ -4,9 +4,9 @@ import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import java.nio.ByteBuffer;
 
-class PacketEncoder {
+public class PacketEncoder {
 
-  byte[] encode(CDTPPacket packet) {
+  public byte[] encode(CDTPPacket packet) {
     CDTPHeader header = packet.getHeader();
 
     byte[] headerBytes;

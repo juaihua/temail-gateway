@@ -6,7 +6,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf;
-import com.syswin.temail.ps.common.entity.CommandSpaceType;
 import com.syswin.temail.ps.common.exception.PacketException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -36,9 +35,9 @@ public class RawPacketDecoder extends ByteToMessageDecoder {
     readCommandSpace(byteBuf, packet);
     readCommand(byteBuf, packet);
     readVersion(byteBuf, packet);
-    short headerLength = readHeader(byteBuf, packet);
+    readHeader(byteBuf, packet);
 
-    readData(byteBuf, packet, packetLength, headerLength);
+    readData(byteBuf, packet, packetLength);
 
     list.add(packet);
     if (!packet.isHeartbeat() && log.isDebugEnabled()) {
@@ -106,14 +105,9 @@ public class RawPacketDecoder extends ByteToMessageDecoder {
     return headerLength;
   }
 
-  private void readData(ByteBuf byteBuf, CDTPPacket packet, int packetLength, short headerLength) {
-    byte[] data;
-    if (packet.getCommandSpace() == CommandSpaceType.CHANNEL_CODE) {
-      data = new byte[packetLength - headerLength - 8];
-    } else {
-      byteBuf.resetReaderIndex();
-      data = new byte[packetLength + LENGTH_FIELD_LENGTH];
-    }
+  private void readData(ByteBuf byteBuf, CDTPPacket packet, int packetLength) {
+    byte[] data = new byte[packetLength + LENGTH_FIELD_LENGTH];
+    byteBuf.resetReaderIndex();
     byteBuf.readBytes(data);
     packet.setData(data);
   }
