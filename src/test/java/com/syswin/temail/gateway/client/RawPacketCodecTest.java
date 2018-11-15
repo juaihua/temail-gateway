@@ -4,6 +4,7 @@ import static com.seanyinx.github.unit.scaffolding.Randomness.uniquify;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.syswin.temail.gateway.codec.FullPacketAwareDecoder;
 import com.syswin.temail.gateway.codec.RawPacketDecoder;
 import com.syswin.temail.gateway.codec.RawPacketEncoder;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
@@ -28,7 +29,7 @@ public class RawPacketCodecTest {
   private final String deviceId = uniquify("deviceId");
 
   private final List<Object> packets = new ArrayList<>();
-  private final RawPacketDecoder decoder = new RawPacketDecoder();
+  private final RawPacketDecoder decoder = new FullPacketAwareDecoder();
   private final RawPacketEncoder encoder = new RawPacketEncoder();
   private final CDTPPacket packet = PacketMaker.singleChatPacket(sender, "recipient", "hello world", deviceId);
   private final ByteBuf buffer = Unpooled.buffer();
@@ -40,7 +41,7 @@ public class RawPacketCodecTest {
   }
 
   @Test
-  public void shouldDecodeNormalPacketBytes() {
+  public void shouldDecodePacketWithFullPayloadBytes() {
     ByteBuf bufferIncludeLength = Unpooled.buffer();
 
     encoder.encode(context, packet, buffer);
@@ -59,27 +60,13 @@ public class RawPacketCodecTest {
     packets.clear();
     buffer.clear();
 
+    // data contains full packet payload
     buffer.writeBytes(decodedPacket.getData());
 
     decoder.decode(context, buffer, packets);
 
     assertThat(packets).isNotEmpty();
     assertThat(packets.get(0)).isEqualToIgnoringGivenFields(packet, "data");
-  }
-
-  @Test
-  public void shouldDecodeChannelPacketBytes() {
-    CDTPPacket packet = PacketMaker.loginPacket(sender, deviceId);
-    ByteBuf bufferIncludeLength = Unpooled.buffer();
-
-    encoder.encode(context, packet, buffer);
-    bufferIncludeLength.writeInt(buffer.readableBytes());
-    bufferIncludeLength.writeBytes(buffer.retain());
-
-    decoder.decode(context, bufferIncludeLength, packets);
-
-    assertThat(packets).isNotEmpty();
-    assertThat(packets.get(0)).isEqualTo(packet);
   }
 
   @Test(expected = PacketException.class)
