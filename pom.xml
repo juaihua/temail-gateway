@@ -45,7 +45,7 @@
   <dependencies>
     <dependency>
       <groupId>com.syswin.temail</groupId>
-      <artifactId>ps-server</artifactId>
+      <artifactId>ps-framework</artifactId>
       <version>${ps.version}</version>
     </dependency>
     <dependency>

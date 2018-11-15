@@ -13,7 +13,6 @@ import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLogin;
 import com.syswin.temail.ps.common.entity.CDTPProtoBuf.CDTPLogin.Builder;
 import com.syswin.temail.ps.common.entity.CommandSpaceType;
 import com.syswin.temail.ps.common.entity.CommandType;
-import com.syswin.temail.ps.common.packet.SimplePacketUtil;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -109,7 +108,7 @@ public class PacketMaker {
     header.setSignature(UUID.randomUUID().toString());
     payload.setHeader(header);
     payload.setData(Base64.getUrlEncoder().encode(gson.toJson(body).getBytes()));
-    return SimplePacketUtil.INSTANCE.toTrans(payload);
+    return new CDTPPacketTrans(payload);
   }
 
 }

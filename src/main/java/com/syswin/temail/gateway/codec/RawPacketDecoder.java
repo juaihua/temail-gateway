@@ -14,7 +14,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class RawPacketDecoder extends ByteToMessageDecoder {
+public abstract class RawPacketDecoder extends ByteToMessageDecoder {
 
   @Override
   public void decode(ChannelHandlerContext ctx, ByteBuf byteBuf, List<Object> list) {
@@ -35,9 +35,9 @@ public class RawPacketDecoder extends ByteToMessageDecoder {
     readCommandSpace(byteBuf, packet);
     readCommand(byteBuf, packet);
     readVersion(byteBuf, packet);
-    readHeader(byteBuf, packet);
+    short headerLength = readHeader(byteBuf, packet);
 
-    readData(byteBuf, packet, packetLength);
+    readData(byteBuf, packet, packetLength, headerLength);
 
     list.add(packet);
     if (!packet.isHeartbeat() && log.isDebugEnabled()) {
@@ -105,10 +105,5 @@ public class RawPacketDecoder extends ByteToMessageDecoder {
     return headerLength;
   }
 
-  private void readData(ByteBuf byteBuf, CDTPPacket packet, int packetLength) {
-    byte[] data = new byte[packetLength + LENGTH_FIELD_LENGTH];
-    byteBuf.resetReaderIndex();
-    byteBuf.readBytes(data);
-    packet.setData(data);
-  }
+  protected abstract void readData(ByteBuf byteBuf, CDTPPacket packet, int packetLength, int headerLength);
 }

@@ -2,7 +2,7 @@ package com.syswin.temail.gateway;
 
 import com.syswin.temail.gateway.channels.ChannelsSyncClient;
 import com.syswin.temail.gateway.channels.clients.grpc.GrpcClientWrapper;
-import com.syswin.temail.gateway.codec.RawPacketDecoder;
+import com.syswin.temail.gateway.codec.FullPacketAwareDecoder;
 import com.syswin.temail.gateway.codec.RawPacketEncoder;
 import com.syswin.temail.gateway.notify.RocketMqRunner;
 import com.syswin.temail.gateway.service.AuthService;
@@ -71,7 +71,7 @@ public class TemailGatewayApplication {
             sessionService,
             requestService,
             new RawPacketEncoder(),
-            new RawPacketDecoder(),
+            new FullPacketAwareDecoder(),
             properties.getNetty().getPort(),
             properties.getNetty().getReadIdleTimeSeconds()));
   }

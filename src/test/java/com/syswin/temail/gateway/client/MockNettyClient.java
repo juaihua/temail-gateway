@@ -2,10 +2,11 @@ package com.syswin.temail.gateway.client;
 
 import static com.syswin.temail.ps.common.Constants.LENGTH_FIELD_LENGTH;
 
-import com.syswin.temail.ps.common.codec.PacketDecoder;
-import com.syswin.temail.ps.common.codec.PacketEncoder;
+import com.syswin.temail.gateway.codec.RawPacketDecoder;
+import com.syswin.temail.gateway.codec.RawPacketEncoder;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -49,7 +50,7 @@ class MockNettyClient {
                 .addLast("lengthFieldPrepender",
                     new LengthFieldPrepender(LENGTH_FIELD_LENGTH, 0, false))
                 .addLast(new PacketDecoder())
-                .addLast(new PacketEncoder())
+                .addLast(new RawPacketEncoder())
                 .addLast(responseHandler);
           }
         });
@@ -83,4 +84,14 @@ class MockNettyClient {
     return responseHandler.getResult();
   }
 
+  private static class PacketDecoder extends RawPacketDecoder {
+
+    @Override
+    protected void readData(ByteBuf byteBuf, CDTPPacket packet, int packetLength, int headerLength) {
+      // copy only remaining bytes to data
+      byte[] data = new byte[packetLength - headerLength - 8];
+      byteBuf.readBytes(data);
+      packet.setData(data);
+    }
+  }
 }
