@@ -31,7 +31,6 @@ public class PacketDeserializerTest {
   public void ignoreNullField() {
     packetTrans.setData(null);
     String json = gson.toJson(packetTrans);
-    System.out.println(json);
 
     CDTPPacket packet = gson.fromJson(json, CDTPPacket.class);
 
