@@ -16,6 +16,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.timeout.IdleStateHandler;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -45,6 +46,7 @@ class MockNettyClient {
           @Override
           protected void initChannel(SocketChannel socketChannel) {
             socketChannel.pipeline()
+                .addLast("IdleHandler", new IdleStateHandler(0, 180, 0))
                 .addLast("lengthFieldBasedFrameDecoder",
                     new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, LENGTH_FIELD_LENGTH, 0, 0))
                 .addLast("lengthFieldPrepender",

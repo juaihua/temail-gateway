@@ -61,7 +61,6 @@ import org.testcontainers.containers.Network;
         "app.gateway.verifyUrl=http://localhost:" + SERVICE_PORT + "/verify",
         "app.gateway.dispatchUrl=http://localhost:" + SERVICE_PORT + "/dispatch",
         "app.gateway.updateSocketStatusUrl=http://localhost:" + SERVICE_PORT + "/updateStatus",
-        "app.gateway.allIdleTimeSeconds=3",
         "app.gateway.netty.port=" + GATEWAY_PORT,
         "spring.rocketmq.namesrv-addr=" + NAMESRV + ":" + MQ_SERVER_PORT,
     })
