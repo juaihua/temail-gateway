@@ -31,9 +31,12 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.Gson;
 import com.syswin.temail.gateway.TemailGatewayApplication;
 import com.syswin.temail.gateway.TemailGatewayProperties;
+import com.syswin.temail.gateway.channels.ChannelsSyncClient;
+import com.syswin.temail.gateway.client.GatewayIntegrationTest.ChannelSyncConfig;
 import com.syswin.temail.gateway.containers.RocketMqBrokerContainer;
 import com.syswin.temail.gateway.containers.RocketMqNameServerContainer;
 import com.syswin.temail.gateway.entity.Response;
+import com.syswin.temail.gateway.entity.TemailAccoutLocations;
 import com.syswin.temail.gateway.service.PacketEncoder;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
@@ -51,12 +54,15 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.Network;
 
 @Slf4j
-@SpringBootTest(classes = TemailGatewayApplication.class,
+@SpringBootTest(classes = {TemailGatewayApplication.class, ChannelSyncConfig.class},
     properties = {
         "app.gateway.verifyUrl=http://localhost:" + SERVICE_PORT + "/verify",
         "app.gateway.dispatchUrl=http://localhost:" + SERVICE_PORT + "/dispatch",
@@ -186,4 +192,33 @@ public class GatewayIntegrationTest {
     assertThat(code).isBetween(200, 299);
   }
 
+  @Configuration
+  @Profile("dev")
+  static class ChannelSyncConfig {
+    @Bean
+    ChannelsSyncClient client() {
+      return new ChannelsSyncClient() {
+        @Override
+        public void initClient() {
+
+        }
+
+        @Override
+        public void destroyClient() {
+
+        }
+
+        @Override
+        public boolean syncChannelLocations(TemailAccoutLocations channelLocations) {
+          return true;
+        }
+
+        @Override
+        public boolean removeChannelLocations(TemailAccoutLocations channelLocations) {
+          return true;
+        }
+      };
+    }
+
+  }
 }

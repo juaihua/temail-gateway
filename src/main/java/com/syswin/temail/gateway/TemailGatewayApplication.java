@@ -19,6 +19,7 @@ import com.syswin.temail.ps.server.service.RequestService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 
 
 @SpringBootApplication
@@ -28,6 +29,7 @@ public class TemailGatewayApplication {
     SpringApplication.run(TemailGatewayApplication.class, args);
   }
 
+  @Profile("!dev")
   @Bean(initMethod = "initClient", destroyMethod = "destroyClient")
   public ChannelsSyncClient initGrpcClient(TemailGatewayProperties properties) {
     return new GrpcClientWrapper(properties);
