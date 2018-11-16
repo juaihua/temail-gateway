@@ -72,8 +72,8 @@ public class TemailGatewayApplication {
         new GatewayServer(
             sessionService,
             requestService,
-            new RawPacketEncoder(),
-            new FullPacketAwareDecoder(),
+            RawPacketEncoder::new,
+            FullPacketAwareDecoder::new,
             properties.getNetty().getPort(),
             properties.getNetty().getReadIdleTimeSeconds()));
   }
