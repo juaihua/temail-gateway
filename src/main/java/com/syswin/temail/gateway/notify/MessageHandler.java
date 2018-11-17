@@ -39,7 +39,7 @@ class MessageHandler {
       Iterable<Channel> channels = channelHolder.getChannels(receiver);
       for (Channel channel : channels) {
         log.debug("当前推送的通道信息：{}，推送的内容信息：{}", channel, packet);
-        channel.writeAndFlush(packet);
+        channel.writeAndFlush(packet, channel.voidPromise());
       }
     } catch (JsonSyntaxException e) {
       log.error("接收到不符合格式的消息：{}", message, e);
