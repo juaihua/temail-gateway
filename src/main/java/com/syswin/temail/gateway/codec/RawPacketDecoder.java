@@ -42,7 +42,7 @@ public abstract class RawPacketDecoder extends ByteToMessageDecoder {
     list.add(packet);
     if (!packet.isHeartbeat() && log.isDebugEnabled()) {
       log.debug("从通道{}读取的信息是：CommandSpace={},Command={},CDTPHeader={},Data={}",
-          ctx.channel().id(),
+          ctx.channel(),
           packet.getCommandSpace(),
           packet.getCommand(),
           packet.getHeader(),
