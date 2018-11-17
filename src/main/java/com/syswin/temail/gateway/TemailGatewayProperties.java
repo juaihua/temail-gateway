@@ -34,6 +34,7 @@ public class TemailGatewayProperties {
 
     private int port;
     private int readIdleTimeSeconds = 180;
+    private boolean epollEnabled = false;
   }
 
   @Data

@@ -85,7 +85,8 @@ public class TemailGatewayApplication {
             RawPacketEncoder::new,
             FullPacketAwareDecoder::new,
             properties.getNetty().getPort(),
-            properties.getNetty().getReadIdleTimeSeconds()));
+            properties.getNetty().getReadIdleTimeSeconds(),
+            properties.getNetty().isEpollEnabled()));
   }
 
   @Bean
