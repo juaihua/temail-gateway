@@ -29,12 +29,11 @@ public class RawPacketEncoder extends MessageToByteEncoder<CDTPPacket> {
     byteBuf.writeBytes(packet.getData());
 
     if (!packet.isHeartbeat() && log.isDebugEnabled()) {
-      log.debug("写入通道{}的信息是：CommandSpace={},Command={},CDTPHeader={},Data={}",
+      log.debug("写入通道{}的信息是：CommandSpace={},Command={},CDTPHeader={}",
           ctx.channel(),
           packet.getCommandSpace(),
           packet.getCommand(),
-          packet.getHeader(),
-          new String(packet.getData()));
+          packet.getHeader());
     }
   }
 }

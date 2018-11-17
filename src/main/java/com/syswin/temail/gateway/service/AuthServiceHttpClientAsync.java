@@ -13,25 +13,23 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.util.EntityUtils;
 import org.springframework.http.HttpStatus;
 
 public class AuthServiceHttpClientAsync implements AuthService {
 
-  private final CloseableHttpAsyncClient asyncClient;
+  private final HttpAsyncClient asyncClient;
   private final String authUrl;
   private final Function<byte[], HttpEntity> httpEntitySupplier;
   private final Gson gson = new Gson();
 
-  public AuthServiceHttpClientAsync(String authUrl) {
-    this(authUrl, HttpAsyncClientBuilder.create().build(), bytes -> new ByteArrayEntity(bytes, APPLICATION_OCTET_STREAM));
-    this.asyncClient.start();
+  public AuthServiceHttpClientAsync(String authUrl, HttpAsyncClient asyncClient) {
+    this(authUrl, asyncClient, bytes -> new ByteArrayEntity(bytes, APPLICATION_OCTET_STREAM));
   }
 
   AuthServiceHttpClientAsync(String authUrl,
-      CloseableHttpAsyncClient asyncClient,
+      HttpAsyncClient asyncClient,
       Function<byte[], HttpEntity> httpEntitySupplier) {
     this.asyncClient = asyncClient;
     this.authUrl = authUrl;

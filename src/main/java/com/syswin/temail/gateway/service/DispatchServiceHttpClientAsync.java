@@ -10,18 +10,17 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.util.EntityUtils;
 
 public class DispatchServiceHttpClientAsync implements DispatchService {
 
-  private final CloseableHttpAsyncClient asyncClient;
+  private final HttpAsyncClient asyncClient;
   private final String dispatchUrl;
   private final Function<byte[], HttpEntity> httpEntitySupplier;
 
   DispatchServiceHttpClientAsync(String dispatchUrl,
-      CloseableHttpAsyncClient asyncClient,
+      HttpAsyncClient asyncClient,
       Function<byte[], HttpEntity> httpEntitySupplier) {
 
     this.asyncClient = asyncClient;
@@ -29,9 +28,8 @@ public class DispatchServiceHttpClientAsync implements DispatchService {
     this.httpEntitySupplier = httpEntitySupplier;
   }
 
-  public DispatchServiceHttpClientAsync(String dispatchUrl) {
-    this(dispatchUrl, HttpAsyncClientBuilder.create().build(), bytes -> new ByteArrayEntity(bytes, APPLICATION_OCTET_STREAM));
-    this.asyncClient.start();
+  public DispatchServiceHttpClientAsync(String dispatchUrl, HttpAsyncClient asyncClient) {
+    this(dispatchUrl, asyncClient, bytes -> new ByteArrayEntity(bytes, APPLICATION_OCTET_STREAM));
   }
 
   @Override

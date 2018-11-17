@@ -16,6 +16,8 @@ import com.syswin.temail.ps.server.GatewayServer;
 import com.syswin.temail.ps.server.service.AbstractSessionService;
 import com.syswin.temail.ps.server.service.ChannelHolder;
 import com.syswin.temail.ps.server.service.RequestService;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.apache.http.nio.client.HttpAsyncClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +31,14 @@ public class TemailGatewayApplication {
     SpringApplication.run(TemailGatewayApplication.class, args);
   }
 
+  @Bean(initMethod = "start", destroyMethod = "close")
+  HttpAsyncClient asyncClient(TemailGatewayProperties properties) {
+    return HttpAsyncClientBuilder.create()
+        .setMaxConnPerRoute(properties.getHttpClient().getMaxConnectionsPerRoute())
+        .setMaxConnTotal(properties.getHttpClient().getMaxConnectionsTotal())
+        .build();
+  }
+
   @Profile("!dev")
   @Bean(initMethod = "initClient", destroyMethod = "destroyClient")
   public ChannelsSyncClient initGrpcClient(TemailGatewayProperties properties) {
@@ -36,8 +46,8 @@ public class TemailGatewayApplication {
   }
 
   @Bean
-  public AuthService loginService(TemailGatewayProperties properties) {
-    return new AuthServiceHttpClientAsync(properties.getVerifyUrl());
+  public AuthService loginService(TemailGatewayProperties properties, HttpAsyncClient asyncClient) {
+    return new AuthServiceHttpClientAsync(properties.getVerifyUrl(), asyncClient);
   }
 
   @Bean
@@ -53,10 +63,10 @@ public class TemailGatewayApplication {
   }
 
   @Bean
-  public DispatchService dispatchService(TemailGatewayProperties properties) {
+  public DispatchService dispatchService(TemailGatewayProperties properties, HttpAsyncClient asyncClient) {
     // 由于Skywalking不支持WebClient的方式，因此改为HttpClient
     // return new DispatchServiceWebClient(properties.getDispatchUrl());
-    return new DispatchServiceHttpClientAsync(properties.getDispatchUrl());
+    return new DispatchServiceHttpClientAsync(properties.getDispatchUrl(), asyncClient);
   }
 
   @Bean

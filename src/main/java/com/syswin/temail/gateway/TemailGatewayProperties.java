@@ -3,6 +3,7 @@ package com.syswin.temail.gateway;
 import java.util.UUID;
 import javax.annotation.Resource;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,7 @@ public class TemailGatewayProperties {
   private boolean groupPacketEnabled = false;
 
   private Netty netty = new Netty();
+  private HttpClient httpClient = new HttpClient();
 
   @Resource
   private Rocketmq rocketmq;
@@ -70,5 +72,11 @@ public class TemailGatewayProperties {
       mqTag = "temail-server-" + hostOf + "-" + processId;
     }
 
+  }
+
+  @Getter
+  public static class HttpClient {
+    private int maxConnectionsPerRoute = 1000;
+    private int maxConnectionsTotal = 1000;
   }
 }

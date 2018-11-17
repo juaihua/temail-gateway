@@ -1,7 +1,5 @@
 package com.syswin.temail.gateway.codec;
 
-import static com.syswin.temail.ps.common.Constants.LENGTH_FIELD_LENGTH;
-
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.syswin.temail.ps.common.entity.CDTPHeader;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
@@ -18,19 +16,10 @@ public abstract class RawPacketDecoder extends ByteToMessageDecoder {
 
   @Override
   public void decode(ChannelHandlerContext ctx, ByteBuf byteBuf, List<Object> list) {
-    if (byteBuf.readableBytes() <= LENGTH_FIELD_LENGTH) {
-      return;
-    }
-
     CDTPPacket packet = new CDTPPacket();
 
     byteBuf.markReaderIndex();
     int packetLength = readPacketLength(byteBuf);
-
-    if (byteBuf.readableBytes() < packetLength) {
-      byteBuf.resetReaderIndex();
-      return;
-    }
 
     readCommandSpace(byteBuf, packet);
     readCommand(byteBuf, packet);
@@ -41,22 +30,16 @@ public abstract class RawPacketDecoder extends ByteToMessageDecoder {
 
     list.add(packet);
     if (!packet.isHeartbeat() && log.isDebugEnabled()) {
-      log.debug("从通道{}读取的信息是：CommandSpace={},Command={},CDTPHeader={},Data={}",
+      log.debug("从通道{}读取的信息是：CommandSpace={},Command={},CDTPHeader={}",
           ctx.channel(),
           packet.getCommandSpace(),
           packet.getCommand(),
-          packet.getHeader(),
-          new String(packet.getData()));
+          packet.getHeader());
     }
   }
 
   private int readPacketLength(ByteBuf byteBuf) {
-    int packetLength = byteBuf.readInt();
-
-    if (packetLength <= 0) {
-      throw new PacketException("包长度不合法：" + packetLength);
-    }
-    return packetLength;
+    return byteBuf.readInt();
   }
 
   private void readCommandSpace(ByteBuf byteBuf, CDTPPacket packet) {

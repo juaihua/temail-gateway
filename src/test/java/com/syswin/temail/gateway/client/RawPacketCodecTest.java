@@ -8,7 +8,6 @@ import com.syswin.temail.gateway.codec.FullPacketAwareDecoder;
 import com.syswin.temail.gateway.codec.RawPacketDecoder;
 import com.syswin.temail.gateway.codec.RawPacketEncoder;
 import com.syswin.temail.ps.common.entity.CDTPPacket;
-import com.syswin.temail.ps.common.exception.PacketException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -67,14 +66,5 @@ public class RawPacketCodecTest {
 
     assertThat(packets).isNotEmpty();
     assertThat(packets.get(0)).isEqualToIgnoringGivenFields(packet, "data");
-  }
-
-  @Test(expected = PacketException.class)
-  public void blowsUpIfNegativePacketLength() {
-    ByteBuf buffer = Unpooled.buffer();
-    buffer.writeInt(-1);
-    encoder.encode(context, packet, buffer);
-
-    decoder.decode(context, buffer, packets);
   }
 }
