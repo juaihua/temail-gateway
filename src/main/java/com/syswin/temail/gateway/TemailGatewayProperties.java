@@ -78,6 +78,6 @@ public class TemailGatewayProperties {
   @Getter
   public static class HttpClient {
     private int maxConnectionsPerRoute = 1000;
-    private int maxConnectionsTotal = 1000;
+    private int maxConnectionsTotal = 3000;
   }
 }
