@@ -4,6 +4,7 @@ import static com.syswin.temail.gateway.client.PacketMaker.mqMsgPayload;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +18,7 @@ import com.syswin.temail.ps.common.entity.CDTPPacket;
 import com.syswin.temail.ps.common.entity.CDTPPacketTrans;
 import com.syswin.temail.ps.server.service.ChannelHolder;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelPromise;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,7 @@ public class MessageHandlerConsumerTest {
   @Rule
   public final MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
 
+  private final ChannelPromise promise = Mockito.mock(ChannelPromise.class);
   private final Channel channel = Mockito.mock(Channel.class);
   private final ChannelHolder channelHolder = Mockito.mock(ChannelHolder.class);
 
@@ -56,6 +59,7 @@ public class MessageHandlerConsumerTest {
   @Test
   @PactVerification({"Able to process online notification message"})
   public void test() {
+    when(channel.voidPromise()).thenReturn(promise);
     when(channelHolder.getChannels(recipient)).thenReturn(singletonList(channel));
 
     MessageHandler messageHandler = new MessageHandler(channelHolder);
@@ -63,7 +67,7 @@ public class MessageHandlerConsumerTest {
     String msg = new String(currentMessage);
     messageHandler.onMessageReceived(msg);
 
-    verify(channel).writeAndFlush(argThat(matchesPayload(payload)));
+    verify(channel).writeAndFlush(argThat(matchesPayload(payload)), same(promise));
   }
 
   public void setMessage(byte[] messageContents) {
