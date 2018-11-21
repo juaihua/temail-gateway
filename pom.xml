@@ -8,6 +8,7 @@
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>2.0.5.RELEASE</version>
   </parent>
+  <groupId>com.syswin.temail</groupId>
   <artifactId>temail-gateway</artifactId>
   <version>1.0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
