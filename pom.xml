@@ -56,11 +56,11 @@
       <artifactId>ps-protocol</artifactId>
       <version>${ps.version}</version>
     </dependency>
-    <dependency>
+    <!--<dependency>
       <groupId>com.systoon.integration</groupId>
       <artifactId>disconf-spring-boot-starter</artifactId>
       <version>${disconf-spring-boot-starter.version}</version>
-    </dependency>
+    </dependency>-->
     <dependency>
       <groupId>org.reflections</groupId>
       <artifactId>reflections</artifactId>
@@ -250,7 +250,7 @@
       <version>${unit-scaffolding.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
+   <!-- <dependency>
       <groupId>au.com.dius</groupId>
       <artifactId>pact-jvm-consumer_2.11</artifactId>
       <version>${pact.version}</version>
@@ -279,7 +279,7 @@
       <artifactId>pact-jvm-provider-junit_2.11</artifactId>
       <version>${pact.version}</version>
       <scope>test</scope>
-    </dependency>
+    </dependency>-->
     <dependency>
       <groupId>org.awaitility</groupId>
       <artifactId>awaitility</artifactId>
